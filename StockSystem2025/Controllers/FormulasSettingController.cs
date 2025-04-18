@@ -676,284 +676,284 @@ namespace StockSystem2025.Controllers
 
                                         break;
 
-                                    case 13:
-                                        formula13 = new Formula13()
-                                        {
-                                            TypeAll = Convert.ToBoolean(FormulaValuesArray[0]),
-                                            TypePositive = Convert.ToBoolean(FormulaValuesArray[1]),
-                                            TypeNegative = Convert.ToBoolean(FormulaValuesArray[2]),
-                                            Days = Convert.ToNullableInt(FormulaValuesArray[3]),
-                                            GreaterThan = Convert.ToDouble(FormulaValuesArray[4]),
-                                            LessThan = Convert.ToDouble(FormulaValuesArray[5])
-                                        };
+                                    //case 13:
+                                    //    formula13 = new Formula13()
+                                    //    {
+                                    //        TypeAll = Convert.ToBoolean(FormulaValuesArray[0]),
+                                    //        TypePositive = Convert.ToBoolean(FormulaValuesArray[1]),
+                                    //        TypeNegative = Convert.ToBoolean(FormulaValuesArray[2]),
+                                    //        Days = Convert.ToNullableInt(FormulaValuesArray[3]),
+                                    //        GreaterThan = Convert.ToDouble(FormulaValuesArray[4]),
+                                    //        LessThan = Convert.ToDouble(FormulaValuesArray[5])
+                                    //    };
 
-                                        if (formula13.Days != null && formula13.Days.Value > 0)
-                                        {
-                                            // MRamadan remove .ToList() before .GroupBy(x => x.Sticker)
-                                            var midSclose = db.StockPrevDayViews.AsNoTracking().Where(x => x.DayNo >= FormulaDayNo).GroupBy(x => x.Sticker).Select(g => new
-                                            {
-                                                sticker = g.Key,
-                                                sumSclose = g.OrderBy(x => x.DayNo).Take(formula13.Days.Value).Sum(x => x.PrevSclose) / formula13.Days.Value
-                                            });
+                                    //    if (formula13.Days != null && formula13.Days.Value > 0)
+                                    //    {
+                                    //        // MRamadan remove .ToList() before .GroupBy(x => x.Sticker)
+                                    //        var midSclose = db.StockPrevDayViews.AsNoTracking().Where(x => x.DayNo >= FormulaDayNo).GroupBy(x => x.Sticker).Select(g => new
+                                    //        {
+                                    //            sticker = g.Key,
+                                    //            sumSclose = g.OrderBy(x => x.DayNo).Take(formula13.Days.Value).Sum(x => x.PrevSclose) / formula13.Days.Value
+                                    //        });
 
-                                            if (formula13.TypeAll)
-                                            {
-                                                if (formula13.GreaterThan != null || formula13.LessThan != null)
-                                                {
-                                                    var stockResult1 = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= 0).ToList();
-                                                    if (formula13.GreaterThan != null)
-                                                    {
-                                                        stockResult1 = stockResult1.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
-                                                    }
-                                                    if (formula13.LessThan != null)
-                                                    {
-                                                        stockResult1 = stockResult1.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
-                                                    }
+                                    //        if (formula13.TypeAll)
+                                    //        {
+                                    //            if (formula13.GreaterThan != null || formula13.LessThan != null)
+                                    //            {
+                                    //                var stockResult1 = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= 0).ToList();
+                                    //                if (formula13.GreaterThan != null)
+                                    //                {
+                                    //                    stockResult1 = stockResult1.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula13.LessThan != null)
+                                    //                {
+                                    //                    stockResult1 = stockResult1.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
+                                    //                }
 
-                                                    var stockResult2 = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= 0).ToList();
-                                                    if (formula13.GreaterThan != null)
-                                                    {
-                                                        stockResult2 = stockResult2.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
-                                                    }
-                                                    if (formula13.LessThan != null)
-                                                    {
-                                                        stockResult2 = stockResult2.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
-                                                    }
-                                                    stockResult1.AddRange(stockResult2);
-                                                    stockResult = stockResult1;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (formula13.TypePositive)
-                                                {
-                                                    stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= 0).ToList();
-                                                    if (formula13.GreaterThan != null)
-                                                    {
-                                                        stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
-                                                    }
-                                                    if (formula13.LessThan != null)
-                                                    {
-                                                        stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
-                                                    }
-                                                }
-                                                else if (formula13.TypeNegative)
-                                                {
-                                                    stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= 0).ToList();
-                                                    if (formula13.GreaterThan != null)
-                                                    {
-                                                        stockResult = stockResult.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
-                                                    }
-                                                    if (formula13.LessThan != null)
-                                                    {
-                                                        stockResult = stockResult.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
-                                                    }
-                                                }
-                                            }
-                                        }
+                                    //                var stockResult2 = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= 0).ToList();
+                                    //                if (formula13.GreaterThan != null)
+                                    //                {
+                                    //                    stockResult2 = stockResult2.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula13.LessThan != null)
+                                    //                {
+                                    //                    stockResult2 = stockResult2.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
+                                    //                }
+                                    //                stockResult1.AddRange(stockResult2);
+                                    //                stockResult = stockResult1;
+                                    //            }
+                                    //        }
+                                    //        else
+                                    //        {
+                                    //            if (formula13.TypePositive)
+                                    //            {
+                                    //                stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= 0).ToList();
+                                    //                if (formula13.GreaterThan != null)
+                                    //                {
+                                    //                    stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula13.LessThan != null)
+                                    //                {
+                                    //                    stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
+                                    //                }
+                                    //            }
+                                    //            else if (formula13.TypeNegative)
+                                    //            {
+                                    //                stockResult = stockResult.Where(x => ((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= 0).ToList();
+                                    //                if (formula13.GreaterThan != null)
+                                    //                {
+                                    //                    stockResult = stockResult.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) >= formula13.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula13.LessThan != null)
+                                    //                {
+                                    //                    stockResult = stockResult.Where(x => -((x.Sclose - (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose)) / (midSclose.Where(y => y.sticker == x.Sticker).First().sumSclose) * 100) <= formula13.LessThan).ToList();
+                                    //                }
+                                    //            }
+                                    //        }
+                                    //    }
 
-                                        break;
+                                    //    break;
 
-                                    case 14:
-                                        formula14 = new Formula14()
-                                        {
-                                            TypeAll = Convert.ToBoolean(FormulaValuesArray[0]),
-                                            TypeGreater = Convert.ToBoolean(FormulaValuesArray[1]),
-                                            TypeLess = Convert.ToBoolean(FormulaValuesArray[2]),
-                                            GreaterThan = Convert.ToDouble(FormulaValuesArray[3]),
-                                            LessThan = Convert.ToDouble(FormulaValuesArray[4])
-                                        };
+                                    //case 14:
+                                    //    formula14 = new Formula14()
+                                    //    {
+                                    //        TypeAll = Convert.ToBoolean(FormulaValuesArray[0]),
+                                    //        TypeGreater = Convert.ToBoolean(FormulaValuesArray[1]),
+                                    //        TypeLess = Convert.ToBoolean(FormulaValuesArray[2]),
+                                    //        GreaterThan = Convert.ToDouble(FormulaValuesArray[3]),
+                                    //        LessThan = Convert.ToDouble(FormulaValuesArray[4])
+                                    //    };
 
-                                        if (formula14.TypeAll)
-                                        {
-                                            if (formula14.GreaterThan != null || formula14.LessThan != null)
-                                            {
-                                                var stockResult1 = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) >= 0).ToList();
-                                                if (formula14.GreaterThan != null)
-                                                {
-                                                    stockResult1 = stockResult1.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
-                                                }
-                                                if (formula14.LessThan != null)
-                                                {
-                                                    stockResult1 = stockResult1.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
-                                                }
+                                    //    if (formula14.TypeAll)
+                                    //    {
+                                    //        if (formula14.GreaterThan != null || formula14.LessThan != null)
+                                    //        {
+                                    //            var stockResult1 = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) >= 0).ToList();
+                                    //            if (formula14.GreaterThan != null)
+                                    //            {
+                                    //                stockResult1 = stockResult1.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
+                                    //            }
+                                    //            if (formula14.LessThan != null)
+                                    //            {
+                                    //                stockResult1 = stockResult1.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
+                                    //            }
 
-                                                var stockResult2 = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) <= 0).ToList();
-                                                if (formula14.GreaterThan != null)
-                                                {
-                                                    stockResult2 = stockResult2.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
-                                                }
-                                                if (formula14.LessThan != null)
-                                                {
-                                                    stockResult2 = stockResult2.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
-                                                }
-                                                stockResult1.AddRange(stockResult2);
-                                                stockResult = stockResult1;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (formula14.TypeGreater)
-                                            {
-                                                stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) >= 0).ToList();
-                                                if (formula14.GreaterThan != null)
-                                                {
-                                                    stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
-                                                }
-                                                if (formula14.LessThan != null)
-                                                {
-                                                    stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
-                                                }
-                                            }
-                                            else if (formula14.TypeLess)
-                                            {
-                                                stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) <= 0).ToList();
-                                                if (formula14.GreaterThan != null)
-                                                {
-                                                    stockResult = stockResult.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
-                                                }
-                                                if (formula14.LessThan != null)
-                                                {
-                                                    stockResult = stockResult.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
-                                                }
-                                            }
-                                        }
+                                    //            var stockResult2 = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) <= 0).ToList();
+                                    //            if (formula14.GreaterThan != null)
+                                    //            {
+                                    //                stockResult2 = stockResult2.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
+                                    //            }
+                                    //            if (formula14.LessThan != null)
+                                    //            {
+                                    //                stockResult2 = stockResult2.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
+                                    //            }
+                                    //            stockResult1.AddRange(stockResult2);
+                                    //            stockResult = stockResult1;
+                                    //        }
+                                    //    }
+                                    //    else
+                                    //    {
+                                    //        if (formula14.TypeGreater)
+                                    //        {
+                                    //            stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) >= 0).ToList();
+                                    //            if (formula14.GreaterThan != null)
+                                    //            {
+                                    //                stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
+                                    //            }
+                                    //            if (formula14.LessThan != null)
+                                    //            {
+                                    //                stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
+                                    //            }
+                                    //        }
+                                    //        else if (formula14.TypeLess)
+                                    //        {
+                                    //            stockResult = stockResult.Where(x => ((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) <= 0).ToList();
+                                    //            if (formula14.GreaterThan != null)
+                                    //            {
+                                    //                stockResult = stockResult.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) > formula14.GreaterThan).ToList();
+                                    //            }
+                                    //            if (formula14.LessThan != null)
+                                    //            {
+                                    //                stockResult = stockResult.Where(x => -((x.Sclose - ((x.Sclose + x.Slow + x.Shigh) / 3)) / ((x.Sclose + x.Slow + x.Shigh) / 3) * 100) < formula14.LessThan).ToList();
+                                    //            }
+                                    //        }
+                                    //    }
 
-                                        break;
+                                    //    break;
 
-                                    case 15:
-                                        formula15 = new Formula15()
-                                        {
-                                            Between = Convert.ToDouble(FormulaValuesArray[0]),
-                                            And = Convert.ToDouble(FormulaValuesArray[1])
-                                        };
+                                    //case 15:
+                                    //    formula15 = new Formula15()
+                                    //    {
+                                    //        Between = Convert.ToDouble(FormulaValuesArray[0]),
+                                    //        And = Convert.ToDouble(FormulaValuesArray[1])
+                                    //    };
 
-                                        if (formula15.Between != null)
-                                        {
-                                            stockResult = stockResult.Where(x => ((x.Shigh - x.PrevSlow) / (x.PrevShigh - x.PrevSlow) * 100) >= formula15.Between).ToList();
-                                        }
-                                        if (formula15.And != null)
-                                        {
-                                            stockResult = stockResult.Where(x => ((x.Shigh - x.PrevSlow) / (x.PrevShigh - x.PrevSlow) * 100) <= formula15.And).ToList();
-                                        }
+                                    //    if (formula15.Between != null)
+                                    //    {
+                                    //        stockResult = stockResult.Where(x => ((x.Shigh - x.PrevSlow) / (x.PrevShigh - x.PrevSlow) * 100) >= formula15.Between).ToList();
+                                    //    }
+                                    //    if (formula15.And != null)
+                                    //    {
+                                    //        stockResult = stockResult.Where(x => ((x.Shigh - x.PrevSlow) / (x.PrevShigh - x.PrevSlow) * 100) <= formula15.And).ToList();
+                                    //    }
 
-                                        break;
+                                    //    break;
 
 
-                                    #region case 17
-                                    case 17:
-                                        formula17 = new Formula17()
-                                        {
-                                            TypeAll = Convert.ToBoolean(FormulaValuesArray[0]),
-                                            TypeGreater = Convert.ToBoolean(FormulaValuesArray[1]),
-                                            TypeLess = Convert.ToBoolean(FormulaValuesArray[2]),
-                                            FromDays = Convert.ToNullableInt(FormulaValuesArray[3]),
-                                            ToDays = Convert.ToNullableInt(FormulaValuesArray[4]),
-                                            GreaterThan = Convert.ToDouble(FormulaValuesArray[5]),
-                                            LessThan = Convert.ToDouble(FormulaValuesArray[6])
-                                        };
+                                    //#region case 17
+                                    //case 17:
+                                    //    formula17 = new Formula17()
+                                    //    {
+                                    //        TypeAll = Convert.ToBoolean(FormulaValuesArray[0]),
+                                    //        TypeGreater = Convert.ToBoolean(FormulaValuesArray[1]),
+                                    //        TypeLess = Convert.ToBoolean(FormulaValuesArray[2]),
+                                    //        FromDays = Convert.ToNullableInt(FormulaValuesArray[3]),
+                                    //        ToDays = Convert.ToNullableInt(FormulaValuesArray[4]),
+                                    //        GreaterThan = Convert.ToDouble(FormulaValuesArray[5]),
+                                    //        LessThan = Convert.ToDouble(FormulaValuesArray[6])
+                                    //    };
 
-                                        if (formula17.FromDays != null && formula17.FromDays.Value > 0 && formula17.ToDays != null && formula17.ToDays.Value > 0)
-                                        {
-                                            var listOfCodes = stockResult.Select(y => y.Sticker).ToList();
-                                            int relatedDayNo = startDayNo - 1;
-                                            int totalFromDayNo = formula17.FromDays.Value + relatedDayNo;
-                                            int totalToDayNo = formula17.ToDays.Value + relatedDayNo;
-                                            var filteredStockResult = db.RecommendationsResultsViews.AsNoTracking()
-                                                                    .Where(x => x.DayNo >= totalFromDayNo && x.DayNo <= totalToDayNo && listOfCodes.Contains(x.Sticker)
-                                                                    && x.Shigh >= x.NextShigh && x.Shigh >= x.PrevShigh);
-                                            //filteredStockResult = filteredStockResult.Where(x => x.Shigh >= x.NextShigh && x.Shigh >= x.PrevShigh).ToList();
-                                            List<Formula17PenetrationObject> PenetrationPointResult = new List<Formula17PenetrationObject>();
+                                    //    if (formula17.FromDays != null && formula17.FromDays.Value > 0 && formula17.ToDays != null && formula17.ToDays.Value > 0)
+                                    //    {
+                                    //        var listOfCodes = stockResult.Select(y => y.Sticker).ToList();
+                                    //        int relatedDayNo = startDayNo - 1;
+                                    //        int totalFromDayNo = formula17.FromDays.Value + relatedDayNo;
+                                    //        int totalToDayNo = formula17.ToDays.Value + relatedDayNo;
+                                    //        var filteredStockResult = db.RecommendationsResultsViews.AsNoTracking()
+                                    //                                .Where(x => x.DayNo >= totalFromDayNo && x.DayNo <= totalToDayNo && listOfCodes.Contains(x.Sticker)
+                                    //                                && x.Shigh >= x.NextShigh && x.Shigh >= x.PrevShigh);
+                                    //        //filteredStockResult = filteredStockResult.Where(x => x.Shigh >= x.NextShigh && x.Shigh >= x.PrevShigh).ToList();
+                                    //        List<Formula17PenetrationObject> PenetrationPointResult = new List<Formula17PenetrationObject>();
 
-                                            //Parallel.ForEach(filteredStockResult, filteredStockItem =>
-                                            foreach (var filteredStockItem in filteredStockResult)
-                                            {
-                                                var result = db.RecommendationsResultsViews.AsNoTracking()
-                                                    .Where(x => x.Sticker == filteredStockItem.Sticker
-                                                    && x.DayNo < filteredStockItem.DayNo
-                                                    && x.Shigh > filteredStockItem.Shigh);
-                                                if (result.Count() == 1)
-                                                {
-                                                    if (result.First().DayNo == startDayNo)
-                                                    {
-                                                        var PenetrationPointItems = new Formula17PenetrationObject()
-                                                        {
-                                                            LatestHigh = result.First().Shigh.Value,
-                                                            StockItem = filteredStockItem
-                                                        };
-                                                        PenetrationPointResult.Add(PenetrationPointItems);
-                                                    }
-                                                }
-                                            }
+                                    //        //Parallel.ForEach(filteredStockResult, filteredStockItem =>
+                                    //        foreach (var filteredStockItem in filteredStockResult)
+                                    //        {
+                                    //            var result = db.RecommendationsResultsViews.AsNoTracking()
+                                    //                .Where(x => x.Sticker == filteredStockItem.Sticker
+                                    //                && x.DayNo < filteredStockItem.DayNo
+                                    //                && x.Shigh > filteredStockItem.Shigh);
+                                    //            if (result.Count() == 1)
+                                    //            {
+                                    //                if (result.First().DayNo == startDayNo)
+                                    //                {
+                                    //                    var PenetrationPointItems = new Formula17PenetrationObject()
+                                    //                    {
+                                    //                        LatestHigh = result.First().Shigh.Value,
+                                    //                        StockItem = filteredStockItem
+                                    //                    };
+                                    //                    PenetrationPointResult.Add(PenetrationPointItems);
+                                    //                }
+                                    //            }
+                                    //        }
 
-                                            if (formula17.TypeAll)
-                                            {
-                                                if (formula17.GreaterThan != null || formula17.LessThan != null)
-                                                {
-                                                    var PenetrationPointResult1 = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= 0).ToList();
-                                                    if (formula17.GreaterThan != null)
-                                                    {
-                                                        PenetrationPointResult1 = PenetrationPointResult1.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
-                                                    }
-                                                    if (formula17.LessThan != null)
-                                                    {
-                                                        PenetrationPointResult1 = PenetrationPointResult1.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
-                                                    }
+                                    //        if (formula17.TypeAll)
+                                    //        {
+                                    //            if (formula17.GreaterThan != null || formula17.LessThan != null)
+                                    //            {
+                                    //                var PenetrationPointResult1 = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= 0).ToList();
+                                    //                if (formula17.GreaterThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult1 = PenetrationPointResult1.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula17.LessThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult1 = PenetrationPointResult1.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
+                                    //                }
 
-                                                    var PenetrationPointResult2 = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= 0).ToList();
-                                                    if (formula17.GreaterThan != null)
-                                                    {
-                                                        PenetrationPointResult2 = PenetrationPointResult2.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
-                                                    }
-                                                    if (formula17.LessThan != null)
-                                                    {
-                                                        PenetrationPointResult2 = PenetrationPointResult2.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
-                                                    }
-                                                    PenetrationPointResult1.AddRange(PenetrationPointResult2);
-                                                    PenetrationPointResult = PenetrationPointResult1;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (formula17.TypeGreater)
-                                                {
-                                                    PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= 0).ToList();
-                                                    if (formula17.GreaterThan != null)
-                                                    {
-                                                        PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
-                                                    }
-                                                    if (formula17.LessThan != null)
-                                                    {
-                                                        PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
-                                                    }
-                                                }
-                                                else if (formula17.TypeLess)
-                                                {
-                                                    PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= 0).ToList();
-                                                    if (formula17.GreaterThan != null)
-                                                    {
-                                                        PenetrationPointResult = PenetrationPointResult.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
-                                                    }
-                                                    if (formula17.LessThan != null)
-                                                    {
-                                                        PenetrationPointResult = PenetrationPointResult.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
-                                                    }
-                                                }
+                                    //                var PenetrationPointResult2 = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= 0).ToList();
+                                    //                if (formula17.GreaterThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult2 = PenetrationPointResult2.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula17.LessThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult2 = PenetrationPointResult2.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
+                                    //                }
+                                    //                PenetrationPointResult1.AddRange(PenetrationPointResult2);
+                                    //                PenetrationPointResult = PenetrationPointResult1;
+                                    //            }
+                                    //        }
+                                    //        else
+                                    //        {
+                                    //            if (formula17.TypeGreater)
+                                    //            {
+                                    //                PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= 0).ToList();
+                                    //                if (formula17.GreaterThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula17.LessThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
+                                    //                }
+                                    //            }
+                                    //            else if (formula17.TypeLess)
+                                    //            {
+                                    //                PenetrationPointResult = PenetrationPointResult.Where(x => (((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= 0).ToList();
+                                    //                if (formula17.GreaterThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult = PenetrationPointResult.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) >= formula17.GreaterThan).ToList();
+                                    //                }
+                                    //                if (formula17.LessThan != null)
+                                    //                {
+                                    //                    PenetrationPointResult = PenetrationPointResult.Where(x => -(((x.LatestHigh - x.StockItem.Shigh) / x.StockItem.Shigh) * 100) <= formula17.LessThan).ToList();
+                                    //                }
+                                    //            }
 
-                                            };
+                                    //        };
 
-                                            // filter
-                                            List<StockPrevDayView> newStockResult = new List<StockPrevDayView>();
-                                            var finalPenetrationPointResult = PenetrationPointResult.Select(x => x.StockItem.Sticker).Distinct();
-                                            foreach (var StickerItem in finalPenetrationPointResult)
-                                            {
-                                                newStockResult.Add(db.StockPrevDayViews.Where(x => x.Sticker.Equals(StickerItem) && x.DayNo == FormulaDayNo).FirstOrDefault());
-                                            }
-                                            stockResult = newStockResult;
-                                        }
+                                    //        // filter
+                                    //        List<StockPrevDayView> newStockResult = new List<StockPrevDayView>();
+                                    //        var finalPenetrationPointResult = PenetrationPointResult.Select(x => x.StockItem.Sticker).Distinct();
+                                    //        foreach (var StickerItem in finalPenetrationPointResult)
+                                    //        {
+                                    //            newStockResult.Add(db.StockPrevDayViews.Where(x => x.Sticker.Equals(StickerItem) && x.DayNo == FormulaDayNo).FirstOrDefault());
+                                    //        }
+                                    //        stockResult = newStockResult;
+                                    //    }
 
-                                        break;
-                                    #endregion
+                                    //    break;
+                                    //#endregion
                                     default:
                                         break;
                                 }
@@ -963,35 +963,35 @@ namespace StockSystem2025.Controllers
 
                         }
 
-                        var companiesResult = stockResult.GroupBy(x => x.ParentIndicator).ToList();
-                        string ParentIndicator = "";
-                        foreach (var item in companiesResult)
-                        {
-                            ParentIndicator = item.First().ParentIndicator;
+                        //var companiesResult = stockResult.GroupBy(x => x.ParentIndicator).ToList();
+                        //string ParentIndicator = "";
+                        //foreach (var item in companiesResult)
+                        //{
+                        //    ParentIndicator = item.First().ParentIndicator;
 
-                            var parentIndicator = db.StockPrevDayViews.AsNoTracking().Where(x => x.Sticker.Equals(ParentIndicator)
-                                                                        && x.DayNo == startDayNo && x.ParentIndicator != null).FirstOrDefault();
-                            if (parentIndicator != null)
-                            {
-                                stockResultSortedList.Add(parentIndicator);
-                            }
-                            if (item.Key != null && item.Key.Equals("TASI") && companiesResult.Count() > 1)
-                            {
-                                var temp = item.ToList();
-                                foreach (var indicatorItem in item)
-                                {
-                                    if (stockResult.Contains(indicatorItem))
-                                    {
-                                        temp.Remove(indicatorItem);
-                                    }
-                                }
-                                stockResultSortedList.AddRange(temp);
-                            }
-                            else
-                            {
-                                stockResultSortedList.AddRange(item);
-                            }
-                        }
+                        //    var parentIndicator = db.StockPrevDayViews.AsNoTracking().Where(x => x.Sticker.Equals(ParentIndicator)
+                        //                                                && x.DayNo == startDayNo && x.ParentIndicator != null).FirstOrDefault();
+                        //    if (parentIndicator != null)
+                        //    {
+                        //        stockResultSortedList.Add(parentIndicator);
+                        //    }
+                        //    if (item.Key != null && item.Key.Equals("TASI") && companiesResult.Count() > 1)
+                        //    {
+                        //        var temp = item.ToList();
+                        //        foreach (var indicatorItem in item)
+                        //        {
+                        //            if (stockResult.Contains(indicatorItem))
+                        //            {
+                        //                temp.Remove(indicatorItem);
+                        //            }
+                        //        }
+                        //        stockResultSortedList.AddRange(temp);
+                        //    }
+                        //    else
+                        //    {
+                        //        stockResultSortedList.AddRange(item);
+                        //    }
+                        //}
 
 
 
@@ -1027,6 +1027,8 @@ namespace StockSystem2025.Controllers
 
             return View(model);
         }
+    }
+}
 
 
 
@@ -1045,105 +1047,104 @@ namespace StockSystem2025.Controllers
 
 
 
-
-        protected void criteriaStartDate_SelectedDateChanged(object sender, Telerik.Web.UI.Calendar.SelectedDateChangedEventArgs e)
-        {
-            if (CriteriaCompaniesBLL.ChackIfDateExists(e.NewDate))
-            {
-                SessionHelper.CriteriaStartDate = e.NewDate;
-                SessionHelper.RecommendationStartDate = e.NewDate;
-                //Response.Redirect("FormulasSetting.aspx", true);
-                LoadChangeDateNewDate();
-            }
-            else
-            {
-                // message
-                WrongDateLabel.Visible = true;
-            }
-        }
-
-        protected void criteriaNextDate_Click(object sender, EventArgs e)
-        {
-            bool success = false;
-            if (SessionHelper.CriteriaStartDate == null)
-            {
-                SessionHelper.CriteriaStartDate = criteriaStartDate.SelectedDate;
-            }
-            if (SessionHelper.CriteriaStartDate != null)
-            {
-                var newDate = CriteriaCompaniesBLL.GetRecommendationpNextDate(SessionHelper.CriteriaStartDate);
-                if (CriteriaCompaniesBLL.ChackIfDateExists(newDate))
-                {
-                    success = true;
-                    SessionHelper.CriteriaStartDate = newDate;
-                    SessionHelper.RecommendationStartDate = newDate;
-                    //Response.Redirect("FormulasSetting.aspx", true);
-                    LoadChangeDateNewDate();
-                }
-            }
-
-            if (!success)
-            {
-                // message
-                WrongDateLabel.Visible = true;
-            }
-        }
-
-        protected void criteriaPrevDate_Click(object sender, EventArgs e)
-        {
-            bool success = false;
-            if (SessionHelper.CriteriaStartDate == null)
-            {
-                SessionHelper.CriteriaStartDate = criteriaStartDate.SelectedDate;
-            }
-            if (SessionHelper.CriteriaStartDate != null)
-            {
-                var newDate = CriteriaCompaniesBLL.GetRecommendationpPreviousDate(SessionHelper.CriteriaStartDate);
-                if (CriteriaCompaniesBLL.ChackIfDateExists(newDate))
-                {
-                    success = true;
-                    SessionHelper.CriteriaStartDate = newDate;
-                    SessionHelper.RecommendationStartDate = newDate;
-                    //Response.Redirect("FormulasSetting.aspx", true);
-                    LoadChangeDateNewDate();
-                }
-            }
-
-            if (!success)
-            {
-                // message
-                WrongDateLabel.Visible = true;
-            }
-        }
-
-        protected void CriteriaGridView_RowDataBound(object sender, GridViewRowEventArgs e)
-        {
-            if (e.Row.RowType == DataControlRowType.DataRow)
-            {
-                string color = ((Criteria)e.Row.DataItem).Color;
-                if (!string.IsNullOrEmpty(color))
-                {
-                    string colorName = color;
-                    colorName = "#" + colorName.Substring(3, colorName.Length - 3) + "75";
-                    e.Row.Style.Add("background-color", colorName);
-                }
-            }
-        }
-
-        protected void CriteriaGridView_RowDeleting(object sender, GridViewDeleteEventArgs e)
-        {
-
-        }
-
-        //protected void CriteriaGridView1_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+        //protected void criteriaStartDate_SelectedDateChanged(object sender, Telerik.Web.UI.Calendar.SelectedDateChangedEventArgs e)
         //{
-        //    //CriteriaGridView1.DataSource = CriteriaBLL.GetCriterias();
+        //    if (CriteriaCompaniesBLL.ChackIfDateExists(e.NewDate))
+        //    {
+        //        SessionHelper.CriteriaStartDate = e.NewDate;
+        //        SessionHelper.RecommendationStartDate = e.NewDate;
+        //        //Response.Redirect("FormulasSetting.aspx", true);
+        //        LoadChangeDateNewDate();
+        //    }
+        //    else
+        //    {
+        //        // message
+        //        WrongDateLabel.Visible = true;
+        //    }
         //}
 
-        protected void CriteriaGridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            CriteriaGridView.PageIndex = e.NewPageIndex;
-            CriteriaGridView.DataSource = CriteriaBLL.GetCriterias();
-            CriteriaGridView.DataBind();
-        }
+        //protected void criteriaNextDate_Click(object sender, EventArgs e)
+        //{
+        //    bool success = false;
+        //    if (SessionHelper.CriteriaStartDate == null)
+        //    {
+        //        SessionHelper.CriteriaStartDate = criteriaStartDate.SelectedDate;
+        //    }
+        //    if (SessionHelper.CriteriaStartDate != null)
+        //    {
+        //        var newDate = CriteriaCompaniesBLL.GetRecommendationpNextDate(SessionHelper.CriteriaStartDate);
+        //        if (CriteriaCompaniesBLL.ChackIfDateExists(newDate))
+        //        {
+        //            success = true;
+        //            SessionHelper.CriteriaStartDate = newDate;
+        //            SessionHelper.RecommendationStartDate = newDate;
+        //            //Response.Redirect("FormulasSetting.aspx", true);
+        //            LoadChangeDateNewDate();
+        //        }
+        //    }
+
+        //    if (!success)
+        //    {
+        //        // message
+        //        WrongDateLabel.Visible = true;
+        //    }
+        //}
+
+        //protected void criteriaPrevDate_Click(object sender, EventArgs e)
+        //{
+        //    bool success = false;
+        //    if (SessionHelper.CriteriaStartDate == null)
+        //    {
+        //        SessionHelper.CriteriaStartDate = criteriaStartDate.SelectedDate;
+        //    }
+        //    if (SessionHelper.CriteriaStartDate != null)
+        //    {
+        //        var newDate = CriteriaCompaniesBLL.GetRecommendationpPreviousDate(SessionHelper.CriteriaStartDate);
+        //        if (CriteriaCompaniesBLL.ChackIfDateExists(newDate))
+        //        {
+        //            success = true;
+        //            SessionHelper.CriteriaStartDate = newDate;
+        //            SessionHelper.RecommendationStartDate = newDate;
+        //            //Response.Redirect("FormulasSetting.aspx", true);
+        //            LoadChangeDateNewDate();
+        //        }
+        //    }
+
+        //    if (!success)
+        //    {
+        //        // message
+        //        WrongDateLabel.Visible = true;
+        //    }
+        //}
+
+        //protected void CriteriaGridView_RowDataBound(object sender, GridViewRowEventArgs e)
+        //{
+        //    if (e.Row.RowType == DataControlRowType.DataRow)
+        //    {
+        //        string color = ((Criteria)e.Row.DataItem).Color;
+        //        if (!string.IsNullOrEmpty(color))
+        //        {
+        //            string colorName = color;
+        //            colorName = "#" + colorName.Substring(3, colorName.Length - 3) + "75";
+        //            e.Row.Style.Add("background-color", colorName);
+        //        }
+        //    }
+        //}
+
+        //protected void CriteriaGridView_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        //{
+
+        //}
+
+        ////protected void CriteriaGridView1_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
+        ////{
+        ////    //CriteriaGridView1.DataSource = CriteriaBLL.GetCriterias();
+        ////}
+
+        //protected void CriteriaGridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        //{
+        //    CriteriaGridView.PageIndex = e.NewPageIndex;
+        //    CriteriaGridView.DataSource = CriteriaBLL.GetCriterias();
+        //    CriteriaGridView.DataBind();
+        //}
 
