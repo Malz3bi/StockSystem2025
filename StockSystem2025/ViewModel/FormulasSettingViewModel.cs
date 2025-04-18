@@ -214,3 +214,12 @@ namespace StockSystem2025.ViewModel
             TypeAll = true;
         }
     }
+
+
+    public class Formula17PenetrationObject
+    {
+        public double LatestHigh { get; set; }
+        public RecommendationsResultsView StockItem { get; set; }
+    }
+
+}
