@@ -11383,7 +11383,7 @@
                  *      } );
                  *    } );
                  */
-                "sSearch": "أبحث:",
+                "sSearch": "بحث  ",
 
                 /**
                  * Assign a `placeholder` attribute to the search `input` element
