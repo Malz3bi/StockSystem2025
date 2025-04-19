@@ -19,14 +19,14 @@ namespace StockSystem2025.Controllers
 
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> FormulasSettingIndex()
         {
 
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoadData(int id)
+        public async Task<IActionResult> LoadData()
         {
             var model = new FormulasSettingViewModel
             {
@@ -122,7 +122,7 @@ namespace StockSystem2025.Controllers
                                 string[] FormulaValuesArray = FormulaItem.FormulaValues.Split(';');
 
 
-                                                      
+
                                 switch (FormulaItem.FormulaType)
                                 {
                                     case 1:
@@ -815,8 +815,6 @@ namespace StockSystem2025.Controllers
 
                                         break;
 
-
-                                  
                                     case 17:
                                         formula17 = new Formula17()
                                         {
@@ -939,18 +937,18 @@ namespace StockSystem2025.Controllers
                                         }
 
                                         break;
-                                   
+
                                     default:
                                         break;
                                 }
-                               
+
 
                             }
 
                         }
 
 
-                       
+
                     }
 
 
@@ -997,124 +995,11 @@ namespace StockSystem2025.Controllers
             }
         }
 
+
+
+
     }
+
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//protected void criteriaStartDate_SelectedDateChanged(object sender, Telerik.Web.UI.Calendar.SelectedDateChangedEventArgs e)
-//{
-//    if (CriteriaCompaniesBLL.ChackIfDateExists(e.NewDate))
-//    {
-//        SessionHelper.CriteriaStartDate = e.NewDate;
-//        SessionHelper.RecommendationStartDate = e.NewDate;
-//        //Response.Redirect("FormulasSetting.aspx", true);
-//        LoadChangeDateNewDate();
-//    }
-//    else
-//    {
-//        // message
-//        WrongDateLabel.Visible = true;
-//    }
-//}
-
-//protected void criteriaNextDate_Click(object sender, EventArgs e)
-//{
-//    bool success = false;
-//    if (SessionHelper.CriteriaStartDate == null)
-//    {
-//        SessionHelper.CriteriaStartDate = criteriaStartDate.SelectedDate;
-//    }
-//    if (SessionHelper.CriteriaStartDate != null)
-//    {
-//        var newDate = CriteriaCompaniesBLL.GetRecommendationpNextDate(SessionHelper.CriteriaStartDate);
-//        if (CriteriaCompaniesBLL.ChackIfDateExists(newDate))
-//        {
-//            success = true;
-//            SessionHelper.CriteriaStartDate = newDate;
-//            SessionHelper.RecommendationStartDate = newDate;
-//            //Response.Redirect("FormulasSetting.aspx", true);
-//            LoadChangeDateNewDate();
-//        }
-//    }
-
-//    if (!success)
-//    {
-//        // message
-//        WrongDateLabel.Visible = true;
-//    }
-//}
-
-//protected void criteriaPrevDate_Click(object sender, EventArgs e)
-//{
-//    bool success = false;
-//    if (SessionHelper.CriteriaStartDate == null)
-//    {
-//        SessionHelper.CriteriaStartDate = criteriaStartDate.SelectedDate;
-//    }
-//    if (SessionHelper.CriteriaStartDate != null)
-//    {
-//        var newDate = CriteriaCompaniesBLL.GetRecommendationpPreviousDate(SessionHelper.CriteriaStartDate);
-//        if (CriteriaCompaniesBLL.ChackIfDateExists(newDate))
-//        {
-//            success = true;
-//            SessionHelper.CriteriaStartDate = newDate;
-//            SessionHelper.RecommendationStartDate = newDate;
-//            //Response.Redirect("FormulasSetting.aspx", true);
-//            LoadChangeDateNewDate();
-//        }
-//    }
-
-//    if (!success)
-//    {
-//        // message
-//        WrongDateLabel.Visible = true;
-//    }
-//}
-
-//protected void CriteriaGridView_RowDataBound(object sender, GridViewRowEventArgs e)
-//{
-//    if (e.Row.RowType == DataControlRowType.DataRow)
-//    {
-//        string color = ((Criteria)e.Row.DataItem).Color;
-//        if (!string.IsNullOrEmpty(color))
-//        {
-//            string colorName = color;
-//            colorName = "#" + colorName.Substring(3, colorName.Length - 3) + "75";
-//            e.Row.Style.Add("background-color", colorName);
-//        }
-//    }
-//}
-
-//protected void CriteriaGridView_RowDeleting(object sender, GridViewDeleteEventArgs e)
-//{
-
-//}
-
-////protected void CriteriaGridView1_NeedDataSource(object sender, GridNeedDataSourceEventArgs e)
-////{
-////    //CriteriaGridView1.DataSource = CriteriaBLL.GetCriterias();
-////}
-
-//protected void CriteriaGridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
-//{
-//    CriteriaGridView.PageIndex = e.NewPageIndex;
-//    CriteriaGridView.DataSource = CriteriaBLL.GetCriterias();
-//    CriteriaGridView.DataBind();
-//}
 

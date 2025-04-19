@@ -6,15 +6,22 @@ namespace StockSystem2025.Controllers
 {
     public class HomeController : Controller
     {
+
+
+        private readonly StockdbContext _context;
+
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, StockdbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
         {
+
+            var k= _context.CompanyTables.ToList();
             return View();
         }
 

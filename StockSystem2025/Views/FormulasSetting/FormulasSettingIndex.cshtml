@@ -1,0 +1,339 @@
+﻿<div class="page-wrapper">
+    <div class="content">
+
+
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Expenses LIST </h4>
+                <h6>Manage your purchases</h6>
+            </div>
+            <div class="page-btn">
+                <a href="createexpense.html" class="btn btn-added"><img src="~/assets/img/icons/plus.svg" class="me-2" alt="img">Add New Expense</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-top">
+                    <div class="search-set">
+                        <div class="search-path">
+                            <a class="btn btn-filter" id="filter_search">
+                                <img src="~/assets/img/icons/filter.svg" alt="img">
+                                <span><img src="~/assets/img/icons/closes.svg" alt="img"></span>
+                            </a>
+                        </div>
+                        <div class="search-input">
+                            <a class="btn btn-searchset">
+                                <img src="~/assets/img/icons/search-white.svg" alt="img">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="wordset">
+                        <ul>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf"><img src="~/assets/img/icons/pdf.svg" alt="img"></a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel"><img src="~/assets/img/icons/excel.svg" alt="img"></a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="print"><img src="~/assets/img/icons/printer.svg" alt="img"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card" id="filter_inputs">
+                    <div class="card-body pb-0">
+                        <div class="row">
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <div class="input-groupicon">
+                                        <input type="text" class="datetimepicker cal-icon" placeholder="Choose Date">
+                                        <div class="addonset">
+                                            <img src="~/assets/img/icons/calendars.svg" alt="img">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Enter Reference">
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <select class="select">
+                                        <option>Choose Category</option>
+                                        <option>Computers</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <select class="select">
+                                        <option>Choose Status</option>
+                                        <option>Complete</option>
+                                        <option>Inprogress</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-1 col-sm-6 col-12 ms-auto">
+                                <div class="form-group">
+                                    <a class="btn btn-filters ms-auto"><img src="~/assets/img/icons/search-whites.svg" alt="img"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive"dir="rtl">
+                    <table  class="table  datanew  table-bordered table-hover text-center align-middle w-100">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label class="checkboxs">
+                                        <input type="checkbox" id="select-all">
+                                        <span class="checkmarks"></span>
+                                    </label>
+                                </th>
+                                <th>م</th>
+                                <th>اسم الإستراتيجية</th>
+                                <th>الفئة</th>
+                                <th>ملاحظات</th>
+                                <th>الفاصل</th>
+                                <th>حذف/تعديل</th>
+                                <th>عدد الشركات</th>
+                                <th>عرض</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                              <tr>
+                                <td>
+                                    <label class="checkboxs">
+                                        <input type="checkbox">
+                                        <span class="checkmarks"></span>
+                                    </label>
+                                </td>
+                                <td>Employee Benefits</td>
+                                <td>PT001</td>
+                                <td>19 Nov 2022</td>
+                                <td><span class="badges bg-lightgreen">Active</span></td>
+                                <td>120</td>
+                                <td>
+                                    <!-- زر تعديل -->
+                                    <a class="me-3" href="editexpense.html">
+                                        <i class="fas fa-edit icon-size icon-edit"></i> <!-- أيقونة تعديل -->
+                                    </a>
+
+                                    <!-- زر حذف -->
+                                    <a class="me-3 confirm-text" href="javascript:void(0);">
+                                        <i class="fas fa-trash-alt icon-size icon-delete"></i> <!-- أيقونة حذف -->
+                                    </a>
+
+                                    <!-- زر التفاصيل -->
+                                    <a class="me-3" href="details.html">
+                                        <i class="fas fa-info-circle icon-size icon-info"></i> <!-- أيقونة تفاصيل -->
+                                    </a>
+                                </td>
+                                <td>10</td> <!-- عدد الشركات -->
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-primary">عرض</a>
+                                </td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@* 
+
+<div class="page-wrapper" dir="rtl">
+    <div class="content">
+
+        <table class="grid-table table table-bordered table-striped" id="criteriaTable">
+            <thead>
+                <tr>
+                    <th class="mtd">م</th>
+                    <th class="ttd">اسم الإستراتيجية</th>
+                    <th class="ktd">الفئة</th>
+                    <th class="nttd">ملاحظات</th>
+                    <th>الفاصل</th>
+                    <th>حذف/تعديل</th>
+                    <th>عدد الشركات</th>
+                    <th>عرض</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be populated via JavaScript/AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Load company data for dropdowns
+            $.ajax({
+                url: '/api/companies',
+                method: 'GET',
+                success: function (data) {
+                    const companySelect = $('#companySelect');
+                    const companyCodeSelect = $('#companyCodeSelect');
+                    data.forEach(company => {
+                        companySelect.append(`<option value="${company.companyCode}">${company.companyName}</option>`);
+                        companyCodeSelect.append(`<option value="${company.companyCode}">${company.companyCode}</option>`);
+                    });
+                }
+            });
+
+            // Load general indicator grid
+            function loadGeneralIndicatorGrid() {
+                $('#loadingSpinner').show();
+                $.ajax({
+                    url: '/api/general-indicators',
+                    method: 'GET',
+                    success: function (data) {
+                        const tbody = $('#generalIndicatorTable tbody');
+                        tbody.empty();
+                        data.forEach(item => {
+                            tbody.append(`
+                                <tr>
+                                    <td><a href="/CompanyDetails?code=${item.sticker}">${item.sticker}</a></td>
+                                    <td><a href="/CompanyDetails?code=${item.sticker}">${item.sname}</a></td>
+                                    <td>${item.sopen.toFixed(2)}</td>
+                                    <td>${item.shigh.toFixed(2)}</td>
+                                    <td>${item.slow.toFixed(2)}</td>
+                                    <td>${item.sclose.toFixed(2)}</td>
+                                    <td dir="ltr">${formatChangeValue(item.changeValue)}</td>
+                                    <td dir="ltr">${formatChangePercent(item.changeRate)}</td>
+                                    <td>${item.svol}</td>
+                                    <td dir="ltr">${item.indicatorIn.toFixed(2)}</td>
+                                    <td dir="ltr">${item.indicatorOut.toFixed(2)}</td>
+                                </tr>
+                            `);
+                        });
+                        $('#loadingSpinner').hide();
+                    }
+                });
+            }
+
+            // Load criteria grid
+            function loadCriteriaGrid() {
+                $('#loadingSpinner').show();
+                $.ajax({
+                    url: '/api/criteria',
+                    method: 'GET',
+                    success: function (data) {
+                        const tbody = $('#criteriaTable tbody');
+                        tbody.empty();
+                        data.forEach((item, index) => {
+                            tbody.append(`
+                                <tr>
+                                    <td class="mtd"><a href="#" data-bs-toggle="modal" data-bs-target="#criteriaModal" data-id="${index + 1}" data-img="/images/${item.imageURL}" data-desc="${item.description}">${index + 1}</a></td>
+                                    <td class="ttd"><a href="/CriteriaResult?id=${item.id}">${item.name}</a></td>
+                                    <td class="ktd">${item.type}</td>
+                                    <td class="nttd">${item.note}</td>
+                                    <td><span>${item.separator}</span><img src="~//images/${item.imageURL}" width="15" height="15" alt="Separator" /></td>
+                                    <td>
+                                        <a href="#" class="delete-criteria" data-id="${item.id}">حذف</a> |
+                                        <a href="/ManageCriteria?id=${item.id}">تعديل</a>
+                                    </td>
+                                    <td>${item.companyCount || '-'}</td>
+                                    <td><a href="/RecommendationResult?id=${item.id}">عرض</a></td>
+                                </tr>
+                            `);
+                        });
+                        $('#loadingSpinner').hide();
+                    }
+                });
+            }
+
+            // Modal content population
+            $('#criteriaModal').on('show.bs.modal', function (event) {
+                const button = $(event.relatedTarget);
+                const imgSrc = button.data('img');
+                const description = button.data('desc');
+                const modal = $(this);
+                modal.find('.modal-img').attr('src', imgSrc);
+                modal.find('.modal-description').text(description);
+            });
+
+            // Search criteria
+            $('#searchCriteriaBtn').click(function () {
+                const separator = $('#separatorInput').val();
+                const name = $('#criteriaNameInput').val();
+                const type = $('#criteriaTypeInput').val();
+                const notes = $('#criteriaNotesInput').val();
+                // Implement search logic via AJAX
+                console.log('Search:', { separator, name, type, notes });
+            });
+
+            // View company criteria
+            $('#viewCompanyCriteriasBtn').click(function () {
+                const companyCode = $('#companySelect').val();
+                // Implement company criteria fetch via AJAX
+                console.log('View company criteria:', companyCode);
+            });
+
+            // View all criteria
+            $('#viewAllCriteriasBtn').click(function () {
+                loadCriteriaGrid();
+            });
+
+            // Date navigation
+            $('#nextDateBtn').click(function () {
+                const dateInput = $('#criteriaStartDate');
+                let date = new Date(dateInput.val());
+                date.setDate(date.getDate() + 1);
+                dateInput.val(date.toISOString().split('T')[0]);
+                // Trigger data refresh
+            });
+
+            $('#prevDateBtn').click(function () {
+                const dateInput = $('#criteriaStartDate');
+                let date = new Date(dateInput.val());
+                date.setDate(date.getDate() - 1);
+                dateInput.val(date.toISOString().split('T')[0]);
+                // Trigger data refresh
+            });
+
+            // Delete criteria
+            $(document).on('click', '.delete-criteria', function (e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                if (confirm('هل أنت متأكد من حذف هذه الإستراتيجية؟')) {
+                    $.ajax({
+                        url: `/api/criteria/${id}`,
+                        method: 'DELETE',
+                        success: function () {
+                            loadCriteriaGrid();
+                        }
+                    });
+                }
+            });
+
+            // Helper functions for formatting
+            function formatChangeValue(value) {
+                return value >= 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
+            }
+
+            function formatChangePercent(value) {
+                return value >= 0 ? `+${value.toFixed(2)}%` : `${value.toFixed(2)}%`;
+            }
+
+            // Initial load
+            loadGeneralIndicatorGrid();
+            loadCriteriaGrid();
+        });
+    </script>
+} *@
