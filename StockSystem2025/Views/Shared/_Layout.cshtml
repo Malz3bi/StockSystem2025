@@ -255,10 +255,10 @@
                         <li>
                             <a href="SpecialFollowList.aspx"><i class="fas fa-bookmark"></i><span> قوائم المتابعة</span></a>
                         </li>
-                        <li style="display: none;" id="menuUploadFile">
-                            <a href="UploadFile.aspx"><i class="fas fa-upload"></i><span> تحميل البيانات</span></a>
+                        <li  id="menuUploadFile">
+                            <a asp-action="UploadFileIndex" asp-controller="UploadFile"><i class="fas fa-upload"></i><span> تحميل البيانات</span></a>
                         </li>
-                        <li style="display: none;" id="menuStrategicAnalysis">
+                        <li  id="menuStrategicAnalysis">
                             <a href="StrategicAnalysis.aspx"><i class="fas fa-chart-pie"></i><span> التحليل الاستراتيجي</span></a>
                         </li>
                         <li>
@@ -289,6 +289,7 @@
 
 
     </div>
+    <partial name="_ValidationScriptsPartial" />
     <!-- jQuery أولاً -->
     <script src="~/assets/js/jquery-3.6.0.min.js"></script>
 
@@ -307,7 +308,7 @@
     <script src="~/assets/plugins/select2/js/select2.min.js"></script>
     <script src="~/assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
     <script src="~/assets/plugins/sweetalert/sweetalerts.min.js"></script>
-
+    <script src="~/assets/js/signalr.min.js"></script>
     <!-- سكربتك المخصص -->
     <script src="~/assets/js/script.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
