@@ -1,25 +1,35 @@
-﻿using StockSystem2025.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.EntityFrameworkCore;
+using StockSystem2025.Hubs;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using StockSystem2025.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR(); // Add SignalR
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddSignalR();
 
-// 🔹 تفعيل الجلسات (Sessions)
-builder.Services.AddDistributedMemoryCache(); // تخزين الجلسات بالذاكرة
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+// Configure sessions
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // وقت انتهاء الجلسة
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
-// إعداد الاتصال بقاعدة البيانات
+// Configure database
 var connectionString = builder.Configuration.GetConnectionString("SQLConn");
 builder.Services.AddDbContext<StockdbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -34,33 +44,36 @@ builder.Services.Configure<KestrelServerOptions>(options =>
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB
 });
 
+// Configure logging
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.AddDebug();
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage(); // لتفاصيل الأخطاء في البيئة غير التطويرية
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
-
-
 app.UseHttpsRedirection();
-
-// تفعيل الملفات الثابتة مثل CSS و JS
 app.UseStaticFiles();
-
-// تفعيل التوجيه
 app.UseRouting();
-
-// 🔹 تفعيل الجلسات
+app.UseCors("AllowAll"); // Apply CORS after routing
 app.UseSession();
-
-// تفعيل صلاحيات الوصول (لو كنت تستخدم Authorization)
 app.UseAuthorization();
 
-// التوجيه للكنترولر والاكشن
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapHub<ProgressHub>("/progressHub"); // Map SignalR hub
 
 app.Run();

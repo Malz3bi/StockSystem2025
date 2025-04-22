@@ -23,13 +23,13 @@
                 <div class="alert alert-success">@TempData["ClearMessage"]</div>
             }
 
-            <form id="uploadForm" asp-action="UploadFiles" method="post" enctype="multipart/form-data" class="mb-5">
+            <form id="uploadForm" asp-action="UploadFiles" asp-controller="UploadFile" method="post" enctype="multipart/form-data" class="mb-5">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">اختيار ملف (.txt)</label>
                     <input type="file" name="files" multiple accept=".txt" class="form-control" required />
-                    <span class="text-danger" asp-validation-for="@Model.Files"></span>
                 </div>
 
+                <div class="mb-1">تقدم رفع الملف:</div>
                 <div class="progress mb-3" style="height: 24px; display: none;">
                     <div id="uploadProgress" class="progress-bar progress-bar-striped bg-info"
                          role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
@@ -37,6 +37,7 @@
                     </div>
                 </div>
 
+                <div class="mb-1">تقدم معالجة الملف:</div>
                 <div class="progress mb-3" style="height: 24px; display: none;">
                     <div id="processProgress" class="progress-bar progress-bar-striped bg-success"
                          role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
@@ -52,11 +53,11 @@
             @if (Model?.ExistingDates?.Any() == true)
             {
                 <div class="bg-light p-4 rounded-3 border">
-                    <form asp-action="ClearAllData" method="post" onsubmit="return confirm('هل أنت متأكد من حذف جميع بيانات التداول؟')">
+                    <form asp-action="ClearAllData" asp-controller="UploadFile" method="post" onsubmit="return confirm('هل أنت متأكد من حذف جميع بيانات التداول؟')">
                         <button type="submit" class="btn btn-outline-danger w-100 mb-3 fw-semibold">🗑️ مسح جميع البيانات</button>
                     </form>
 
-                    <form asp-action="ClearDataBetweenDates" method="post" onsubmit="return confirm('هل أنت متأكد من حذف البيانات بين التاريخين؟')">
+                    <form asp-action="ClearDataBetweenDates" asp-controller="UploadFile" method="post" onsubmit="return confirm('هل أنت متأكد من حذف البيانات بين التاريخين؟')">
                         <div class="row g-3 align-items-end mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">من تاريخ</label>
@@ -78,15 +79,16 @@
 </div>
 
 @section Scripts {
- 
     <script>
         $(document).ready(function () {
             // Generate a unique process ID
             const processId = '@Guid.NewGuid().ToString()';
 
-            // Connect to SignalR hub
+            // Connect to SignalR hub with automatic reconnect
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl('/progressHub')
+                .withAutomaticReconnect()
+                .configureLogging(signalR.LogLevel.Information)
                 .build();
 
             connection.on('ReceiveProgress', function (receivedProcessId, percentage, message) {
@@ -105,9 +107,19 @@
                 }
             });
 
-            connection.start().catch(function (err) {
-                console.error('SignalR connection error: ', err.toString());
-            });
+            // Start SignalR connection with retry logic
+            function startConnection() {
+                connection.start()
+                    .then(function () {
+                        console.log('SignalR connected successfully');
+                    })
+                    .catch(function (err) {
+                        console.error('SignalR connection error: ', err.toString());
+                        setTimeout(startConnection, 5000); // Retry after 5 seconds
+                    });
+            }
+
+            startConnection();
 
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault(); // Prevent default form submission
@@ -168,7 +180,7 @@
                             .addClass('alert-success')
                             .text(response.message);
                         setTimeout(function () {
-                            window.location.reload();
+                           
                         }, 2000);
                     },
                     error: function (xhr, status, error) {
