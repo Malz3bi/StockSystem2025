@@ -20,6 +20,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddMemoryCache();
+
 // Configure sessions
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -28,6 +30,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
 
 // Configure database
 var connectionString = builder.Configuration.GetConnectionString("SQLConn");

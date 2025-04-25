@@ -37,7 +37,6 @@ namespace StockSystem2025.Controllers
             return View(model);
         }
 
-        [HttpPost]
         public async Task<IActionResult> UploadFiles(List<IFormFile> files, string processId)
         {
             if (files == null || files.Count == 0 || files.All(f => f.Length == 0))
@@ -46,7 +45,7 @@ namespace StockSystem2025.Controllers
                 return BadRequest(new { success = false, message = "يرجى اختيار ملف صالح (.txt)." });
             }
 
-            var uploadPath = Path.Combine(_environment.WebRootPath, "uploads");
+            var uploadPath = Path.Combine(_environment.WebRootPath, "Uploads");
             Directory.CreateDirectory(uploadPath);
 
             int counter = 0;
@@ -77,7 +76,12 @@ namespace StockSystem2025.Controllers
                     return BadRequest(new { success = false, message = "لم يتم معالجة أي ملفات. تأكد من اختيار ملفات .txt صالحة." });
                 }
 
-                await SortStockTables();
+                // Call SortStockTables for each file to ensure progress is tracked
+                foreach (var file in files.Where(f => f.Length > 0 && Path.GetExtension(f.FileName).ToLower() == ".txt"))
+                {
+                    await SortStockTables(processId, file.FileName);
+                }
+
                 return Ok(new { success = true, message = $"تم تحميل {files.Count(f => f.Length > 0)} ملفات و {counter} أيام تداول بنجاح" });
             }
             catch (Exception ex)
@@ -87,51 +91,8 @@ namespace StockSystem2025.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ClearAllData()
-        {
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM StockTable");
-            TempData["ClearMessage"] = "تم مسح جميع بيانات التداول بنجاح";
-            HttpContext.Session.Clear();
-            return RedirectToAction("UploadFileIndex");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ClearDataBetweenDates([FromForm] UploadFileViewModel model)
-        {
-            if (!ModelState.IsValid || model.FromDate == null || model.ToDate == null)
-            {
-                TempData["ClearMessage"] = "يرجى إدخال تواريخ صالحة";
-                return RedirectToAction("UploadFileIndex");
-            }
-
-            if (model.FromDate > model.ToDate)
-            {
-                TempData["ClearMessage"] = "تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء";
-                return RedirectToAction("UploadFileIndex");
-            }
-
-            try
-            {
-                await _context.Database.ExecuteSqlRawAsync(
-                    "DELETE FROM StockTable WHERE Createddate >= {0} AND Createddate <= {1}",
-                    model.FromDate, model.ToDate);
-                await SortStockTables();
-                TempData["ClearMessage"] = "تم مسح بيانات التداول بين التاريخين بنجاح";
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error clearing data between dates");
-                TempData["ClearMessage"] = "حدث خطأ أثناء مسح بيانات التداول";
-            }
-
-            return RedirectToAction("UploadFileIndex");
-        }
-
         private async Task<int> ProcessFileLines(string[] lines, string processId, string fileName)
         {
-           
-
             // Fetch all existing stocks and companies once
             var existingStocks = await _context.StockTables
                 .Select(x => new { x.Sticker, x.Sdate })
@@ -148,8 +109,8 @@ namespace StockSystem2025.Controllers
             int counter = 0;
             int totalLines = lines.Length;
 
-            // Phase 1: Processing lines (80% of progress)
-            const double processingPhasePercentage = 80.0;
+            // Phase 1: Processing lines (20% of progress)
+            const double processingPhasePercentage = 20.0;
             for (int i = 0; i < totalLines; i++)
             {
                 try
@@ -167,8 +128,6 @@ namespace StockSystem2025.Controllers
                         continue;
                     }
                     var createdDate = new DateTime(year, month, day);
-
-                  
 
                     string sticker = words[0];
                     sdate = $"{year}/{month:D2}/{day:D2}";
@@ -188,7 +147,7 @@ namespace StockSystem2025.Controllers
 
                     stockRecordsToAdd.Add(new StockTable
                     {
-                        DayNo = 1,
+                        DayNo = 0, // سيتم تحديثه في SortStockTables
                         Sticker = sticker,
                         Sname = companyName,
                         Sdate = sdate,
@@ -223,7 +182,7 @@ namespace StockSystem2025.Controllers
 
                     counter++;
 
-                    // Send progress update for processing phase (up to 80%)
+                    // Send progress update for processing phase (up to 20%)
                     if ((i + 1) % Math.Max(totalLines / 100, 10000) == 0 || i + 1 == totalLines)
                     {
                         double processingProgress = (double)(i + 1) / totalLines * processingPhasePercentage;
@@ -236,11 +195,11 @@ namespace StockSystem2025.Controllers
                 }
             }
 
-            // Phase 2: Saving to database (20% of progress)
-            const double savingPhasePercentage = 20.0;
+            // Phase 2: Saving to database (40% of progress, from 20% to 60%)
+            const double savingPhasePercentage = 40.0;
             try
             {
-                // Send initial saving progress (80%)
+                // Send initial saving progress (20%)
                 await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingPhasePercentage, $"جاري حفظ البيانات في قاعدة البيانات...");
 
                 // Increase command timeout to 120 seconds
@@ -298,8 +257,8 @@ namespace StockSystem2025.Controllers
                     }
                 }
 
-                // Ensure final progress is 100%
-                await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, 100.0, $"اكتمل حفظ الملف {fileName} بنجاح!");
+                // Ensure saving phase ends at 60%
+                await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingPhasePercentage + savingPhasePercentage, $"اكتمل حفظ البيانات للملف {fileName}!");
             }
             catch (Exception ex)
             {
@@ -310,9 +269,17 @@ namespace StockSystem2025.Controllers
 
             return counter;
         }
-        private async Task SortStockTables()
+
+        private async Task SortStockTables(string processId, string fileName)
         {
+            const double sortingPhasePercentage = 40.0;
+            const double sortingStartPercentage = 60.0; // 20% processing + 40% saving
+
             var companies = await _context.StockTables.Select(x => x.Sticker).Distinct().ToListAsync();
+            var stocksToUpdate = new List<StockTable>();
+            int totalCompanies = companies.Count;
+            int processedCompanies = 0;
+
             foreach (var company in companies)
             {
                 var stocks = await _context.StockTables
@@ -324,9 +291,74 @@ namespace StockSystem2025.Controllers
                 foreach (var stock in stocks)
                 {
                     stock.DayNo = dayNo++;
+                    stocksToUpdate.Add(stock);
+                }
+
+                // Send progress update for sorting phase (from 60% to 100%)
+                processedCompanies++;
+                if (processedCompanies % Math.Max(totalCompanies / 100, 10) == 0 || processedCompanies == totalCompanies)
+                {
+                    double sortingProgress = sortingStartPercentage + (double)processedCompanies / totalCompanies * sortingPhasePercentage;
+                    await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, sortingProgress, $"جاري إعادة ترتيب DayNo للشركة {processedCompanies} من {totalCompanies} ({fileName})...");
                 }
             }
-            await _context.BulkUpdateAsync(_context.StockTables.ToList());
+
+            if (stocksToUpdate.Any())
+            {
+                _logger.LogInformation($"Updating {stocksToUpdate.Count} stock records with new DayNo values...");
+                await _context.BulkUpdateAsync(stocksToUpdate);
+
+                // Send final sorting progress (100%)
+                await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, 100.0, $"اكتمل إعادة ترتيب DayNo للملف {fileName}!");
+            }
+            else
+            {
+                _logger.LogInformation("No stock records to update for DayNo.");
+                await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, 100.0, $"لم يتم العثور على سجلات لإعادة ترتيب DayNo للملف {fileName}.");
+            }
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> ClearAllData()
+        {
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM StockTable");
+            TempData["ClearMessage"] = "تم مسح جميع بيانات التداول بنجاح";
+            HttpContext.Session.Clear();
+            return RedirectToAction("UploadFileIndex");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ClearDataBetweenDates([FromForm] UploadFileViewModel model)
+        {
+            if (!ModelState.IsValid || model.FromDate == null || model.ToDate == null)
+            {
+                TempData["ClearMessage"] = "يرجى إدخال تواريخ صالحة";
+                return RedirectToAction("UploadFileIndex");
+            }
+
+            if (model.FromDate > model.ToDate)
+            {
+                TempData["ClearMessage"] = "تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء";
+                return RedirectToAction("UploadFileIndex");
+            }
+
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    "DELETE FROM StockTable WHERE Createddate >= {0} AND Createddate <= {1}",
+                    model.FromDate, model.ToDate);
+                await SortStockTables("999","999");
+                TempData["ClearMessage"] = "تم مسح بيانات التداول بين التاريخين بنجاح";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error clearing data between dates");
+                TempData["ClearMessage"] = "حدث خطأ أثناء مسح بيانات التداول";
+            }
+
+            return RedirectToAction("UploadFileIndex");
         }
 
        

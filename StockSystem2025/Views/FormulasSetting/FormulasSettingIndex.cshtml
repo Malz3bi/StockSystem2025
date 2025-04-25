@@ -57,19 +57,23 @@
    
 
     <script>
-        $(document).ready(function () {
+          $(document).ready(function () {
             let page = 1;
             const pageSize = 10;
             let isLoading = false;
             let totalRecords = 0;
-                const table = $('#datanew').DataTable({
-            paging: false,        // ⛔ لا تقسيم لصفحات
-            searching: true,     // اختياري: تعطيل البحث
-            ordering: true,      // اختياري: تعطيل الترتيب
-            info: false           // اختياري: إخفاء معلومات الجدول
-        });
 
-                    // تحميل البيانات تدريجيًا
+            const table = $('#datanew').DataTable({
+                paging: false,
+                searching: true,
+                ordering: true,
+                info: false,
+                deferRender: true, // تحسين الأداء عند تحميل بيانات كبيرة
+                columnDefs: [
+                    { targets: '_all', defaultContent: '-' } // عرض '-' للقيم الفارغة
+                ]
+            });
+
             function loadData() {
                 if (isLoading || (totalRecords > 0 && (page - 1) * pageSize >= totalRecords)) return;
                 isLoading = true;
@@ -83,46 +87,44 @@
                         if (response.success) {
                             totalRecords = response.totalRecords;
 
-                            // إضافة الصفوف إلى DataTable
-                            response.data.forEach(function (item, index) {
-                                table.row.add([
-                                    
-                                    (page - 1) * pageSize + index + 1, // رقم تسلسلي
-                                    item.criteria.name || '-',
-                                    item.criteria.type || '-',
-                                    item.criteria.note || '-',
-                                    `<span class="badges bg-lightgreen">${item.criteria.isIndicator === 1 ? 'Active' : 'Inactive'}</span>`,
-                                    item.criteria.separater || '-',
-                                    `<a class="me-3" href="/Strategies/Edit/${item.criteria.id}">
-                                        <i class="fas fa-edit icon-size icon-edit"></i>
-                                     </a>
-                                     <a class="me-3 confirm-text" href="javascript:void(0);" onclick="confirmDelete(${item.criteria.id})">
-                                        <i class="fas fa-trash-alt icon-size icon-delete"></i>
-                                     </a>
-                                     <a class="me-3" href="/Strategies/Details/${item.criteria.id}">
-                                        <i class="fas fa-info-circle icon-size icon-info"></i>
-                                     </a>`,
-                                    item.companiesCount, // عدد الشركات الخاص بكل Criteria
-                                    `<a href="/Strategies/View/${item.criteria.id}" class="btn btn-sm btn-primary">عرض</a>`
-                                ]).draw(false);
-                            });
+                            // تحضير البيانات لإضافتها دفعة واحدة
+                            const rows = response.data.map((item, index) => [
+                                (page - 1) * pageSize + index + 1,
+                                item.name || '-',
+                                item.type || '-',
+                                item.note || '-',
+                                `<span class="badges bg-lightgreen">${item.isIndicator === 1 ? 'Active' : 'Inactive'}</span>`,
+                                item.separater || '-',
+                                `<a class="me-3" href="/Strategies/Edit/${item.id}">
+                                    <i class="fas fa-edit icon-size icon-edit"></i>
+                                 </a>
+                                 <a class="me-3 confirm-text" href="javascript:void(0);" onclick="confirmDelete(${item.id})">
+                                    <i class="fas fa-trash-alt icon-size icon-delete"></i>
+                                 </a>
+                                 <a href="/RecommendationResult/RecommendationResult?criteriaId=${item.id}&selectedDate=${item.selectedDate ? new Date(item.selectedDate).toISOString().split('T')[0] : ''}&sortColumn=${item.sortColumn || ''}&sortOrder=${item.sortOrder || ''}&viewIndex=${item.viewIndex || 0}" class="btn btn-sm btn-primary">عرض</a>`,
+                                item.companiesCount || 0,
+                                `<a href="/Strategies/View/${item.id}" class="btn btn-sm btn-primary">عرض</a>`
+                            ]);
 
-                            // زيادة رقم الصفحة
+                            // إضافة الصفوف دفعة واحدة
+                            table.rows.add(rows).draw(false);
+
                             page++;
                             isLoading = false;
                             $('#loading').hide();
 
-                            // استمر في التحميل إذا كان هناك المزيد من البيانات
                             if (response.data.length === pageSize) {
-                                setTimeout(loadData, 1000); // تأخير بسيط
+                                setTimeout(loadData, 500); // تقليل التأخير لتحسين تجربة المستخدم
                             }
                         } else {
+                            console.error('خطأ: ' + response.message);
                             alert('خطأ: ' + response.message);
                             isLoading = false;
                             $('#loading').hide();
                         }
                     },
-                    error: function () {
+                    error: function (xhr, status, error) {
+                        console.error('خطأ AJAX:', status, error);
                         alert('حدث خطأ أثناء جلب البيانات');
                         isLoading = false;
                         $('#loading').hide();
@@ -130,12 +132,6 @@
                 });
             }
 
-           
-
-            // بدء تحميل البيانات عند تحميل الصفحة
-            loadData();
-
-            // دالة تأكيد الحذف
             function confirmDelete(id) {
                 if (confirm('هل أنت متأكد من حذف هذه الإستراتيجية؟')) {
                     $.ajax({
@@ -144,10 +140,10 @@
                         data: { id: id },
                         success: function (response) {
                             if (response.success) {
-                                $('#datanew').DataTable().row($(`input[value="${id}"]`).closest('tr')).remove().draw();
+                                table.row($(`a[onclick="confirmDelete(${id})"]`).closest('tr')).remove().draw();
                                 alert('تم الحذف بنجاح');
                             } else {
-                                alert('فشل الحذف');
+                                alert('فشل الحذف: ' + response.message);
                             }
                         },
                         error: function () {
@@ -156,6 +152,8 @@
                     });
                 }
             }
+
+            loadData();
         });
     </script>
 }
