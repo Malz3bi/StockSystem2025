@@ -321,6 +321,9 @@ public partial class StockdbContext : DbContext
                 .HasNoKey()
                 .ToView("RecommendationsResultsView");
 
+            entity.Property(e => e.ParentIndicator)
+            .HasMaxLength(4)
+            .IsUnicode(false);
             entity.Property(e => e.NextSclose).HasColumnName("NextSClose");
             entity.Property(e => e.NextShigh).HasColumnName("NextSHigh");
             entity.Property(e => e.OpeningGapRate).HasColumnName("openingGapRate");

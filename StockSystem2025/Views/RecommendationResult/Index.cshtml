@@ -1,0 +1,721 @@
+﻿@using StockSystem2025.Controllers
+@model StockSystem2025.ViewModel.RecommendationResultViewModel
+@{
+    ViewData["Title"] = "عرض نتائج التوصيات";
+}
+
+<div class="page-wrapper">
+    <div class="content">
+    @*     <style>
+            /* تحسينات CSS */
+            .rdBorder {
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                margin-bottom: 15px;
+            }
+
+            .rdHeader {
+                background-color: #f8f9fa;
+                font-weight: bold;
+                text-align: center;
+                color: #343a40;
+            }
+
+            .rdSubHeader {
+                font-weight: bold;
+                background-color: #f1f1f1;
+            }
+
+            .grid {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+            .left-b-thick {
+                border-left: 2px solid #dee2e6;
+            }
+
+            .f-17 {
+                font-size: 15px;
+            }
+
+            .stats {
+                margin: 15px 0;
+                background: #f8f9fa;
+                padding: 10px;
+                border-radius: 4px;
+            }
+
+                .stats table {
+                    width: auto;
+                    margin: 0 auto;
+                }
+
+            .up {
+                color: #28a745;
+                font-weight: bold;
+            }
+
+            .down {
+                color: #dc3545;
+                font-weight: bold;
+            }
+
+            .context-menu {
+                display: none;
+                position: absolute;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                z-index: 1000;
+                min-width: 150px;
+            }
+
+                .context-menu ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+
+                .context-menu li {
+                    padding: 8px 12px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #eee;
+                }
+
+                    .context-menu li:hover {
+                        background-color: #f5f5f5;
+                    }
+
+            .tooltip {
+                position: relative;
+                cursor: help;
+            }
+
+                .tooltip:hover:after {
+                    content: attr(title);
+                    position: absolute;
+                    background-color: #333;
+                    color: #fff;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                    z-index: 1000;
+                    bottom: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    white-space: nowrap;
+                    font-size: 12px;
+                }
+
+            .error-message {
+                color: #dc3545;
+                display: none;
+                font-size: 12px;
+                margin-left: 10px;
+            }
+
+            /* تحسينات جديدة */
+            .section-title {
+                color: #2c3e50;
+                margin: 20px 0 10px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .control-panel {
+                background: #f8f9fa;
+                padding: 10px;
+                border-radius: 4px;
+                margin: 10px 0;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .date-controls {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+                .date-controls button {
+                    padding: 2px 8px;
+                    font-size: 12px;
+                    line-height: 1;
+                }
+
+            select, input[type="date"] {
+                padding: 5px 10px;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            .company-link {
+                color: #007bff;
+                text-decoration: none;
+            }
+
+                .company-link:hover {
+                    text-decoration: underline;
+                }
+
+            .highlight-cell {
+                font-weight: bold;
+            }
+
+            .positive-change {
+                color: #28a745;
+                font-weight: bold;
+            }
+
+            .negative-change {
+                color: #dc3545;
+                font-weight: bold;
+            }
+
+            .neutral-change {
+                color: #6c757d;
+            }
+
+            .special-row {
+                background-color: rgba(255, 193, 7, 0.2) !important;
+            }
+        </style> *@
+      @*   <link rel="shortcut icon" type="image/x-icon" href="~/assets/img/favicon.png">
+
+        <link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
+
+        <link rel="stylesheet" href="~/assets/css/bootstrap-datetimepicker.min.css">
+
+        <link rel="stylesheet" href="~/assets/css/animate.css">
+
+        <link rel="stylesheet" href="~/assets/plugins/select2/css/select2.min.css">
+        <link href="~/assets/datatable/datatables.min.css" rel="stylesheet" />
+
+        <link rel="stylesheet" href="~/assets/plugins/fontawesome/css/fontawesome.min.css">
+        <link rel="stylesheet" href="~/assets/plugins/fontawesome/css/all.min.css">
+
+        <link rel="stylesheet" href="~/assets/css/style.css"> *@
+
+        <h2 class="section-title">@ViewData["Title"]</h2>
+
+        <!-- معلومات الشركة العامة -->
+        <h3 class="section-title">معلومات الشركة</h3>
+        <table class="rdBorder grid">
+            <thead class="rdHeader">
+                <tr>
+                    <th>رمز الشركة</th>
+                    <th>اسم الشركة</th>
+                    <th>الإفتتاح</th>
+                    <th>الأعلى</th>
+                    <th>الأدنى</th>
+                    <th>الإغلاق</th>
+                    <th>قيمة التغيير</th>
+                    <th>نسبة التغيير</th>
+                    <th>كمية التداول</th>
+                    <th>إيجابي</th>
+                    <th>سلبي</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="rdSubHeader">
+                    <td><a href="CompanyDetails?code=@Model.GeneralIndicator.Sticker" class="company-link">@Model.GeneralIndicator.Sticker</a></td>
+                    <td><a href="CompanyDetails?code=@Model.GeneralIndicator.Sticker" class="company-link">@Model.GeneralIndicator.Sname</a></td>
+                    <td>@Model.GeneralIndicator.FormattedSopen</td>
+                    <td>@Model.GeneralIndicator.FormattedShigh</td>
+                    <td>@Model.GeneralIndicator.FormattedSlow</td>
+                    <td>@Model.GeneralIndicator.FormattedSclose</td>
+                    <td class="@(Model.GeneralIndicator.ChangeValue >= 0 ? "positive-change" : "negative-change")">@Html.Raw(Model.GeneralIndicator.FormattedChangeValue)</td>
+                    <td class="@(Model.GeneralIndicator.ChangeRate >= 0 ? "positive-change" : "negative-change")">@Html.Raw(Model.GeneralIndicator.FormattedChangeRate)</td>
+                    <td>@Model.GeneralIndicator.Svol</td>
+                    <td>@Model.GeneralIndicator.FormattedIndicatorIn</td>
+                    <td>@Model.GeneralIndicator.FormattedIndicatorOut</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr class="elhr-b" />
+
+        <!-- لوحة التحكم والإحصائيات -->
+        <div class="control-panel">
+            <div class="stats">
+                <strong>القطاعات:</strong>
+                <span class="up">صاعدة: @Model.IndicatorsUpCount</span> |
+                <span class="down">هابطة: @Model.IndicatorsDownCount</span> |
+                <span class="neutral-change">بدون تغيير: @Model.IndicatorsNoChangeCount</span>
+            </div>
+
+            <div class="stats">
+                <strong>الشركات:</strong>
+                <span class="up">صاعدة: @Model.CompaniesUpCount</span> |
+                <span class="down">هابطة: @Model.CompaniesDownCount</span> |
+                <span class="neutral-change">بدون تغيير: @Model.CompaniesNoChangeCount</span>
+            </div>
+
+            <div class="stats">
+                <strong>نتائج توصيات يوم:</strong>
+                <div class="date-controls">
+                    <input type="date" id="selectedDate" value="@Model.SelectedDate?.ToString("yyyy-MM-dd")"
+                           min="@Model.MinDate?.ToString("yyyy-MM-dd")" max="@Model.MaxDate?.ToString("yyyy-MM-dd")" />
+                    <button id="nextDate" class="btn btn-sm btn-outline-secondary">▲</button>
+                    <button id="previousDate" class="btn btn-sm btn-outline-secondary">▼</button>
+                    <span id="dateError" class="error-message">يرجى إدخال تاريخ صحيح</span>
+                </div>
+            </div>
+
+            <div class="stats">
+                <strong>وضع العرض:</strong>
+                <select id="viewMode">
+                    <option value="ProfitLoss" selected="@(Model.ViewMode == "ProfitLoss" ? "selected" : null)">نسبة الأرباح والخسائر</option>
+                    <option value="SupportResistance" selected="@(Model.ViewMode == "SupportResistance" ? "selected" : null)">الدعوم والمقاومات</option>
+                </select>
+            </div>
+        </div>
+
+        <hr class="elhr-b" />
+
+        <!-- معايير التوصية -->
+        <h3 class="section-title">معايير التوصية</h3>
+        <table class="rdBorder grid" style="width: 90%; margin: 0 auto;">
+            <thead class="rdHeader">
+                <tr>
+                    <th>رقم التسلسل</th>
+                    <th>الفاصل</th>
+                    <th>اسم المعيار</th>
+                    <th>نوع المعيار</th>
+                    <th>ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="highlight-cell">@Model.CriteriaIndex</td>
+                    <td>@Model.CriteriaSeparater</td>
+                    <td class="highlight-cell">@Model.CriteriaTitle</td>
+                    <td>@Model.CriteriaType</td>
+                    <td>@Model.CriteriaNotes</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- جدول التوصيات -->
+        <h3 class="section-title">تفاصيل التوصيات</h3>
+        <table class="rdBorder grid datanew " id="recommendationsTable">
+            <thead class="rdHeader">
+                @if (Model.ViewMode == "ProfitLoss")
+                {
+                    <tr>
+                        <th colspan="4" rowspan="2" class="left-b-thick">بيان المؤشرات والشركات</th>
+                        <th colspan="15">نسبة الأرباح والخسائر للتوصيات</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="left-b-thick">الافتتاح المتوقع</th>
+                        <th colspan="3" class="left-b-thick">الإفتتاح</th>
+                        <th colspan="3" class="left-b-thick">الحد الأعلى</th>
+                        <th colspan="3" class="left-b-thick">الحد الأدنى</th>
+                        <th colspan="3" class="left-b-thick">قيمة الإغلاق</th>
+                    </tr>
+                    <tr>
+                        <th>م</th>
+                        <th><a href="#" class="sort-link" data-column="Sticker">رمز</a></th>
+                        <th><a href="#" class="sort-link" data-column="Sname">اسم الشركة</a></th>
+                        <th class="left-b-thick">سعر التوصية</th>
+                        <th>المتوقع</th>
+                        <th><a href="#" class="sort-link" data-column="ExpectedOpenValue">القيمة</a></th>
+                        <th class="left-b-thick"><a href="#" class="sort-link" data-column="ExpectedOpenPercent">النسبة</a></th>
+                        <th>الإفتتاح</th>
+                        <th><a href="#" class="sort-link" data-column="OpeningGapValue">القيمة</a></th>
+                        <th class="left-b-thick"><a href="#" class="sort-link" data-column="OpeningGapRate">النسبة</a></th>
+                        <th>الأعلى</th>
+                        <th><a href="#" class="sort-link" data-column="UpperLimitValue">القيمة</a></th>
+                        <th class="left-b-thick"><a href="#" class="sort-link" data-column="UpperLimitRate">النسبة</a></th>
+                        <th>الأدنى</th>
+                        <th><a href="#" class="sort-link" data-column="LowerLimitValue">القيمة</a></th>
+                        <th class="left-b-thick"><a href="#" class="sort-link" data-column="LowerLimitRate">النسبة</a></th>
+                        <th>الإغلاق</th>
+                        <th><a href="#" class="sort-link" data-column="ChangeValue">القيمة</a></th>
+                        <th class="left-b-thick"><a href="#" class="sort-link" data-column="ChangeRate">النسبة</a></th>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <th colspan="4" rowspan="2" class="left-b-thick">بيان المؤشرات والشركات</th>
+                        <th colspan="6" class="left-b-thick">الدعوم والمقاومات</th>
+                        <th colspan="5" class="left-b-thick">الأهداف الفعلية المحققة</th>
+                    </tr>
+                    <tr>
+                        <th>وقف خسارة</th>
+                        <th>دعم ثاني</th>
+                        <th class="left-b-thick">دعم أول</th>
+                        <th>هدف أول</th>
+                        <th>هدف ثاني</th>
+                        <th class="left-b-thick">هدف ثالث</th>
+                        <th class="left-b-thick">السعر الحالي</th>
+                        <th><a href="#" class="sort-link" data-column="Sclose">القيمة</a></th>
+                        <th class="left-b-thick"><a href="#" class="sort-link" data-column="SclosePercent">النسبة</a></th>
+                        <th>القيمة</th>
+                        <th>النسبة</th>
+                    </tr>
+                    <tr>
+                        <th>م</th>
+                        <th><a href="#" class="sort-link" data-column="Sticker">رمز</a></th>
+                        <th><a href="#" class="sort-link" data-column="Sname">اسم الشركة</a></th>
+                        <th class="left-b-thick">سعر التوصية</th>
+                        <th>@Model.StopLossValue%</th>
+                        <th>@Model.SecondSupportValue%</th>
+                        <th class="left-b-thick">@Model.FirstSupportValue%</th>
+                        <th>@Model.FirstTargetValue%</th>
+                        <th>@Model.SecondTargetValue%</th>
+                        <th class="left-b-thick">@Model.ThirdTargetValue%</th>
+                        <th class="left-b-thick">السعر الحالي</th>
+                        <th>القيمة</th>
+                        <th class="left-b-thick">النسبة</th>
+                        <th>القيمة</th>
+                        <th>النسبة</th>
+                    </tr>
+                }
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Recommendations.Select((value, index) => new { value, index }))
+                {
+                    var row = item.value;
+                    <tr class="@(row.IsIndicator ? "rdSubHeader" : "") @(row.IsSpecial ? "special-row" : "")" context-menu-target data-sticker="@row.Sticker">
+                        <td style="background-color: @row.BackgroundColor;">@(item.index + 1)</td>
+                        <td><a href="CompanyDetails?code=@row.Sticker" class="company-link">@row.Sticker</a></td>
+                        <td class="tooltip" title="@row.Tooltip"><a href="CompanyDetails?code=@row.Sticker" target="_blank" class="company-link">@row.Sname</a></td>
+                        @if (Model.ViewMode == "ProfitLoss")
+                        {
+                            <td class="left-b-thick f-17 highlight-cell">@Html.Raw(row.FormattedSclose)</td>
+                            <td class="f-17">@Html.Raw(row.FormattedExpectedOpen)</td>
+                            <td class="f-17 @(row.ExpectedOpenValue >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedExpectedOpenValue)</td>
+                            <td class="left-b-thick f-17 @(row.ExpectedOpenPercent >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedExpectedOpenPercent)</td>
+                            <td class="f-17">@Html.Raw(row.FormattedPrevSopen)</td>
+                            <td class="f-17 @(row.OpeningGapValue >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedOpeningGapValue)</td>
+                            <td class="left-b-thick f-17 @(row.OpeningGapRate >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedOpeningGapRate)</td>
+                            <td class="f-17">@Html.Raw(row.FormattedPrevShigh)</td>
+                            <td class="f-17 @(row.UpperLimitValue >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedUpperLimitValue)</td>
+                            <td class="left-b-thick f-17 @(row.UpperLimitRate >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedUpperLimitRate)</td>
+                            <td class="f-17">@Html.Raw(row.FormattedPrevSlow)</td>
+                            <td class="f-17 @(row.LowerLimitValue >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedLowerLimitValue)</td>
+                            <td class="left-b-thick f-17 @(row.LowerLimitRate >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedLowerLimitRate)</td>
+                            <td class="f-17">@Html.Raw(row.FormattedPrevSclose)</td>
+                            <td class="f-17 @(row.ChangeValue >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedChangeValue)</td>
+                            <td class="left-b-thick f-17 @(row.ChangeRate >= 0 ? "positive-change" : "negative-change")">@Html.Raw(row.FormattedChangeRate)</td>
+                        }
+                        else
+                        {
+                            <td class="left-b-thick f-17 highlight-cell">@Html.Raw(row.FormattedSclose)</td>
+                            <td class="f-17" style="background-color: @row.StopLossColor;">
+                                @Html.Raw(row.FormattedStopLoss)
+                            </td>
+                            <td class="f-17" style="background-color: @row.SecondSupportColor;">
+                                @Html.Raw(row.FormattedSecondSupport)
+                            </td>
+                            <td class="left-b-thick f-17" style="background-color: @row.FirstSupportColor;">
+                                @Html.Raw(row.FormattedFirstSupport)
+                            </td>
+                            <td class="f-17" style="background-color: @row.FirstTargetColor;">
+                                @Html.Raw(row.FormattedFirstTarget)
+                            </td>
+                            <td class="f-17" style="background-color: @row.SecondTargetColor;">
+                                @Html.Raw(row.FormattedSecondTarget)
+                            </td>
+                            <td class="left-b-thick f-17" style="background-color: @row.ThirdTargetColor;">
+                                @Html.Raw(row.FormattedThirdTarget)
+                            </td>
+                            <td class="left-b-thick f-17">@Html.Raw(row.FormattedLastClose)</td>
+                            <td class="f-17">@Html.Raw(row.FormattedMaxHigh)</td>
+                            <td class="left-b-thick f-17">@Html.Raw(row.FormattedMaxHighPercentage)</td>
+                            <td class="f-17"><span>0</span></td>
+                            <td class="f-17"><span>0</span></td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- قائمة السياق -->
+        <div id="contextMenu" class="context-menu">
+            <ul>
+                @foreach (var followList in Model.FollowLists)
+                {
+                    var color = $"#{followList.Color.Substring(3)}75";
+                    <li style="background-color: @color;" data-follow-list-id="@followList.Id" data-follow-list-name="@followList.Name">@followList.Name</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+  @*   <partial name="_ValidationScriptsPartial" />
+    <!-- jQuery أولاً -->
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="~/assets/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="~/assets/datatable/datatables.bundle.js"></script>
+    <script src="~/assets/js/my.js"></script>
+
+    <!-- بقية السكربتات -->
+    <script src="~/assets/js/feather.min.js"></script>
+    <script src="~/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="~/assets/js/moment.min.js"></script>
+    <script src="~/assets/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="~/assets/plugins/select2/js/select2.min.js"></script>
+    <script src="~/assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
+    <script src="~/assets/plugins/sweetalert/sweetalerts.min.js"></script>
+    <script src="~/assets/js/signalr.min.js"></script> *@
+    <script>
+
+
+                $(document).ready(function () {
+            // Destroy existing DataTable instance if it exists
+            if ($.fn.dataTable.isDataTable('#datanew')) {
+                $('#datanew').DataTable().destroy();
+            }
+
+            // Initialize DataTable
+            $('.datanew').DataTable({
+                "language": {
+                    "sProcessing": "جاري المعالجة...",
+                    "sLengthMenu": "عرض _MENU_ مدخلات",
+                    "sZeroRecords": "لم يتم العثور على نتائج",
+                    "sEmptyTable": "لا توجد بيانات متاحة في الجدول",
+                    "sInfo": "إظهار _START_ إلى _END_ من _TOTAL_ مدخلات",
+                    "sInfoEmpty": "إظهار 0 إلى 0 من 0 مدخلات",
+                    "sInfoFiltered": "(تمت تصفيتها من _MAX_ مدخلات كليّة)",
+                    "sSearch": "بحث:",
+                    "sLoadingRecords": "جاري التحميل...",
+                    "oPaginate": {
+                        "sFirst": "الأول",
+                        "sPrevious": "السابق",
+                        "sNext": "التالي",
+                        "sLast": "الأخير"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": تفعيل لترتيب العمود تصاعديًا",
+                        "sSortDescending": ": تفعيل لترتيب العمود تنازليًا"
+                    }
+                },
+                "destroy": true // Ensure reinitialization is allowed
+            });
+        });
+
+
+
+        // حالة الصفحة
+        const pageState = {
+            criteriaId: @Model.criteriaId,
+            selectedDate: '@Model.SelectedDate?.ToString("yyyy-MM-dd")',
+            viewMode: '@Model.ViewMode',
+            sortColumn: '@Model.SortColumn',
+            sortOrder: '@Model.SortOrder'
+        };
+
+        // تهيئة قائمة السياق
+        let currentCompanyCode = null;
+        document.querySelectorAll('[context-menu-target]').forEach(row => {
+            row.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                currentCompanyCode = row.dataset.sticker;
+                const menu = document.getElementById('contextMenu');
+                menu.style.display = 'block';
+                menu.style.left = `${e.pageX}px`;
+                menu.style.top = `${e.pageY}px`;
+            });
+        });
+
+        document.addEventListener('click', () => {
+            document.getElementById('contextMenu').style.display = 'none';
+        });
+
+        // التعامل مع عناصر قائمة السياق
+        document.querySelectorAll('#contextMenu li').forEach(item => {
+            item.addEventListener('click', () => {
+                const followListId = item.dataset.followListId;
+                const followListName = item.dataset.followListName;
+                addToFollowList(followListId, followListName);
+            });
+        });
+
+        // إضافة إلى قائمة المتابعة عبر AJAX
+        function addToFollowList(followListId, followListName) {
+            $.ajax({
+                url: '@Url.Action("AddToFollowList")',
+                method: 'POST',
+                data: {
+                    criteriaId: pageState.criteriaId,
+                    followListId: followListId,
+                    companyCode: currentCompanyCode,
+                    selectedDate: pageState.selectedDate,
+                    viewMode: pageState.viewMode,
+                    sortColumn: pageState.sortColumn,
+                    sortOrder: pageState.sortOrder
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(`تم الإضافة إلى ${followListName}`);
+                        refreshRecommendations();
+                    } else {
+                        alert('حدث خطأ أثناء الإضافة إلى قائمة المتابعة');
+                    }
+                },
+                error: function() {
+                    alert('حدث خطأ أثناء الإضافة إلى قائمة المتابعة');
+                }
+            });
+        }
+
+        // تحديث التاريخ
+        document.getElementById('selectedDate').addEventListener('change', function() {
+            pageState.selectedDate = this.value;
+            refreshRecommendations();
+        });
+
+        // التنقل إلى التاريخ التالي
+        document.getElementById('nextDate').addEventListener('click', function() {
+            $.ajax({
+                url: '@Url.Action("GetNextDate")',
+                method: 'POST',
+                data: { selectedDate: pageState.selectedDate },
+                success: function(response) {
+                    if (response.success && response.nextDate) {
+                        pageState.selectedDate = response.nextDate;
+                        document.getElementById('selectedDate').value = response.nextDate;
+                        refreshRecommendations();
+                    } else {
+                        document.getElementById('dateError').style.display = 'inline';
+                    }
+                }
+            });
+        });
+
+        // التنقل إلى التاريخ السابق
+        document.getElementById('previousDate').addEventListener('click', function() {
+            $.ajax({
+                url: '@Url.Action("GetPreviousDate")',
+                method: 'POST',
+                data: { selectedDate: pageState.selectedDate },
+                success: function(response) {
+                    if (response.success && response.prevDate) {
+                        pageState.selectedDate = response.prevDate;
+                        document.getElementById('selectedDate').value = response.prevDate;
+                        refreshRecommendations();
+                    } else {
+                        document.getElementById('dateError').style.display = 'inline';
+                    }
+                }
+            });
+        });
+
+        // تحديث وضع العرض
+        document.getElementById('viewMode').addEventListener('change', function() {
+            pageState.viewMode = this.value;
+            refreshRecommendations();
+        });
+
+        // التعامل مع الفرز
+        document.querySelectorAll('.sort-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const column = this.dataset.column;
+                if (pageState.sortColumn === column) {
+                    pageState.sortOrder = pageState.sortOrder === 'ASC' ? 'DESC' : 'ASC';
+                } else {
+                    pageState.sortColumn = column;
+                    pageState.sortOrder = 'ASC';
+                }
+                refreshRecommendations();
+            });
+        });
+
+        // تحديث جدول التوصيات
+        function refreshRecommendations() {
+            document.getElementById('dateError').style.display = 'none';
+            $.ajax({
+                url: '@Url.Action("GetRecommendations")',
+                method: 'GET',
+                data: {
+                    id: pageState.criteriaId,
+                    date: pageState.selectedDate,
+                    viewMode: pageState.viewMode,
+                    sortColumn: pageState.sortColumn,
+                    sortOrder: pageState.sortOrder
+                },
+                success: function(response) {
+                    if (response.success) {
+                        updateRecommendationsTable(response.data);
+                    } else {
+                        document.getElementById('dateError').style.display = 'inline';
+                    }
+                },
+                error: function() {
+                    document.getElementById('dateError').style.display = 'inline';
+                }
+            });
+        }
+
+        // تحديث جدول التوصيات
+        function updateRecommendationsTable(data) {
+            const tbody = document.querySelector('#recommendationsTable tbody');
+            tbody.innerHTML = ''; // مسح الصفوف الحالية
+
+            data.recommendations.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('context-menu-target', '');
+                tr.setAttribute('data-sticker', row.sticker);
+                if (row.isIndicator) tr.classList.add('rdSubHeader');
+                if (row.isSpecial) tr.classList.add('special-row');
+
+                if (data.viewMode === 'ProfitLoss') {
+                    tr.innerHTML = `
+                        <td style="background-color: ${row.backgroundColor}">${index + 1}</td>
+                        <td><a href="CompanyDetails?code=${row.sticker}" class="company-link">${row.sticker}</a></td>
+                        <td class="tooltip" title="${row.tooltip}"><a href="CompanyDetails?code=${row.sticker}" target="_blank" class="company-link">${row.sname}</a></td>
+                        <td class="left-b-thick f-17 highlight-cell">${row.formattedSclose}</td>
+                        <td class="f-17">${row.formattedExpectedOpen}</td>
+                        <td class="f-17 ${row.expectedOpenValue >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedExpectedOpenValue}</td>
+                        <td class="left-b-thick f-17 ${row.expectedOpenPercent >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedExpectedOpenPercent}</td>
+                        <td class="f-17">${row.formattedPrevSopen}</td>
+                        <td class="f-17 ${row.openingGapValue >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedOpeningGapValue}</td>
+                        <td class="left-b-thick f-17 ${row.openingGapRate >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedOpeningGapRate}</td>
+                        <td class="f-17">${row.formattedPrevShigh}</td>
+                        <td class="f-17 ${row.upperLimitValue >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedUpperLimitValue}</td>
+                        <td class="left-b-thick f-17 ${row.upperLimitRate >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedUpperLimitRate}</td>
+                        <td class="f-17">${row.formattedPrevSlow}</td>
+                        <td class="f-17 ${row.lowerLimitValue >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedLowerLimitValue}</td>
+                        <td class="left-b-thick f-17 ${row.lowerLimitRate >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedLowerLimitRate}</td>
+                        <td class="f-17">${row.formattedPrevSclose}</td>
+                        <td class="f-17 ${row.changeValue >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedChangeValue}</td>
+                        <td class="left-b-thick f-17 ${row.changeRate >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedChangeRate}</td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td style="background-color: ${row.backgroundColor}">${index + 1}</td>
+                        <td><a href="CompanyDetails?code=${row.sticker}" class="company-link">${row.sticker}</a></td>
+                        <td class="tooltip" title="${row.tooltip}"><a href="CompanyDetails?code=${row.sticker}" target="_blank" class="company-link">${row.sname}</a></td>
+                        <td class="left-b-thick f-17 highlight-cell">${row.formattedSclose}</td>
+                        <td class="f-17" style="background-color: ${row.stopLossColor}">${row.formattedStopLoss}</td>
+                        <td class="f-17" style="background-color: ${row.secondSupportColor}">${row.formattedSecondSupport}</td>
+                        <td class="left-b-thick f-17" style="background-color: ${row.firstSupportColor}">${row.formattedFirstSupport}</td>
+                        <td class="f-17" style="background-color: ${row.firstTargetColor}">${row.formattedFirstTarget}</td>
+                        <td class="f-17" style="background-color: ${row.secondTargetColor}">${row.formattedSecondTarget}</td>
+                        <td class="left-b-thick f-17" style="background-color: ${row.thirdTargetColor}">${row.formattedThirdTarget}</td>
+                        <td class="left-b-thick f-17">${row.formattedLastClose}</td>
+                        <td class="f-17 ${row.maxHigh >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedMaxHigh}</td>
+                        <td class="left-b-thick f-17 ${row.maxHighPercentage >= 0 ? 'positive-change' : 'negative-change'}">${row.formattedMaxHighPercentage}</td>
+                        <td class="f-17"><span>0</span></td>
+                        <td class="f-17"><span>0</span></td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+}

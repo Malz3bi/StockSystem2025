@@ -23,7 +23,7 @@ public partial class StockPrevDayView
 
     public double? Svol { get; set; }
 
-    public DateOnly? Createddate { get; set; }
+    public DateTime? Createddate { get; set; }
 
     public double? PrevSopen { get; set; }
 

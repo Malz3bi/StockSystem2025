@@ -1,6 +1,11 @@
-﻿@* تأكد من تضمين Layout المناسب *@
+﻿@model StockSystem2025.ViewModel.FormulasSettingViewModel
+
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var page = Model.Page;
+    var pageSize = Model.PageSize;
+    var totalRecords = Model.TotalRecords;
+    var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
 }
 
 <div class="page-wrapper">
@@ -27,12 +32,10 @@
 
         <div class="card">
             <div class="card-body">
-               
                 <div class="table-responsive" dir="rtl">
-                    <table id="datanew" class="table  table-bordered table-hover text-center align-middle w-100">
+                    <table class="table table-bordered table-hover text-center align-middle w-100">
                         <thead>
                             <tr>
-                               
                                 <th>م</th>
                                 <th>اسم الإستراتيجية</th>
                                 <th>الفئة</th>
@@ -44,123 +47,96 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- سيتم ملء الصفوف ديناميكيًا عبر AJAX -->
+                            @if (Model.Criteria.Any())
+                            {
+                                @for (int i = 0; i < Model.Criteria.Count; i++)
+                                {
+                                    var item = Model.Criteria[i];
+                                    <tr>
+                                        <td>@((page - 1) * pageSize + i + 1)</td>
+                                        <td>@(item.Criteria.Name ?? "-")</td>
+                                        <td>@(item.Criteria.Type ?? "-")</td>
+                                        <td>@(item.Criteria.Note ?? "-")</td>
+                                        <td>
+                                            <span class="badges bg-lightgreen">@(item.Criteria.IsIndicator == 1 ? "Active" : "Inactive")</span>
+                                        </td>
+                                        <td>@(item.Criteria.Separater ?? "-")</td>
+                                        <td>
+                                            <a class="me-3" href="/Strategies/Edit/@item.Criteria.Id">
+                                                <i class="fas fa-edit icon-size icon-edit"></i>
+                                            </a>
+                                            <a class="me-3 confirm-text" href="javascript:void(0);" onclick="confirmDelete(@item.Criteria.Id, this)">
+                                                <i class="fas fa-trash-alt icon-size icon-delete"></i>
+                                            </a>
+                                            <a href="/RecommendationResult/Index?id=@item.Criteria.Id" class="btn btn-sm btn-primary">عرض</a>
+                                        </td>
+                                        <td>@item.CompaniesCount</td>
+                                        <td>
+                                            <a href="/Strategies/View/@item.Criteria.Id" class="btn btn-sm btn-primary">عرض</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8">لا توجد بيانات متاحة</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
+
+                <!-- ترقيم الصفحات -->
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mt-3">
+                            <li class="page-item @(page <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="/FormulasSetting/FormulasSettingIndex?page=@(page - 1)&pageSize=@pageSize" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == page ? "active" : "")">
+                                    <a class="page-link" href="/FormulasSetting/FormulasSettingIndex?page=@i&pageSize=@pageSize">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(page >= totalPages ? "disabled" : "")">
+                                <a class="page-link" href="/FormulasSetting/FormulasSettingIndex?page=@(page + 1)&pageSize=@pageSize" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-   
-
     <script>
-          $(document).ready(function () {
-            let page = 1;
-            const pageSize = 10;
-            let isLoading = false;
-            let totalRecords = 0;
-
-            const table = $('#datanew').DataTable({
-                paging: false,
-                searching: true,
-                ordering: true,
-                info: false,
-                deferRender: true, // تحسين الأداء عند تحميل بيانات كبيرة
-                columnDefs: [
-                    { targets: '_all', defaultContent: '-' } // عرض '-' للقيم الفارغة
-                ]
-            });
-
-            function loadData() {
-                if (isLoading || (totalRecords > 0 && (page - 1) * pageSize >= totalRecords)) return;
-                isLoading = true;
-                $('#loading').show();
-
+        function confirmDelete(id, element) {
+            if (confirm('هل أنت متأكد من حذف هذه الإستراتيجية؟')) {
                 $.ajax({
-                    url: '/FormulasSetting/LoadData',
-                    method: 'GET',
-                    data: { page: page, pageSize: pageSize },
+                    url: '/FormulasSetting/Delete',
+                    method: 'POST',
+                    data: { id: id },
                     success: function (response) {
                         if (response.success) {
-                            totalRecords = response.totalRecords;
-
-                            // تحضير البيانات لإضافتها دفعة واحدة
-                            const rows = response.data.map((item, index) => [
-                                (page - 1) * pageSize + index + 1,
-                                item.name || '-',
-                                item.type || '-',
-                                item.note || '-',
-                                `<span class="badges bg-lightgreen">${item.isIndicator === 1 ? 'Active' : 'Inactive'}</span>`,
-                                item.separater || '-',
-                                `<a class="me-3" href="/Strategies/Edit/${item.id}">
-                                    <i class="fas fa-edit icon-size icon-edit"></i>
-                                 </a>
-                                 <a class="me-3 confirm-text" href="javascript:void(0);" onclick="confirmDelete(${item.id})">
-                                    <i class="fas fa-trash-alt icon-size icon-delete"></i>
-                                 </a>
-                                 <a href="/RecommendationResult/RecommendationResult?criteriaId=${item.id}&selectedDate=${item.selectedDate ? new Date(item.selectedDate).toISOString().split('T')[0] : ''}&sortColumn=${item.sortColumn || ''}&sortOrder=${item.sortOrder || ''}&viewIndex=${item.viewIndex || 0}" class="btn btn-sm btn-primary">عرض</a>`,
-                                item.companiesCount || 0,
-                                `<a href="/Strategies/View/${item.id}" class="btn btn-sm btn-primary">عرض</a>`
-                            ]);
-
-                            // إضافة الصفوف دفعة واحدة
-                            table.rows.add(rows).draw(false);
-
-                            page++;
-                            isLoading = false;
-                            $('#loading').hide();
-
-                            if (response.data.length === pageSize) {
-                                setTimeout(loadData, 500); // تقليل التأخير لتحسين تجربة المستخدم
-                            }
+                            $(element).closest('tr').remove();
+                            alert('تم الحذف بنجاح');
                         } else {
-                            console.error('خطأ: ' + response.message);
-                            alert('خطأ: ' + response.message);
-                            isLoading = false;
-                            $('#loading').hide();
+                            alert('فشل الحذف: ' + response.message);
                         }
                     },
-                    error: function (xhr, status, error) {
-                        console.error('خطأ AJAX:', status, error);
-                        alert('حدث خطأ أثناء جلب البيانات');
-                        isLoading = false;
-                        $('#loading').hide();
+                    error: function () {
+                        alert('حدث خطأ أثناء الحذف');
                     }
                 });
             }
-
-            function confirmDelete(id) {
-                if (confirm('هل أنت متأكد من حذف هذه الإستراتيجية؟')) {
-                    $.ajax({
-                        url: '/Strategies/Delete',
-                        method: 'POST',
-                        data: { id: id },
-                        success: function (response) {
-                            if (response.success) {
-                                table.row($(`a[onclick="confirmDelete(${id})"]`).closest('tr')).remove().draw();
-                                alert('تم الحذف بنجاح');
-                            } else {
-                                alert('فشل الحذف: ' + response.message);
-                            }
-                        },
-                        error: function () {
-                            alert('حدث خطأ أثناء الحذف');
-                        }
-                    });
-                }
-            }
-
-            loadData();
-        });
+        }
     </script>
 }
-
-<div id="loading" style="display: none; text-align: center; margin-top: 10px;">
-    <img src="/images/loading.gif" width="32" height="32" alt="Loading" />
-</div>
-
-
-

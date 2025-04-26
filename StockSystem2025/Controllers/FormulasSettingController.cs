@@ -1,9 +1,8 @@
-﻿using System.Diagnostics;
-using System.Drawing.Printing;
-using System.Net.Mime;
-using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using StockSystem2025.Models;
 using StockSystem2025.ViewModel;
 
@@ -12,63 +11,105 @@ namespace StockSystem2025.Controllers
     public class FormulasSettingController : Controller
     {
         private readonly ILogger<UploadFileController> _logger;
-
+        private readonly IMemoryCache _cache;
         private readonly StockdbContext _context;
 
-        public FormulasSettingController(StockdbContext context, ILogger<UploadFileController> logger)
+        public FormulasSettingController(StockdbContext context, ILogger<UploadFileController> logger, IMemoryCache cache)
         {
             _context = context;
             _logger = logger;
+            _cache = cache;
         }
 
-        public async Task<IActionResult> FormulasSettingIndex()
+        public async Task<IActionResult> FormulasSettingIndex(int page = 1, int pageSize = 10)
         {
-
-            return View();
+            return View(await LoadData(page, pageSize));
         }
 
-
-
-
-
-
-
-        [HttpGet]
-        public async Task<IActionResult> LoadData(int page = 1, int pageSize = 10)
+        private async Task<FormulasSettingViewModel> LoadData(int page = 1, int pageSize = 10)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                // 1. تحميل البيانات الأساسية
+                // التخزين المؤقت للبيانات الثابتة
+                var cacheKey = "StaticData";
+                if (!_cache.TryGetValue(cacheKey, out (List<CompanyTable> Companies, bool ViewCompaniesCount) staticData))
+                {
+                    staticData.Companies = await _context.CompanyTables
+                        .AsNoTracking()
+                        .Select(c => new CompanyTable { CompanyId = c.CompanyId, CompanyName = c.CompanyName })
+                        .ToListAsync();
+
+                    var settings = await _context.Settings
+                        .AsNoTracking()
+                        .Where(x => x.Name == "ShowCompaniesCount")
+                        .Select(x => x.Value == "1")
+                        .FirstOrDefaultAsync();
+                    staticData.ViewCompaniesCount = settings;
+
+                    _cache.Set(cacheKey, staticData, TimeSpan.FromHours(1));
+                }
+
+                // تحميل البيانات الأساسية
                 var totalRecords = await _context.Criterias.CountAsync();
 
                 var model = new FormulasSettingViewModel
                 {
                     ContentTitle = "عرض التوصيات",
-                    Criteria = await _context.Criterias
-                        .Include(c => c.Formulas)
-                        .AsNoTracking()
-                        .Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToListAsync(),
-
+                    Criteria = new List<CriteriaViewModel>(),
                     GeneralIndicators = await _context.StockPrevDayViews
                         .AsNoTracking()
                         .Where(x => x.Sticker == "TASI" && x.DayNo == 1)
+                        .Select(x => new StockPrevDayView
+                        {
+                            Sticker = x.Sticker,
+                            DayNo = x.DayNo,
+                            Sclose = x.Sclose
+                        })
                         .ToListAsync(),
-
-                    Companies = await _context.CompanyTables
-                        .AsNoTracking()
-                        .ToListAsync(),
-
-                    MinDate = await _context.StockTables
-                        .AsNoTracking()
-                        .MinAsync(x => x.Createddate),
-
-                    MaxDate = await _context.StockTables
-                        .AsNoTracking()
-                        .MaxAsync(x => x.Createddate),
+                    Companies = staticData.Companies,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalRecords = totalRecords
                 };
+
+                // تحميل المعايير
+                var criteria = await _context.Criterias
+                    .AsNoTracking()
+                    .Select(c => new Criteria
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Type = c.Type,
+                        Note = c.Note,
+                        Separater = c.Separater,
+                        OrderNo = c.OrderNo,
+                        Description = c.Description,
+                        Color = c.Color,
+                        ImageUrl = c.ImageUrl,
+                        IsIndicator = c.IsIndicator,
+                        IsGeneral = c.IsGeneral,
+                        UserId = c.UserId,
+                        Formulas = c.Formulas.Select(f => new Formula
+                        {
+                            Id = f.Id,
+                            Day = f.Day,
+                            FormulaType = f.FormulaType,
+                            FormulaValues = f.FormulaValues
+                        }).ToList()
+                    })
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                // تحميل MinDate و MaxDate في استعلام واحد
+                var dateRange = await _context.StockTables
+                    .AsNoTracking()
+                    .GroupBy(x => 1)
+                    .Select(g => new { MinDate = g.Min(x => x.Createddate), MaxDate = g.Max(x => x.Createddate) })
+                    .FirstOrDefaultAsync();
+                model.MinDate = dateRange?.MinDate;
+                model.MaxDate = dateRange?.MaxDate;
 
                 // تحميل DayNo للتاريخ الأقصى
                 var maxDateDayNo = await _context.StockTables
@@ -79,29 +120,33 @@ namespace StockSystem2025.Controllers
                 int startDayNo = maxDateDayNo > 0 ? maxDateDayNo : 1;
 
                 // تحميل StockPrevDayViews للأيام المطلوبة
-                var requiredDays = model.Criteria
+                var requiredDays = criteria
                     .SelectMany(c => c.Formulas)
                     .Select(f => startDayNo + f.Day - 1)
                     .Distinct()
                     .ToList();
-                var stockPrevDayViewsList = await _context.StockPrevDayViews
-                    .AsNoTracking()
-                    .Where(x => x.ParentIndicator != null)
-                    .ToListAsync();
 
-                // الخطوة 2: تصفية البيانات بناءً على requiredDays في الذاكرة
-                var filteredStockPrevDayViews = stockPrevDayViewsList
-                    .Where(x => requiredDays.Contains(x.DayNo))
-                    .ToList();
-
-                // الخطوة 3: إنشاء القاموس في الذاكرة
-                var stockPrevDayViews = filteredStockPrevDayViews
-                    .ToDictionary(x => (x.Sticker, x.DayNo), x => x);
-                // تحميل إعدادات عرض عدد الشركات
-                var settings = await _context.Settings
+                var stockPrevDayViews = await _context.StockPrevDayViews
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Name == "ShowCompaniesCount");
-                bool viewCompaniesCount = settings?.Value == "1";
+                    .Where(x => requiredDays.Contains(x.DayNo) && x.ParentIndicator != null)
+                    .Select(x => new StockPrevDayView
+                    {
+                        Sticker = x.Sticker,
+                        DayNo = x.DayNo,
+                        Sopen = x.Sopen,
+                        Sclose = x.Sclose,
+                        Shigh = x.Shigh,
+                        Slow = x.Slow,
+                        Svol = x.Svol,
+                        PrevSopen = x.PrevSopen,
+                        PrevSclose = x.PrevSclose,
+                        PrevShigh = x.PrevShigh,
+                        PrevSlow = x.PrevSlow,
+                        PrevSvol = x.PrevSvol,
+                        IsIndicator = x.IsIndicator,
+                        ParentIndicator = x.ParentIndicator
+                    })
+                    .ToDictionaryAsync(x => (x.Sticker, x.DayNo), x => x);
 
                 // تحميل تاريخ بداية المعايير
                 string? criteriaStartDateString = HttpContext.Session.GetString("CriteriaStartDate");
@@ -109,150 +154,150 @@ namespace StockSystem2025.Controllers
                     ? DateTime.Parse(criteriaStartDateString)
                     : model.MaxDate;
 
-                // 2. إعداد قاموس لإنشاء الصيغ
+                // إعداد قاموس الصيغ
                 var formulaFactories = new Dictionary<int, Func<string[], object>>
-        {
-            { 1, values => new Formula1
                 {
-                    TypeAll = bool.Parse(values[0]),
-                    TypePositive = bool.Parse(values[1]),
-                    TypeNegative = bool.Parse(values[2]),
-                    TypeNoChange = bool.Parse(values[3]),
-                    GreaterThan = double.TryParse(values[4], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[5], out var lt) ? lt : (double?)null
-                }
-            },
-            { 2, values => new Formula2
-                {
-                    GreaterThan = double.TryParse(values[0], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[1], out var lt) ? lt : (double?)null
-                }
-            },
-            { 3, values => new Formula3
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypeHigherGap = bool.Parse(values[1]),
-                    TypeLowerGap = bool.Parse(values[2]),
-                    GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
-                }
-            },
-            { 4, values => new Formula4
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypeHigher = bool.Parse(values[1]),
-                    TypeLower = bool.Parse(values[2]),
-                    GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
-                }
-            },
-            { 5, values => new Formula5
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypeHigherGap = bool.Parse(values[1]),
-                    TypeLowerGap = bool.Parse(values[2])
-                }
-            },
-            { 6, values => new Formula6
-                {
-                    Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
-                    And = double.TryParse(values[1], out var and) ? and : (double?)null
-                }
-            },
-            { 7, values => new Formula7
-                {
-                    Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
-                    And = double.TryParse(values[1], out var and) ? and : (double?)null
-                }
-            },
-            { 8, values => new Formula8
-                {
-                    Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
-                    And = double.TryParse(values[1], out var and) ? and : (double?)null
-                }
-            },
-            { 9, values => new Formula9
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypePositive = bool.Parse(values[1]),
-                    TypeNegative = bool.Parse(values[2]),
-                    GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
-                }
-            },
-            { 10, values => new Formula10
-                {
-                    Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
-                    And = double.TryParse(values[1], out var and) ? and : (double?)null
-                }
-            },
-            { 11, values => new Formula11
-                {
-                    MaximumAll = bool.Parse(values[0]),
-                    MaximumGreater = bool.Parse(values[1]),
-                    MaximumLess = bool.Parse(values[2]),
-                    MaximumBetween = double.TryParse(values[3], out var mb) ? mb : (double?)null,
-                    MaximumAnd = double.TryParse(values[4], out var ma) ? ma : (double?)null,
-                    MinimumAll = bool.Parse(values[5]),
-                    MinimumGreater = bool.Parse(values[6]),
-                    MinimumLess = bool.Parse(values[7]),
-                    MinimumBetween = double.TryParse(values[8], out var mib) ? mib : (double?)null,
-                    MinimumAnd = double.TryParse(values[9], out var mia) ? mia : (double?)null
-                }
-            },
-            { 12, values => new Formula12
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypeGreater = bool.Parse(values[1]),
-                    TypeLess = bool.Parse(values[2]),
-                    GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
-                }
-            },
-            { 13, values => new Formula13
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypePositive = bool.Parse(values[1]),
-                    TypeNegative = bool.Parse(values[2]),
-                    Days = int.TryParse(values[3], out var days) ? days : (int?)null,
-                    GreaterThan = double.TryParse(values[4], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[5], out var lt) ? lt : (double?)null
-                }
-            },
-            { 14, values => new Formula14
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypeGreater = bool.Parse(values[1]),
-                    TypeLess = bool.Parse(values[2]),
-                    GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
-                }
-            },
-            { 15, values => new Formula15
-                {
-                    Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
-                    And = double.TryParse(values[1], out var and) ? and : (double?)null
-                }
-            },
-            { 16, values => new Formula16 { /* إذا كانت فارغة، أضف الحقول المطلوبة */ } },
-            { 17, values => new Formula17
-                {
-                    TypeAll = bool.Parse(values[0]),
-                    TypeGreater = bool.Parse(values[1]),
-                    TypeLess = bool.Parse(values[2]),
-                    FromDays = int.TryParse(values[3], out var fd) ? fd : (int?)null,
-                    ToDays = int.TryParse(values[4], out var td) ? td : (int?)null,
-                    GreaterThan = double.TryParse(values[5], out var gt) ? gt : (double?)null,
-                    LessThan = double.TryParse(values[6], out var lt) ? lt : (double?)null
-                }
-            }
-        };
+                    { 1, values => new Formula1
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypePositive = bool.Parse(values[1]),
+                            TypeNegative = bool.Parse(values[2]),
+                            TypeNoChange = bool.Parse(values[3]),
+                            GreaterThan = double.TryParse(values[4], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[5], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 2, values => new Formula2
+                        {
+                            GreaterThan = double.TryParse(values[0], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[1], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 3, values => new Formula3
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypeHigherGap = bool.Parse(values[1]),
+                            TypeLowerGap = bool.Parse(values[2]),
+                            GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 4, values => new Formula4
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypeHigher = bool.Parse(values[1]),
+                            TypeLower = bool.Parse(values[2]),
+                            GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 5, values => new Formula5
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypeHigherGap = bool.Parse(values[1]),
+                            TypeLowerGap = bool.Parse(values[2])
+                        }
+                    },
+                    { 6, values => new Formula6
+                        {
+                            Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
+                            And = double.TryParse(values[1], out var and) ? and : (double?)null
+                        }
+                    },
+                    { 7, values => new Formula7
+                        {
+                            Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
+                            And = double.TryParse(values[1], out var and) ? and : (double?)null
+                        }
+                    },
+                    { 8, values => new Formula8
+                        {
+                            Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
+                            And = double.TryParse(values[1], out var and) ? and : (double?)null
+                        }
+                    },
+                    { 9, values => new Formula9
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypePositive = bool.Parse(values[1]),
+                            TypeNegative = bool.Parse(values[2]),
+                            GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 10, values => new Formula10
+                        {
+                            Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
+                            And = double.TryParse(values[1], out var and) ? and : (double?)null
+                        }
+                    },
+                    { 11, values => new Formula11
+                        {
+                            MaximumAll = bool.Parse(values[0]),
+                            MaximumGreater = bool.Parse(values[1]),
+                            MaximumLess = bool.Parse(values[2]),
+                            MaximumBetween = double.TryParse(values[3], out var mb) ? mb : (double?)null,
+                            MaximumAnd = double.TryParse(values[4], out var ma) ? ma : (double?)null,
+                            MinimumAll = bool.Parse(values[5]),
+                            MinimumGreater = bool.Parse(values[6]),
+                            MinimumLess = bool.Parse(values[7]),
+                            MinimumBetween = double.TryParse(values[8], out var mib) ? mib : (double?)null,
+                            MinimumAnd = double.TryParse(values[9], out var mia) ? mia : (double?)null
+                        }
+                    },
+                    { 12, values => new Formula12
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypeGreater = bool.Parse(values[1]),
+                            TypeLess = bool.Parse(values[2]),
+                            GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 13, values => new Formula13
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypePositive = bool.Parse(values[1]),
+                            TypeNegative = bool.Parse(values[2]),
+                            Days = int.TryParse(values[3], out var days) ? days : (int?)null,
+                            GreaterThan = double.TryParse(values[4], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[5], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 14, values => new Formula14
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypeGreater = bool.Parse(values[1]),
+                            TypeLess = bool.Parse(values[2]),
+                            GreaterThan = double.TryParse(values[3], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[4], out var lt) ? lt : (double?)null
+                        }
+                    },
+                    { 15, values => new Formula15
+                        {
+                            Between = double.TryParse(values[0], out var bt) ? bt : (double?)null,
+                            And = double.TryParse(values[1], out var and) ? and : (double?)null
+                        }
+                    },
+                    { 16, values => new Formula16 { } },
+                    { 17, values => new Formula17
+                        {
+                            TypeAll = bool.Parse(values[0]),
+                            TypeGreater = bool.Parse(values[1]),
+                            TypeLess = bool.Parse(values[2]),
+                            FromDays = int.TryParse(values[3], out var fd) ? fd : (int?)null,
+                            ToDays = int.TryParse(values[4], out var td) ? td : (int?)null,
+                            GreaterThan = double.TryParse(values[5], out var gt) ? gt : (double?)null,
+                            LessThan = double.TryParse(values[6], out var lt) ? lt : (double?)null
+                        }
+                    }
+                };
 
-                // 3. معالجة المعايير
-                var criteriaList = new List<CriteriaViewModel>();
-                if (viewCompaniesCount && model.Criteria.Any())
+                // معالجة المعايير باستخدام المعالجة الموازية
+                var criteriaList = new ConcurrentBag<CriteriaViewModel>();
+                if (staticData.ViewCompaniesCount && criteria.Any())
                 {
-                    foreach (var criteriaItem in model.Criteria)
+                    await Parallel.ForEachAsync(criteria, async (criteriaItem, ct) =>
                     {
                         var oneCriteriaVM = new CriteriaViewModel
                         {
@@ -274,7 +319,7 @@ namespace StockSystem2025.Controllers
                         };
 
                         // معالجة الصيغ
-                        List<StockPrevDayView> stockResult = stockPrevDayViews
+                        var stockResult = stockPrevDayViews
                             .Where(x => x.Value.ParentIndicator != null && x.Value.DayNo == startDayNo)
                             .Select(x => x.Value)
                             .ToList();
@@ -284,26 +329,25 @@ namespace StockSystem2025.Controllers
                         else if (criteriaItem.IsIndicator == 1)
                             stockResult = stockResult.Where(x => x.IsIndicator == true).ToList();
 
-                        var FormulasGrop = criteriaItem.Formulas.OrderByDescending(x => x.Day).GroupBy(x => x.Day);
-
-                        foreach (var GropItem in FormulasGrop)
+                        var formulasGroup = criteriaItem.Formulas.OrderByDescending(x => x.Day).GroupBy(x => x.Day);
+                        foreach (var groupItem in formulasGroup)
                         {
-                            int FormulaDayNo = startDayNo + GropItem.First().Day - 1;
-                            var stockStickers = stockResult.Select(y => y.Sticker).ToHashSet();
+                            int formulaDayNo = startDayNo + groupItem.First().Day - 1;
+                            var stockStickers = new HashSet<string>(stockResult.Select(y => y.Sticker));
                             var res = stockPrevDayViews
-                                .Where(x => x.Key.DayNo == FormulaDayNo && stockStickers.Contains(x.Key.Sticker))
+                                .Where(x => x.Key.DayNo == formulaDayNo && stockStickers.Any(s => x.Key.Sticker.StartsWith(s)))
                                 .Select(x => x.Value)
                                 .ToList();
 
                             stockResult = res;
-                            foreach (var FormulaItem in GropItem)
+                            foreach (var formulaItem in groupItem)
                             {
-                                string[] FormulaValuesArray = FormulaItem.FormulaValues.Split(';');
-                                if (!formulaFactories.TryGetValue(FormulaItem.FormulaType, out var factory))
+                                string[] formulaValuesArray = formulaItem.FormulaValues.Split(';');
+                                if (!formulaFactories.TryGetValue(formulaItem.FormulaType, out var factory))
                                     continue;
 
-                                var formula = factory(FormulaValuesArray);
-                                switch (FormulaItem.FormulaType)
+                                var formula = factory(formulaValuesArray);
+                                switch (formulaItem.FormulaType)
                                 {
                                     case 1:
                                         var formula1 = (Formula1)formula;
@@ -709,7 +753,7 @@ namespace StockSystem2025.Controllers
                                         {
                                             var midScloseDict = await _context.StockPrevDayViews
                                                 .AsNoTracking()
-                                                .Where(x => x.DayNo >= FormulaDayNo)
+                                                .Where(x => x.DayNo >= formulaDayNo)
                                                 .GroupBy(x => x.Sticker)
                                                 .Select(g => new
                                                 {
@@ -873,16 +917,23 @@ namespace StockSystem2025.Controllers
                                             int totalToDayNo = formula17.ToDays.Value + relatedDayNo;
 
                                             var recommendationsList = await _context.RecommendationsResultsViews
-      .AsNoTracking()
-      .Where(x => x.DayNo >= totalFromDayNo && x.DayNo <= totalToDayNo)
-      .ToListAsync();
+                                                .AsNoTracking()
+                                                .Where(x => x.DayNo >= totalFromDayNo && x.DayNo <= totalToDayNo)
+                                                .Select(x => new RecommendationsResultsView
+                                                {
+                                                    Sticker = x.Sticker,
+                                                    DayNo = x.DayNo,
+                                                    Shigh = x.Shigh,
+                                                    NextShigh = x.NextShigh,
+                                                    PrevShigh = x.PrevShigh
+                                                })
+                                                .ToListAsync();
 
-                                            // تصفية البيانات بناءً على listOfCodes في الذاكرة
+                                            // تصفية البيانات باستخدام StartsWith مع تطابق البادئة الكاملة
                                             var filteredRecommendations = recommendationsList
-                                                .Where(x => listOfCodes.Contains(x.Sticker))
+                                                .Where(x => listOfCodes.Any(c => x.Sticker.StartsWith(c)))
                                                 .ToList();
 
-                                            // تجميع النتائج وإنشاء القاموس في الذاكرة
                                             var recommendationsDict = filteredRecommendations
                                                 .GroupBy(x => x.Sticker)
                                                 .ToDictionary(g => g.Key, g => g.ToList());
@@ -958,7 +1009,7 @@ namespace StockSystem2025.Controllers
 
                                             var finalStickers = penetrationPointResult.Select(x => x.StockItem.Sticker).Distinct().ToList();
                                             stockResult = stockPrevDayViews
-                                                .Where(x => x.Key.DayNo == FormulaDayNo && finalStickers.Contains(x.Key.Sticker))
+                                                .Where(x => x.Key.DayNo == formulaDayNo && finalStickers.Any(s => x.Key.Sticker.StartsWith(s)))
                                                 .Select(x => x.Value)
                                                 .ToList();
                                         }
@@ -997,72 +1048,52 @@ namespace StockSystem2025.Controllers
                             }
                         }
 
-                        int CompaniesCount = stockResultSortedList.Count(x => !x.IsIndicator);
-                        if (CompaniesCount == 0)
+                        int companiesCount = stockResultSortedList.Count(x => !x.IsIndicator);
+                        if (companiesCount == 0)
                         {
-                            CompaniesCount = stockResultSortedList.Count(x => x.IsIndicator);
+                            companiesCount = stockResultSortedList.Count(x => x.IsIndicator);
                         }
 
-                        oneCriteriaVM.CompaniesCount = CompaniesCount;
+                        oneCriteriaVM.CompaniesCount = companiesCount;
                         criteriaList.Add(oneCriteriaVM);
-                    }
+                    });
                 }
+
+                model.Criteria = criteriaList.ToList();
 
                 stopwatch.Stop();
                 _logger.LogInformation($"LoadData took {stopwatch.ElapsedMilliseconds} ms");
 
-                // إرجاع البيانات المطلوبة فقط
-                return Json(new
-                {
-
-
-                 
-                
-
-                    success = true,
-                    data = criteriaList.Select(c => new
-                    {
-                        c.Criteria.Id,
-                        c.Criteria.Name,
-                        c.CompaniesCount,
-                    }),
-                    page,
-                    pageSize,
-                    totalRecords
-                });
+                return model;
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, $"LoadData failed after {stopwatch.ElapsedMilliseconds} ms");
-                return Json(new { success = false, message = ex.Message });
+                throw; // يمكنك إعادة توجيه إلى صفحة خطأ إذا لزم الأمر
             }
         }
 
-        public static class ConvertHelper
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
         {
-            public static int? ToNullableInt(string input)
+            try
             {
-                if (string.IsNullOrWhiteSpace(input))
-                    return null;
+                var criteria = await _context.Criterias.FindAsync(id);
+                if (criteria == null)
+                {
+                    return Json(new { success = false, message = "الإستراتيجية غير موجودة" });
+                }
 
-                return int.TryParse(input, out int result) ? result : (int?)null;
+                _context.Criterias.Remove(criteria);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting criteria");
+                return Json(new { success = false, message = "حدث خطأ أثناء الحذف" });
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }
-
-

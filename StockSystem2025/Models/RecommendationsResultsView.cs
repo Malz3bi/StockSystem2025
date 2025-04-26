@@ -23,7 +23,7 @@ public partial class RecommendationsResultsView
 
     public double? Svol { get; set; }
 
-    public DateOnly? Createddate { get; set; }
+    public DateTime? Createddate { get; set; }
 
     public double? PrevSopen { get; set; }
 
@@ -66,4 +66,5 @@ public partial class RecommendationsResultsView
     public double? ExpectedOpenPercent { get; set; }
 
     public double? NextShigh { get; set; }
+    public string? ParentIndicator { get; set; }
 }

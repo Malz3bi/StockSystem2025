@@ -5,16 +5,14 @@ namespace StockSystem2025.ViewModel
     public class FormulasSettingViewModel
     {
         public string ContentTitle { get; set; }
+        public List<CriteriaViewModel> Criteria { get; set; }
         public List<StockPrevDayView> GeneralIndicators { get; set; }
-        public List<Criteria> Criteria { get; set; }
         public List<CompanyTable> Companies { get; set; }
-        public DateOnly? CriteriaStartDate { get; set; }
         public DateTime? MinDate { get; set; }
         public DateTime? MaxDate { get; set; }
-        public string WrongDateMessage { get; set; }
-        public string TimeLabel { get; set; }
-
-        public List<CriteriaViewModel> criteriaVM { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalRecords { get; set; }
     }
 
     public class CriteriaViewModel
@@ -23,7 +21,7 @@ namespace StockSystem2025.ViewModel
         public int CompaniesCount { get; set; }
     }
 
-    public class Formula1
+public class Formula1
     {
         public bool TypeAll { get; set; }
         public bool TypePositive { get; set; }
