@@ -140,6 +140,7 @@ public class Formula1
     public class Formula12
     {
         public bool TypeAll { get; set; }
+
         public bool TypeGreater { get; set; }
         public bool TypeLess { get; set; }
         public double? GreaterThan { get; set; }
