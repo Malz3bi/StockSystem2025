@@ -195,7 +195,7 @@
                 <form asp-action="ChangeDate" method="post">
                     <input type="date" asp-for="SelectedDate" min="@Model.MinDate?.ToString("yyyy-MM-dd")" max="@Model.MaxDate?.ToString("yyyy-MM-dd")" class="form-control d-inline-block w-auto" />
                     <input type="hidden" asp-for="Criteria.Index" />
-                    <input type="hidden" asp-for="ViewIndex" />
+                    <input type="hidden" value="0" name="ViewIndex" />   
                     <input type="hidden" asp-for="SortColumn" />
                     <input type="hidden" asp-for="SortOrder" />
                     <button type="submit" class="btn btn-primary btn-sm">تحديث</button>
@@ -203,7 +203,7 @@
                 <form asp-action="NextDate" method="post" class="d-inline">
                     <input type="hidden" asp-for="SelectedDate" />
                     <input type="hidden" asp-for="Criteria.Index" />
-                    <input type="hidden" asp-for="ViewIndex" />
+                    <input type="hidden" value="0" name="ViewIndex" />
                     <input type="hidden" asp-for="SortColumn" />
                     <input type="hidden" asp-for="SortOrder" />
                     <button type="submit" class="btn btn-secondary btn-sm">▲</button>
@@ -211,7 +211,7 @@
                 <form asp-action="PreviousDate" method="post" class="d-inline">
                     <input type="hidden" asp-for="SelectedDate" />
                     <input type="hidden" asp-for="Criteria.Index" />
-                    <input type="hidden" asp-for="ViewIndex" />
+                    <input type="hidden" value="0" name="ViewIndex" />
                     <input type="hidden" asp-for="SortColumn" />
                     <input type="hidden" asp-for="SortOrder" />
                     <button type="submit" class="btn btn-secondary btn-sm">▼</button>
@@ -270,9 +270,9 @@
         @if (Model.ViewIndex == 0)
         {
             <form asp-action="SwitchView" method="post" class="d-inline">
-                <input type="hidden" asp-for="Criteria.Index" />
+                <input type="hidden" name="CriteriaId" value="@Model.Criteria.Index" />
                 <input type="hidden" asp-for="SelectedDate" />
-                <input type="hidden" asp-for="ViewIndex" />
+                <input type="hidden" value="1" name="ViewIndex" /> 
                 <input type="hidden" asp-for="SortColumn" />
                 <input type="hidden" asp-for="SortOrder" />
                 <button type="submit" class="btn btn-info mb-3">عرض الدعوم والمقاومات</button>
@@ -340,12 +340,12 @@
         else
         {
             <form asp-action="SwitchView" method="post" class="d-inline">
-                <input type="hidden" asp-for="Criteria.Index" />
+                <input type="hidden" name="CriteriaId" value="@Model.Criteria.Index" />
                 <input type="hidden" asp-for="SelectedDate" />
-                <input type="hidden" asp-for="ViewIndex" />
+                <input type="hidden" value="0" name="ViewIndex" />
                 <input type="hidden" asp-for="SortColumn" />
                 <input type="hidden" asp-for="SortOrder" />
-                <button type="submit" class="btn btn-info mb-3">عرض نسبة الأرباح والخسائر</button>
+                <button type="submit"  class="btn btn-info mb-3">عرض نسبة الأرباح والخسائر</button>
             </form>
             <table class="table table-bordered grid">
                 <thead class="rdHeader">

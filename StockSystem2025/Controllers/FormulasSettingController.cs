@@ -360,17 +360,38 @@ namespace StockSystem2025.Controllers
 
                                         if (formula1.TypeAll)
                                         {
-                                            stockResult = stockResult.Where(stock =>
-                                            {
-                                                var change = stock.Sclose.HasValue && stock.PrevSclose.HasValue && stock.PrevSclose != 0
-                                                    ? (stock.Sclose.Value - stock.PrevSclose.Value) / stock.PrevSclose.Value * 100
-                                                    : 0;
-                                                if (change > 0)
-                                                    return applyRangeFilter1(change);
-                                                else if (change < 0)
-                                                    return applyRangeFilter1(-change);
-                                                return false;
-                                            }).ToList();
+                                            //stockResult = stockResult.Where(stock =>
+                                            //{
+                                            //    var change = stock.Sclose.HasValue && stock.PrevSclose.HasValue && stock.PrevSclose != 0
+                                            //        ? (stock.Sclose.Value - stock.PrevSclose.Value) / stock.PrevSclose.Value * 100
+                                            //        : 0;
+                                            //    if (change > 0)
+                                            //        return applyRangeFilter1(change);
+                                            //    else if (change < 0)
+                                            //        return applyRangeFilter1(-change);
+                                            //    return false;
+                                            //}).ToList();
+
+
+                                            stockResult = stockResult.Where(stock => 
+                                            stock.Sclose.HasValue &&
+                                            stock.Sclose != 0 &&
+
+                                            stock.Shigh.HasValue &&
+                                            stock.Shigh != 0 &&
+
+                                            stock.Slow.HasValue &&
+                                            stock.Slow != 0 &&
+
+                                            stock.PrevShigh.HasValue &&
+                                            stock.PrevShigh != 0 &&
+
+                                            stock.PrevSlow.HasValue &&
+                                            stock.PrevSlow != 0 &&
+
+                                            stock.PrevSclose.HasValue &&
+                                            stock.PrevSclose != 0
+                                            ).ToList();
                                         }
                                         else
                                         {
@@ -392,6 +413,7 @@ namespace StockSystem2025.Controllers
 
                                     case 2:
                                         var formula2 = (Formula2)formula;
+                                      
                                         if (formula2.GreaterThan != null)
                                         {
                                             stockResult = stockResult
@@ -407,8 +429,14 @@ namespace StockSystem2025.Controllers
                                         break;
 
                                     case 3:
+
+                                     
                                         var formula3 = (Formula3)formula;
-                                        bool InRange3(double gap) =>
+
+                                        if (formula3.TypeAll == true)
+                                         break;
+
+                                            bool InRange3(double gap) =>
                                             (!formula3.GreaterThan.HasValue || gap > formula3.GreaterThan.Value) &&
                                             (!formula3.LessThan.HasValue || gap < formula3.LessThan.Value);
 
@@ -442,6 +470,7 @@ namespace StockSystem2025.Controllers
 
                                     case 4:
                                         var formula4 = (Formula4)formula;
+                                       
                                         if (formula4.TypeAll && (formula4.GreaterThan != null || formula4.LessThan != null))
                                         {
                                             var stockResult1 = stockResult
@@ -488,6 +517,8 @@ namespace StockSystem2025.Controllers
 
                                     case 5:
                                         var formula5 = (Formula5)formula;
+
+                                      
                                         if (formula5.TypeLowerGap)
                                         {
                                             stockResult = stockResult
