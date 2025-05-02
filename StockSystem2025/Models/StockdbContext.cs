@@ -77,13 +77,13 @@ public partial class StockdbContext : DbContext
             entity.Property(e => e.ParentIndicator)
                 .HasMaxLength(4)
                 .IsUnicode(false);
-            entity.Property(e => e.PrevSclose).HasColumnName("PrevSClose");
-            entity.Property(e => e.Sclose).HasColumnName("SClose");
+            entity.Property(e => e.PrevSclose).HasColumnName("PrevSclose");
+            entity.Property(e => e.Sclose).HasColumnName("Sclose");
             entity.Property(e => e.Sdate)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.Shigh).HasColumnName("SHigh");
-            entity.Property(e => e.Slow).HasColumnName("SLow");
+            entity.Property(e => e.Shigh).HasColumnName("Shigh");
+            entity.Property(e => e.Slow).HasColumnName("Slow");
             entity.Property(e => e.Sname).HasMaxLength(50);
             entity.Property(e => e.Sticker)
                 .HasMaxLength(4)
@@ -246,15 +246,15 @@ public partial class StockdbContext : DbContext
             entity.Property(e => e.CIndicatorOut).HasColumnName("C_IndicatorOut");
             entity.Property(e => e.GIndicatorIn).HasColumnName("G_IndicatorIn");
             entity.Property(e => e.GIndicatorOut).HasColumnName("G_IndicatorOut");
-            entity.Property(e => e.PrevSclose).HasColumnName("PrevSClose");
+            entity.Property(e => e.PrevSclose).HasColumnName("PrevSclose");
             entity.Property(e => e.SIndicatorIn).HasColumnName("S_IndicatorIn");
             entity.Property(e => e.SIndicatorOut).HasColumnName("S_IndicatorOut");
-            entity.Property(e => e.Sclose).HasColumnName("SClose");
+            entity.Property(e => e.Sclose).HasColumnName("Sclose");
             entity.Property(e => e.Sdate)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.Shigh).HasColumnName("SHigh");
-            entity.Property(e => e.Slow).HasColumnName("SLow");
+            entity.Property(e => e.Shigh).HasColumnName("Shigh");
+            entity.Property(e => e.Slow).HasColumnName("Slow");
             entity.Property(e => e.Sname).HasMaxLength(50);
             entity.Property(e => e.Sticker)
                 .HasMaxLength(4)
@@ -324,19 +324,19 @@ public partial class StockdbContext : DbContext
             entity.Property(e => e.ParentIndicator)
             .HasMaxLength(4)
             .IsUnicode(false);
-            entity.Property(e => e.NextSclose).HasColumnName("NextSClose");
-            entity.Property(e => e.NextShigh).HasColumnName("NextSHigh");
+            entity.Property(e => e.NextSclose).HasColumnName("NextSclose");
+            entity.Property(e => e.NextShigh).HasColumnName("NextShigh");
             entity.Property(e => e.OpeningGapRate).HasColumnName("openingGapRate");
             entity.Property(e => e.OpeningGapValue).HasColumnName("openingGapValue");
-            entity.Property(e => e.PrevSclose).HasColumnName("PrevSClose");
-            entity.Property(e => e.PrevShigh).HasColumnName("PrevSHigh");
-            entity.Property(e => e.PrevSlow).HasColumnName("PrevSLow");
-            entity.Property(e => e.Sclose).HasColumnName("SClose");
+            entity.Property(e => e.PrevSclose).HasColumnName("PrevSclose");
+            entity.Property(e => e.PrevShigh).HasColumnName("PrevShigh");
+            entity.Property(e => e.PrevSlow).HasColumnName("PrevSlow");
+            entity.Property(e => e.Sclose).HasColumnName("Sclose");
             entity.Property(e => e.Sdate)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.Shigh).HasColumnName("SHigh");
-            entity.Property(e => e.Slow).HasColumnName("SLow");
+            entity.Property(e => e.Shigh).HasColumnName("Shigh");
+            entity.Property(e => e.Slow).HasColumnName("Slow");
             entity.Property(e => e.Sname).HasMaxLength(50);
             entity.Property(e => e.Sticker)
                 .HasMaxLength(4)
@@ -361,15 +361,15 @@ public partial class StockdbContext : DbContext
 
             entity.Property(e => e.GIndicatorIn).HasColumnName("G_IndicatorIn");
             entity.Property(e => e.GIndicatorOut).HasColumnName("G_IndicatorOut");
-            entity.Property(e => e.PrevSclose).HasColumnName("PrevSClose");
+            entity.Property(e => e.PrevSclose).HasColumnName("PrevSclose");
             entity.Property(e => e.SIndicatorIn).HasColumnName("S_IndicatorIn");
             entity.Property(e => e.SIndicatorOut).HasColumnName("S_IndicatorOut");
-            entity.Property(e => e.Sclose).HasColumnName("SClose");
+            entity.Property(e => e.Sclose).HasColumnName("Sclose");
             entity.Property(e => e.Sdate)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.Shigh).HasColumnName("SHigh");
-            entity.Property(e => e.Slow).HasColumnName("SLow");
+            entity.Property(e => e.Shigh).HasColumnName("Shigh");
+            entity.Property(e => e.Slow).HasColumnName("Slow");
             entity.Property(e => e.Sname).HasMaxLength(50);
             entity.Property(e => e.Sticker)
                 .HasMaxLength(4)
@@ -409,15 +409,15 @@ public partial class StockdbContext : DbContext
             entity.Property(e => e.ParentIndicator)
                 .HasMaxLength(4)
                 .IsUnicode(false);
-            entity.Property(e => e.PrevSclose).HasColumnName("PrevSClose");
-            entity.Property(e => e.PrevShigh).HasColumnName("PrevSHigh");
-            entity.Property(e => e.PrevSlow).HasColumnName("PrevSLow");
-            entity.Property(e => e.Sclose).HasColumnName("SClose");
+            entity.Property(e => e.PrevSclose).HasColumnName("PrevSclose");
+            entity.Property(e => e.PrevShigh).HasColumnName("PrevShigh");
+            entity.Property(e => e.PrevSlow).HasColumnName("PrevSlow");
+            entity.Property(e => e.Sclose).HasColumnName("Sclose");
             entity.Property(e => e.Sdate)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.Shigh).HasColumnName("SHigh");
-            entity.Property(e => e.Slow).HasColumnName("SLow");
+            entity.Property(e => e.Shigh).HasColumnName("Shigh");
+            entity.Property(e => e.Slow).HasColumnName("Slow");
             entity.Property(e => e.Sname).HasMaxLength(50);
             entity.Property(e => e.Sticker)
                 .HasMaxLength(4)
@@ -437,9 +437,9 @@ public partial class StockdbContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.Sclose).HasColumnName("SClose");
-            entity.Property(e => e.Shigh).HasColumnName("SHigh");
-            entity.Property(e => e.Slow).HasColumnName("SLow");
+            entity.Property(e => e.Sclose).HasColumnName("Sclose");
+            entity.Property(e => e.Shigh).HasColumnName("Shigh");
+            entity.Property(e => e.Slow).HasColumnName("Slow");
             entity.Property(e => e.Sname).HasMaxLength(50);
         });
 
@@ -467,4 +467,8 @@ public partial class StockdbContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+
+
+
 }

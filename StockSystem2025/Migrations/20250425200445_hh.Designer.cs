@@ -61,11 +61,11 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("PrevSclose")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSClose");
+                        .HasColumnName("PrevSclose");
 
                     b.Property<double?>("Sclose")
                         .HasColumnType("float")
-                        .HasColumnName("SClose");
+                        .HasColumnName("Sclose");
 
                     b.Property<string>("Sdate")
                         .IsRequired()
@@ -75,11 +75,11 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Shigh")
                         .HasColumnType("float")
-                        .HasColumnName("SHigh");
+                        .HasColumnName("Shigh");
 
                     b.Property<double?>("Slow")
                         .HasColumnType("float")
-                        .HasColumnName("SLow");
+                        .HasColumnName("Slow");
 
                     b.Property<string>("Sname")
                         .HasMaxLength(50)
@@ -492,7 +492,7 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("PrevSclose")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSClose");
+                        .HasColumnName("PrevSclose");
 
                     b.Property<double?>("SIndicatorIn")
                         .HasColumnType("float")
@@ -504,7 +504,7 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Sclose")
                         .HasColumnType("float")
-                        .HasColumnName("SClose");
+                        .HasColumnName("Sclose");
 
                     b.Property<string>("Sdate")
                         .IsRequired()
@@ -514,11 +514,11 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Shigh")
                         .HasColumnType("float")
-                        .HasColumnName("SHigh");
+                        .HasColumnName("Shigh");
 
                     b.Property<double?>("Slow")
                         .HasColumnType("float")
-                        .HasColumnName("SLow");
+                        .HasColumnName("Slow");
 
                     b.Property<string>("Sname")
                         .HasMaxLength(50)
@@ -721,11 +721,11 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("NextSclose")
                         .HasColumnType("float")
-                        .HasColumnName("NextSClose");
+                        .HasColumnName("NextSclose");
 
                     b.Property<double?>("NextShigh")
                         .HasColumnType("float")
-                        .HasColumnName("NextSHigh");
+                        .HasColumnName("NextShigh");
 
                     b.Property<double?>("OpeningGapRate")
                         .HasColumnType("float")
@@ -745,15 +745,15 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("PrevSclose")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSClose");
+                        .HasColumnName("PrevSclose");
 
                     b.Property<double?>("PrevShigh")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSHigh");
+                        .HasColumnName("PrevShigh");
 
                     b.Property<double?>("PrevSlow")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSLow");
+                        .HasColumnName("PrevSlow");
 
                     b.Property<double?>("PrevSopen")
                         .HasColumnType("float");
@@ -763,7 +763,7 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Sclose")
                         .HasColumnType("float")
-                        .HasColumnName("SClose");
+                        .HasColumnName("Sclose");
 
                     b.Property<string>("Sdate")
                         .IsRequired()
@@ -773,11 +773,11 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Shigh")
                         .HasColumnType("float")
-                        .HasColumnName("SHigh");
+                        .HasColumnName("Shigh");
 
                     b.Property<double?>("Slow")
                         .HasColumnType("float")
-                        .HasColumnName("SLow");
+                        .HasColumnName("Slow");
 
                     b.Property<string>("Sname")
                         .HasMaxLength(50)
@@ -852,7 +852,7 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("PrevSclose")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSClose");
+                        .HasColumnName("PrevSclose");
 
                     b.Property<double?>("SIndicatorIn")
                         .HasColumnType("float")
@@ -864,7 +864,7 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Sclose")
                         .HasColumnType("float")
-                        .HasColumnName("SClose");
+                        .HasColumnName("Sclose");
 
                     b.Property<string>("Sdate")
                         .IsRequired()
@@ -874,11 +874,11 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Shigh")
                         .HasColumnType("float")
-                        .HasColumnName("SHigh");
+                        .HasColumnName("Shigh");
 
                     b.Property<double?>("Slow")
                         .HasColumnType("float")
-                        .HasColumnName("SLow");
+                        .HasColumnName("Slow");
 
                     b.Property<string>("Sname")
                         .HasMaxLength(50)
@@ -988,15 +988,15 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("PrevSclose")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSClose");
+                        .HasColumnName("PrevSclose");
 
                     b.Property<double?>("PrevShigh")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSHigh");
+                        .HasColumnName("PrevShigh");
 
                     b.Property<double?>("PrevSlow")
                         .HasColumnType("float")
-                        .HasColumnName("PrevSLow");
+                        .HasColumnName("PrevSlow");
 
                     b.Property<double?>("PrevSopen")
                         .HasColumnType("float");
@@ -1006,7 +1006,7 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Sclose")
                         .HasColumnType("float")
-                        .HasColumnName("SClose");
+                        .HasColumnName("Sclose");
 
                     b.Property<string>("Sdate")
                         .IsRequired()
@@ -1016,11 +1016,11 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Shigh")
                         .HasColumnType("float")
-                        .HasColumnName("SHigh");
+                        .HasColumnName("Shigh");
 
                     b.Property<double?>("Slow")
                         .HasColumnType("float")
-                        .HasColumnName("SLow");
+                        .HasColumnName("Slow");
 
                     b.Property<string>("Sname")
                         .HasMaxLength(50)
@@ -1072,15 +1072,15 @@ namespace StockSystem2025.Migrations
 
                     b.Property<double?>("Sclose")
                         .HasColumnType("float")
-                        .HasColumnName("SClose");
+                        .HasColumnName("Sclose");
 
                     b.Property<double?>("Shigh")
                         .HasColumnType("float")
-                        .HasColumnName("SHigh");
+                        .HasColumnName("Shigh");
 
                     b.Property<double?>("Slow")
                         .HasColumnType("float")
-                        .HasColumnName("SLow");
+                        .HasColumnName("Slow");
 
                     b.Property<string>("Sname")
                         .HasMaxLength(50)

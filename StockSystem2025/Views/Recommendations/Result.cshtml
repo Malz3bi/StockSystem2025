@@ -1,0 +1,416 @@
+﻿@model StockSystem2025.Models.RecommendationResultViewModel
+@using StockSystem2025.AppCode
+@{
+    ViewData["Title"] = "عرض نتائج التوصيات";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css" />
+    <style>
+        .grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .rdHeader {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #dee2e6;
+        }
+
+        .rdSubHeader {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+
+        .left-b-thick {
+            border-left: 2px solid #dee2e6;
+        }
+
+        .f-17 {
+            font-size: 17px;
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+            .tooltip::after {
+                content: attr(title);
+                visibility: hidden;
+                position: absolute;
+                background-color: #333;
+                color: #fff;
+                padding: 5px;
+                border-radius: 4px;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                white-space: nowrap;
+            }
+
+            .tooltip:hover::after {
+                visibility: visible;
+            }
+
+        .stats-div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+        }
+
+        .up {
+            color: green;
+        }
+
+        .down {
+            color: red;
+        }
+
+        .loading-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-modal-center {
+            text-align: center;
+            color: white;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let companyCode = null;
+
+            $.contextMenu({
+                selector: '.company-row, .openmenu',
+                trigger: $('.openmenu').length ? 'left' : 'right',
+                callback: function (key, options) {
+                    const $row = options.$trigger.closest('tr');
+                    const rowIndex = $row.index() - 2; // Adjust for header rows
+                    companyCode = $(`#company-code-${rowIndex}`).text();
+                    const [action, followListId] = key.split(';');
+                    if (action === 'add') {
+                        $.post({
+                            url: '@Url.Action("AddToFollowList")',
+                            data: { followListId, companyCode, criteriaId: '@Model.Criteria?.Index', date: '@Model.SelectedDate?.ToString("yyyy-MM-dd")', viewIndex: '@Model.ViewIndex', sortColumn: '@Model.SortColumn', sortOrder: '@Model.SortOrder' },
+                            success: function () { location.reload(); },
+                            beforeSend: function () { $('#loadingModal').show(); },
+                            complete: function () { $('#loadingModal').hide(); }
+                        });
+                    }
+                },
+                items: {
+        @foreach (var followList in Model.FollowLists)
+        {
+            var color = string.IsNullOrEmpty(followList.Color) ? "ffffff00" : followList.Color.Substring(3) + "75";
+            @($"\"add;{followList.Id}\": {{ name: \"{followList.Name}\", icon: \"add\", style: \"background-color: #{color}\" }},")
+        }
+                }
+            });
+        });
+    </script>
+}
+<div class="page-wrapper">
+    <div class="content">
+        <h2>@ViewData["Title"]</h2>
+
+        <!-- General Indicators -->
+        <table class="table table-bordered grid">
+            <thead class="rdHeader">
+                <tr>
+                    <th>رمز الشركة</th>
+                    <th>اسم الشركة</th>
+                    <th>الإفتتاح</th>
+                    <th>الأعلى</th>
+                    <th>الأدنى</th>
+                    <th>الإغلاق</th>
+                    <th>قيمة التغيير</th>
+                    <th>نسبة التغيير</th>
+                    <th>كمية التداول</th>
+                    <th>إيجابي</th>
+                    <th>سلبي</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var indicator in Model.GeneralIndicators)
+                {
+                    <tr class="rdSubHeader">
+                        <td><a href="CompanyDetails?code=@indicator.Sticker">@indicator.Sticker</a></td>
+                        <td><a href="CompanyDetails?code=@indicator.Sticker">@indicator.Sname</a></td>
+                        <td>@ConvertHelper.FormatDouble(indicator.Sopen)</td>
+                        <td>@ConvertHelper.FormatDouble(indicator.Shigh)</td>
+                        <td>@ConvertHelper.FormatDouble(indicator.Slow)</td>
+                        <td>@ConvertHelper.FormatDouble(indicator.Sclose)</td>
+                        <td>@Html.Raw(ControlHelper.GetChangeValueControl(indicator.ChangeValue))</td>
+                        <td>@Html.Raw(ControlHelper.GetChangeValueControlPercent(indicator.ChangeRate))</td>
+                        <td>@indicator.Svol</td>
+                        <td>@ConvertHelper.FormatDouble(indicator.IndicatorIn)</td>
+                        <td>@ConvertHelper.FormatDouble(indicator.IndicatorOut)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <hr />
+
+        <!-- Stats and Date Picker -->
+        <div class="stats-div">
+            <table class="stats">
+                <tr><th colspan="4">القطاعات</th></tr>
+                <tr>
+                    <th>القطاعات</th>
+                    <th class="up">صاعدة</th>
+                    <th class="down">هابطة</th>
+                    <th>بدون تغيير</th>
+                </tr>
+                <tr>
+                    <td>القطاعات</td>
+                    <td class="up">@Model.SectorStats.UpCount</td>
+                    <td class="down">@Model.SectorStats.DownCount</td>
+                    <td>@Model.SectorStats.NoChangeCount</td>
+                </tr>
+            </table>
+
+            <div class="stats">
+                <b>نتائج توصيات يوم:</b>
+                <form asp-action="ChangeDate" method="post">
+                    <input type="date" asp-for="SelectedDate" min="@Model.MinDate?.ToString("yyyy-MM-dd")" max="@Model.MaxDate?.ToString("yyyy-MM-dd")" class="form-control d-inline-block w-auto" />
+                    <input type="hidden" asp-for="Criteria.Index" />
+                    <input type="hidden" asp-for="ViewIndex" />
+                    <input type="hidden" asp-for="SortColumn" />
+                    <input type="hidden" asp-for="SortOrder" />
+                    <button type="submit" class="btn btn-primary btn-sm">تحديث</button>
+                </form>
+                <form asp-action="NextDate" method="post" class="d-inline">
+                    <input type="hidden" asp-for="SelectedDate" />
+                    <input type="hidden" asp-for="Criteria.Index" />
+                    <input type="hidden" asp-for="ViewIndex" />
+                    <input type="hidden" asp-for="SortColumn" />
+                    <input type="hidden" asp-for="SortOrder" />
+                    <button type="submit" class="btn btn-secondary btn-sm">▲</button>
+                </form>
+                <form asp-action="PreviousDate" method="post" class="d-inline">
+                    <input type="hidden" asp-for="SelectedDate" />
+                    <input type="hidden" asp-for="Criteria.Index" />
+                    <input type="hidden" asp-for="ViewIndex" />
+                    <input type="hidden" asp-for="SortColumn" />
+                    <input type="hidden" asp-for="SortOrder" />
+                    <button type="submit" class="btn btn-secondary btn-sm">▼</button>
+                </form>
+                @if (Model.ShowError)
+                {
+                    <span class="text-danger">يرجى إدخال تاريخ صحيح</span>
+                }
+            </div>
+
+            <table class="stats">
+                <tr><th colspan="4">الشركات</th></tr>
+                <tr>
+                    <th>الشركات</th>
+                    <th class="up">صاعدة</th>
+                    <th class="down">هابطة</th>
+                    <th>بدون تغيير</th>
+                </tr>
+                <tr>
+                    <td>الشركات</td>
+                    <td class="up">@Model.CompanyStats.UpCount</td>
+                    <td class="down">@Model.CompanyStats.DownCount</td>
+                    <td>@Model.CompanyStats.NoChangeCount</td>
+                </tr>
+            </table>
+        </div>
+
+        <hr />
+
+        <!-- Criteria Details -->
+        @if (Model.Criteria != null)
+        {
+            <table class="table table-bordered grid" style="width: 90%; margin: 0 auto;">
+                <thead class="rdHeader">
+                    <tr>
+                        <th>رقم التسلسل</th>
+                        <th>الفاصل</th>
+                        <th>اسم المعيار</th>
+                        <th>نوع المعيار</th>
+                        <th>ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.Criteria.Index</td>
+                        <td>@Model.Criteria.Separator</td>
+                        <td>@Model.Criteria.Name</td>
+                        <td>@Model.Criteria.Type</td>
+                        <td>@Model.Criteria.Notes</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+
+        <!-- Recommendations -->
+        @if (Model.ViewIndex == 0)
+        {
+            <form asp-action="SwitchView" method="post" class="d-inline">
+                <input type="hidden" asp-for="Criteria.Index" />
+                <input type="hidden" asp-for="SelectedDate" />
+                <input type="hidden" asp-for="ViewIndex" />
+                <input type="hidden" asp-for="SortColumn" />
+                <input type="hidden" asp-for="SortOrder" />
+                <button type="submit" class="btn btn-info mb-3">عرض الدعوم والمقاومات</button>
+            </form>
+            <table class="table table-bordered grid">
+                <thead class="rdHeader">
+                    <tr>
+                        <th colspan="4" class="left-b-thick">بيان المؤشرات والشركات</th>
+                        <th colspan="3" class="left-b-thick">الافتتاح المتوقع</th>
+                        <th colspan="3" class="left-b-thick">الإفتتاح</th>
+                        <th colspan="3" class="left-b-thick">الحد الأعلى</th>
+                        <th colspan="3" class="left-b-thick">الحد الأدنى</th>
+                        <th colspan="3" class="left-b-thick">الإغلاق</th>
+                    </tr>
+                    <tr>
+                        <th>م</th>
+                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sticker" asp-route-sortOrder="@(Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sname" asp-route-sortOrder="@(Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick">سعر التوصية</th>
+                        <th class="f-17">المتوقع</th>
+                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="ExpectedOpenValue" asp-route-sortOrder="@(Model.SortColumn == "ExpectedOpenValue" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "ExpectedOpenValue" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="ExpectedOpenPercent" asp-route-sortOrder="@(Model.SortColumn == "ExpectedOpenPercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "ExpectedOpenPercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">الإفتتاح</th>
+                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="SOpen" asp-route-sortOrder="@(Model.SortColumn == "SOpen" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "SOpen" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="OpeningGapRate" asp-route-sortOrder="@(Model.SortColumn == "OpeningGapRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "OpeningGapRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">الأعلى</th>
+                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Shigh" asp-route-sortOrder="@(Model.SortColumn == "Shigh" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Shigh" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="UpperLimitRate" asp-route-sortOrder="@(Model.SortColumn == "UpperLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "UpperLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">الأدنى</th>
+                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Slow" asp-route-sortOrder="@(Model.SortColumn == "Slow" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Slow" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="LowerLimitRate" asp-route-sortOrder="@(Model.SortColumn == "LowerLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "LowerLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">الإغلاق</th>
+                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sclose" asp-route-sortOrder="@(Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="ChangeRate" asp-route-sortOrder="@(Model.SortColumn == "ChangeRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "ChangeRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rec in Model.Recommendations.Select((value, i) => new { value, i }))
+                    {
+                        <tr class="@(rec.value.IsIndicator ? "rdSubHeader" : "company-row")" style="@(rec.value.IsSpecial ? $"background-color: {Model.SpecialCompanyColor};" : "")">
+                            <td style="@(!string.IsNullOrEmpty(rec.value.FollowListColor) ? $"background-color: #{rec.value.FollowListColor};" : "")">@(rec.i + 1)</td>
+                            <td><a href="CompanyDetails?code=@rec.value.Sticker" id="company-code-@rec.i">@rec.value.Sticker</a></td>
+                            <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a href="CompanyDetails?code=@rec.value.Sticker" target="_blank">@rec.value.Sname</a></td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Sclose, rec.value.NextSclose))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.ExpectedOpen, rec.value.Sclose))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetExpectedOpenControlWithCompareValuesAndControlValue(rec.value.ExpectedOpen, rec.value.Sclose, rec.value.ExpectedOpenValue, false, rec.value.ExpectedOpen))</td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetExpectedOpenControlWithCompareValuesAndControlValue(rec.value.ExpectedOpen, rec.value.Sclose, rec.value.ExpectedOpenPercent, true, rec.value.ExpectedOpen))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.SOpen, rec.value.Sclose))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.SOpen, rec.value.Sclose, rec.value.OpeningGapValue, false))</td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.SOpen, rec.value.Sclose, rec.value.OpeningGapRate, true))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Shigh, rec.value.Sclose))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.Shigh, rec.value.Sclose, rec.value.UpperLimitValue, false))</td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.Shigh, rec.value.Sclose, rec.value.UpperLimitRate, true))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Slow, rec.value.Sclose))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.Slow, rec.value.Sclose, rec.value.LowerLimitValue, false))</td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.Slow, rec.value.Sclose, rec.value.LowerLimitRate, true))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.PrevSclose, rec.value.Sclose))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.PrevSclose, rec.value.Sclose, rec.value.ChangeValue, false))</td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.PrevSclose, rec.value.Sclose, rec.value.ChangeRate, true))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <form asp-action="SwitchView" method="post" class="d-inline">
+                <input type="hidden" asp-for="Criteria.Index" />
+                <input type="hidden" asp-for="SelectedDate" />
+                <input type="hidden" asp-for="ViewIndex" />
+                <input type="hidden" asp-for="SortColumn" />
+                <input type="hidden" asp-for="SortOrder" />
+                <button type="submit" class="btn btn-info mb-3">عرض نسبة الأرباح والخسائر</button>
+            </form>
+            <table class="table table-bordered grid">
+                <thead class="rdHeader">
+                    <tr>
+                        <th colspan="4" class="left-b-thick">بيان المؤشرات والشركات</th>
+                        <th>وقف خسارة</th>
+                        <th>دعم ثاني</th>
+                        <th class="left-b-thick">دعم أول</th>
+                        <th>هدف أول</th>
+                        <th>هدف ثاني</th>
+                        <th class="left-b-thick">هدف ثالث</th>
+                        <th class="left-b-thick"></th>
+                        <th colspan="2" class="left-b-thick">هدف يومي محقق</th>
+                        <th colspan="2" class="left-b-thick">هدف أسبوعي محقق</th>
+                    </tr>
+                    <tr>
+                        <th>م</th>
+                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sticker" asp-route-sortOrder="@(Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sname" asp-route-sortOrder="@(Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick">سعر التوصية</th>
+                        <th style="background-color: @Model.SupportTargetSettings.StopLossColor">@Model.SupportTargetSettings.StopLossValue%</th>
+                        <th style="background-color: @Model.SupportTargetSettings.SecondSupportColor">@Model.SupportTargetSettings.SecondSupportValue%</th>
+                        <th class="left-b-thick" style="background-color: @Model.SupportTargetSettings.FirstSupportColor">@Model.SupportTargetSettings.FirstSupportValue%</th>
+                        <th style="background-color: @Model.SupportTargetSettings.FirstTargetColor">@Model.SupportTargetSettings.FirstTargetValue%</th>
+                        <th style="background-color: @Model.SupportTargetSettings.SecondTargetColor">@Model.SupportTargetSettings.SecondTargetValue%</th>
+                        <th class="left-b-thick" style="background-color: @Model.SupportTargetSettings.ThirdTargetColor">@Model.SupportTargetSettings.ThirdTargetValue%</th>
+                        <th class="left-b-thick">السعر الحالي</th>
+                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sclose" asp-route-sortOrder="@(Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="left-b-thick"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="SclosePercent" asp-route-sortOrder="@(Model.SortColumn == "SclosePercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "SclosePercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th>القيمة</th>
+                        <th>النسبة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rec in Model.Recommendations.Select((value, i) => new { value, i }))
+                    {
+                        var stopLossValue = rec.value.Sclose.HasValue ? rec.value.Sclose.Value - (rec.value.Sclose.Value * (Model.SupportTargetSettings.StopLossValue / 100)) : 0;
+                        var secondSupportValue = rec.value.Sclose.HasValue ? rec.value.Sclose.Value - (rec.value.Sclose.Value * (Model.SupportTargetSettings.SecondSupportValue / 100)) : 0;
+                        var firstSupportValue = rec.value.Sclose.HasValue ? rec.value.Sclose.Value - (rec.value.Sclose.Value * (Model.SupportTargetSettings.FirstSupportValue / 100)) : 0;
+                        var firstTargetValue = rec.value.Sclose.HasValue ? rec.value.Sclose.Value + (rec.value.Sclose.Value * (Model.SupportTargetSettings.FirstTargetValue / 100)) : 0;
+                        var secondTargetValue = rec.value.Sclose.HasValue ? rec.value.Sclose.Value + (rec.value.Sclose.Value * (Model.SupportTargetSettings.SecondTargetValue / 100)) : 0;
+                        var thirdTargetValue = rec.value.Sclose.HasValue ? rec.value.Sclose.Value + (rec.value.Sclose.Value * (Model.SupportTargetSettings.ThirdTargetValue / 100)) : 0;
+
+                        <tr class="@(rec.value.IsIndicator ? "rdSubHeader" : "company-row")" style="@(rec.value.IsSpecial ? $"background-color: {Model.SpecialCompanyColor};" : "")">
+                            <td style="@(!string.IsNullOrEmpty(rec.value.FollowListColor) ? $"background-color: #{rec.value.FollowListColor};" : "")">@(rec.i + 1)</td>
+                            <td><a href="CompanyDetails?code=@rec.value.Sticker" id="company-code-@rec.i">@rec.value.Sticker</a></td>
+                            <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a href="CompanyDetails?code=@rec.value.Sticker" target="_blank">@rec.value.Sname</a></td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Sclose, rec.value.NextSclose))</td>
+                            <td style="background-color: @Model.SupportTargetSettings.StopLossColor">@Html.Raw(ControlHelper.GetStopLossChangeValueColor(stopLossValue, rec.value.MinClose ?? 0))</td>
+                            <td style="background-color: @Model.SupportTargetSettings.SecondSupportColor">@Html.Raw(ControlHelper.GetSupportChangeValueColor(secondSupportValue, rec.value.MinLow ?? 0))</td>
+                            <td class="left-b-thick" style="background-color: @Model.SupportTargetSettings.FirstSupportColor">@Html.Raw(ControlHelper.GetSupportChangeValueColor(firstSupportValue, rec.value.MinLow ?? 0))</td>
+                            <td style="background-color: @Model.SupportTargetSettings.FirstTargetColor">@Html.Raw(ControlHelper.GetTargetChangeValueColor(firstTargetValue, rec.value.MaxHigh ?? 0))</td>
+                            <td style="background-color: @Model.SupportTargetSettings.SecondTargetColor">@Html.Raw(ControlHelper.GetTargetChangeValueColor(secondTargetValue, rec.value.MaxHigh ?? 0))</td>
+                            <td class="left-b-thick" style="background-color: @Model.SupportTargetSettings.ThirdTargetColor">@Html.Raw(ControlHelper.GetTargetChangeValueColor(thirdTargetValue, rec.value.MaxHigh ?? 0))</td>
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.LastClose, rec.value.Sclose))</td>
+                            <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Sclose, rec.value.Sclose))</td> <!-- Placeholder, adjust logic -->
+                            <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValuesAndControlValue(rec.value.Shigh, rec.value.Sclose, rec.value.MaxHighPercentage, true))</td>
+                            <td class="f-17">0</td>
+                            <td class="f-17">0</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+
+    </div>
+</div>

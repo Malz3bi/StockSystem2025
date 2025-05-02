@@ -6383,7 +6383,7 @@
          * Fire callback functions and trigger events. Note that the loop over the
          * callback array store is done backwards! Further note that you do not want to
          * fire off triggers in time sensitive applications (for example cell creation)
-         * as its slow.
+         * as its Slow.
          *  @param {object} settings dataTables settings object
          *  @param {string} callbackArr Name of the array storage for the callbacks in
          *      oSettings
@@ -9533,7 +9533,7 @@
              * temporary table and reads the widths from that. The problem with this
              * is that "mmm" is much wider then "iiii", but the latter is a longer
              * string - thus the calculation can go wrong (doing it properly and putting
-             * it into an DOM object and measuring that is horribly(!) slow). Thus as
+             * it into an DOM object and measuring that is horribly(!) Slow). Thus as
              * a "work around" we provide this option. It will append its value to the
              * text that is found to be the longest string for the column - i.e. padding.
              *  @type string
@@ -12297,7 +12297,7 @@
              * temporary table and reads the widths from that. The problem with this
              * is that "mmm" is much wider then "iiii", but the latter is a longer
              * string - thus the calculation can go wrong (doing it properly and putting
-             * it into an DOM object and measuring that is horribly(!) slow). Thus as
+             * it into an DOM object and measuring that is horribly(!) Slow). Thus as
              * a "work around" we provide this option. It will append its value to the
              * text that is found to be the longest string for the column - i.e. padding.
              * Generally you shouldn't need this!
@@ -12687,7 +12687,7 @@
 
                 /**
                  * Apply a class to the columns which are being sorted to provide a
-                 * visual highlight or not. This can slow things down when enabled since
+                 * visual highlight or not. This can Slow things down when enabled since
                  * there is a lot of DOM interaction.
                  * Note that this parameter will be set by the initialisation routine. To
                  * set a default use {@link DataTable.defaults}.

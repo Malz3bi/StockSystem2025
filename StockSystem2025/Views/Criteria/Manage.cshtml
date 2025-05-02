@@ -1,0 +1,1122 @@
+﻿@model StockSystem2025.ViewModels.CriteriaManageViewModel
+@inject StockSystem2025.Services.ICriteriaService CriteriaService
+@{
+    ViewData["Title"] = "إنشاء الاستراتيجيات";
+    bool isEdit = ViewData["IsEdit"] != null && (bool)ViewData["IsEdit"];
+}
+
+<style>
+    td img {
+        max-width: 20px;
+    }
+
+    .vtext {
+        width: 80px;
+    }
+
+    .box-header {
+        padding: 0.5rem 1.5rem !important;
+        background-color: #f5f7fa;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .alt-row {
+        background-color: #dae2e8;
+    }
+
+    .box {
+        box-shadow: 0px 0px 5px 0px rgba(71, 95, 123, 0.5);
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+
+    .box-body1 > .col-12 {
+        padding-right: 0px;
+        padding-left: 0px;
+    }
+
+    .box-body1 {
+        padding: 0.5rem 1.5rem;
+    }
+
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+
+    .criteria-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+
+        .criteria-table th,
+        .criteria-table td {
+            padding: 10px;
+            text-align: right;
+            border: 1px solid #ddd;
+        }
+
+        .criteria-table th {
+            background-color: #f5f7fa;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .criteria-table tr:nth-child(even) {
+            background-color: #dae2e8;
+        }
+
+        .criteria-table input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 3px;
+    }
+
+        .btn-danger:hover,
+        .btn-primary:hover,
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+    h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #007bff;
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="content">
+        <h2>قسم إنشاء الاستراتيجيات</h2>
+        <form asp-action="Manage" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div class="box">
+                <div class="box-body row">
+                    <div class="col-lg-6 col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">اسم الإستراتيجية</label>
+                            <input asp-for="Name" class="form-control" placeholder="اسم الإستراتيجية" maxlength="100" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Type" class="form-label">الفئة</label>
+                            <input asp-for="Type" class="form-control" placeholder="الفئة" maxlength="100" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Separater" class="form-label">الفاصل</label>
+                            <input asp-for="Separater" class="form-control" placeholder="الفاصل" maxlength="100" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Note" class="form-label">ملاحظات</label>
+                            <textarea asp-for="Note" class="form-control" placeholder="ملاحظات" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">الوصف</label>
+                            <textarea asp-for="Description" class="form-control" placeholder="الوصف" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6">
+                                نوع الاستراتيجية
+                            </div>
+                            <div class="col-lg-5 col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="IsGeneral" type="radio" class="form-check-input" value="true" checked="@Model.IsGeneral" />
+                                    <label class="form-check-label">عامة</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="IsGeneral" type="radio" class="form-check-input" value="false" checked="@(!Model.IsGeneral)" />
+                                    <label class="form-check-label">خاصة</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <label asp-for="OrderNo" class="form-label">الترتيب</label>
+                                <input asp-for="OrderNo" class="form-control" placeholder="الترتيب" maxlength="3" type="number" />
+                            </div>
+                            <div class="col-lg-1 col-md-6">
+                                <label class="form-label">اختر اللون</label>
+                                <input type="hidden" asp-for="Color" id="colorPickerValue" />
+                                <div id="colorPicker"></div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-lg-3 col-md-6">
+                                نوع المؤشر
+                            </div>
+                            <div class="col-lg-9 col-md-6">
+                                <div class="form-check form-check-inline">
+                                    <input asp-for="IsIndicator" type="radio" class="form-check-input" value="2" checked="@(Model.IsIndicator == 2)" />
+                                    <label class="form-check-label">الكل</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input asp-for="IsIndicator" type="radio" class="form-check-input" value="0" checked="@(Model.IsIndicator == 0)" />
+                                    <label class="form-check-label">أسهم</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input asp-for="IsIndicator" type="radio" class="form-check-input" value="1" checked="@(Model.IsIndicator == 1)" />
+                                    <label class="form-check-label">مؤشرات</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-lg-12 col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="InsertToMarketPage" class="form-check-input" />
+                                    <label class="form-check-label">إدراج الاستراتيجية فى صفحة متابعة السوق</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-lg-3 col-md-6">
+                                إدراج نموذج
+                            </div>
+                            <div class="col-lg-9 col-md-6">
+                                <div class="d-flex flex-wrap">
+                                    <div class="form-check me-3">
+                                        <input asp-for="ImageUrl" type="radio" class="form-check-input" value="00.jpg" checked="@(Model.ImageUrl == "00.jpg")" />
+                                        <label class="form-check-label">بدون</label>
+                                    </div>
+                                    @for (int i = 1; i <= 13; i++)
+                                    {
+                                        var imgValue = $"{i:D2}.jpg";
+                                        <div class="form-check me-3">
+                                            <input asp-for="ImageUrl" type="radio" class="form-check-input" value="@imgValue" checked="@(Model.ImageUrl == imgValue)" />
+                                            <label class="form-check-label"><img src="~/images/@imgValue" alt="@i" title="@i" /></label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @for (int i = 0; i < Model.Formulas.Count; i++)
+            {
+                <input type="hidden" asp-for="Formulas[i].Day" />
+                <input type="hidden" asp-for="Formulas[i].FormulaType" />
+                <div class="box formula-section" data-day="@Model.Formulas[i].Day">
+                    <div class="box-header d-flex justify-content-between align-items-center">
+                        <h4>تداول يوم @await CriteriaService.GetDateByDayNumberAsync(Model.Formulas[i].Day)</h4>
+                        @if (i > 0)
+                        {
+                            <form asp-action="DeleteDay" method="post" class="d-inline">
+                                <input type="hidden" name="dayNo" value="@Model.Formulas[i].Day" />
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <span>حذف</span>
+                                </button>
+                            </form>
+                        }
+                    </div>
+                    <div class="box-body">
+                        <!-- Formula 1: Change Percentage -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>معيار شكل الشمعة</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>1- نسبة التغيير</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula1.TypeAll" class="form-check-input" onchange="toggleFormula1(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula1.TypePositive" class="form-check-input" onchange="toggleFormula1(this, @i)" />
+                                                <label class="form-check-label">إيجابي</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula1.TypeNegative" class="form-check-input" onchange="toggleFormula1(this, @i)" />
+                                                <label class="form-check-label">سلبي</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula1.TypeNoChange" class="form-check-input" onchange="toggleFormula1(this, @i)" />
+                                                <label class="form-check-label">بدون تغيير</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula1.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula1.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 2: Volume -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>حجم التداول</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>2- حجم التداول</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula2.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula2.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 3: Trading Gap -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>فتحة التداول</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>3- فتحة التداول</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula3.TypeAll" class="form-check-input" onchange="toggleFormula3(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula3.TypeHigherGap" class="form-check-input" onchange="toggleFormula3(this, @i)" />
+                                                <label class="form-check-label">فتحة عليا</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula3.TypeLowerGap" class="form-check-input" onchange="toggleFormula3(this, @i)" />
+                                                <label class="form-check-label">فتحة سفلى</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula3.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula3.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 4: High/Low Range -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>نطاق الارتفاع/الانخفاض</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>4- نطاق الارتفاع/الانخفاض</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula4.TypeAll" class="form-check-input" onchange="toggleFormula4(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula4.TypeHigher" class="form-check-input" onchange="toggleFormula4(this, @i)" />
+                                                <label class="form-check-label">أعلى</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula4.TypeLower" class="form-check-input" onchange="toggleFormula4(this, @i)" />
+                                                <label class="form-check-label">أدنى</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula4.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula4.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 5: Gap Type -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>نوع الفتحة</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>5- نوع الفتحة</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula5.TypeAll" class="form-check-input" onchange="toggleFormula5(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula5.TypeHigherGap" class="form-check-input" onchange="toggleFormula5(this, @i)" />
+                                                <label class="form-check-label">فتحة عليا</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula5.TypeLowerGap" class="form-check-input" onchange="toggleFormula5(this, @i)" />
+                                                <label class="form-check-label">فتحة سفلى</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 6: Volume Range -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>نطاق الحجم</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>6- نطاق الحجم</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين</label>
+                                                <input asp-for="Formulas[i].Formula6.Between" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و</label>
+                                                <input asp-for="Formulas[i].Formula6.And" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 7: Price Range -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>نطاق السعر</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>7- نطاق السعر</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين</label>
+                                                <input asp-for="Formulas[i].Formula7.Between" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و</label>
+                                                <input asp-for="Formulas[i].Formula7.And" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 8: Volatility Range -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>نطاق التقلب</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>8- نطاق التقلب</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين</label>
+                                                <input asp-for="Formulas[i].Formula8.Between" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و</label>
+                                                <input asp-for="Formulas[i].Formula8.And" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 9: Momentum -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>الزخم</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>9- الزخم</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula9.TypeAll" class="form-check-input" onchange="toggleFormula9(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula9.TypePositive" class="form-check-input" onchange="toggleFormula9(this, @i)" />
+                                                <label class="form-check-label">إيجابي</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula9.TypeNegative" class="form-check-input" onchange="toggleFormula9(this, @i)" />
+                                                <label class="form-check-label">سلبي</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula9.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula9.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 10: Trend Strength -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>قوة الاتجاه</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>10- قوة الاتجاه</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين</label>
+                                                <input asp-for="Formulas[i].Formula10.Between" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و</label>
+                                                <input asp-for="Formulas[i].Formula10.And" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 11: Maximum/Minimum Analysis -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>التحليل الأقصى/الأدنى</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>11- الأقصى</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula11.MaximumAll" class="form-check-input" onchange="toggleFormula11Max(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula11.MaximumGreater" class="form-check-input" onchange="toggleFormula11Max(this, @i)" />
+                                                <label class="form-check-label">أكبر</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula11.MaximumLess" class="form-check-input" onchange="toggleFormula11Max(this, @i)" />
+                                                <label class="form-check-label">أقل</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين</label>
+                                                <input asp-for="Formulas[i].Formula11.MaximumBetween" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و</label>
+                                                <input asp-for="Formulas[i].Formula11.MaximumAnd" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>الأدنى</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula11.MinimumAll" class="form-check-input" onchange="toggleFormula11Min(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula11.MinimumGreater" class="form-check-input" onchange="toggleFormula11Min(this, @i)" />
+                                                <label class="form-check-label">أكبر</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula11.MinimumLess" class="form-check-input" onchange="toggleFormula11Min(this, @i)" />
+                                                <label class="form-check-label">أقل</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين</label>
+                                                <input asp-for="Formulas[i].Formula11.MinimumBetween" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و</label>
+                                                <input asp-for="Formulas[i].Formula11.MinimumAnd" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 12: Trend Direction -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>اتجاه الاتجاه</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>12- اتجاه الاتجاه</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula12.TypeAll" class="form-check-input" onchange="toggleFormula12(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula12.TypeGreater" class="form-check-input" onchange="toggleFormula12(this, @i)" />
+                                                <label class="form-check-label">أكبر</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula12.TypeLess" class="form-check-input" onchange="toggleFormula12(this, @i)" />
+                                                <label class="form-check-label">أقل</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula12.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula12.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 13: Historical Performance -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>الأداء التاريخي</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>13- الأداء التاريخي</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula13.TypeAll" class="form-check-input" onchange="toggleFormula13(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula13.TypePositive" class="form-check-input" onchange="toggleFormula13(this, @i)" />
+                                                <label class="form-check-label">إيجابي</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula13.TypeNegative" class="form-check-input" onchange="toggleFormula13(this, @i)" />
+                                                <label class="form-check-label">سلبي</label>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">الأيام</label>
+                                                <input asp-for="Formulas[i].Formula13.Days" class="form-control vtext" type="number" min="1" />
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula13.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula13.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 14: Support/Resistance -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>الدعم/المقاومة</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>14- الدعم/المقاومة</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula14.TypeAll" class="form-check-input" onchange="toggleFormula14(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula14.TypeGreater" class="form-check-input" onchange="toggleFormula14(this, @i)" />
+                                                <label class="form-check-label">أكبر</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula14.TypeLess" class="form-check-input" onchange="toggleFormula14(this, @i)" />
+                                                <label class="form-check-label">أقل</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula14.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula14.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 15: Custom Metric -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>مقياس مخصص</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>15- مقياس مخصص</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين</label>
+                                                <input asp-for="Formulas[i].Formula15.Between" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و</label>
+                                                <input asp-for="Formulas[i].Formula15.And" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 16: Digital Analysis -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border">
+                                <h4>التحليل الرقمي</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>16- التحليل الرقمي</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula16.TypeAll" class="form-check-input" onchange="toggleFormula16(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula16.TypePositive" class="form-check-input" onchange="toggleFormula16(this, @i)" />
+                                                <label class="form-check-label">إيجابي</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula16.TypeNegative" class="form-check-input" onchange="toggleFormula16(this, @i)" />
+                                                <label class="form-check-label">سلبي</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">بين (إيجابي)</label>
+                                                <input asp-for="Formulas[i].Formula16.BetweenPositive" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">و (إيجابي)</label>
+                                                <input asp-for="Formulas[i].Formula16.AndPositive" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">بين (سلبي)</label>
+                                                <input asp-for="Formulas[i].Formula16.BetweenNegative" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">و (سلبي)</label>
+                                                <input asp-for="Formulas[i].Formula16.AndNegative" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Formula 17: Penetration Analysis -->
+                        <div class="box mb-3">
+                            <div class="box-header with-border alt-row">
+                                <h4>تحليل الاختراق</h4>
+                            </div>
+                            <div class="box-body1">
+                                <table class="criteria-table">
+                                    <tr>
+                                        <td style="width: 30%;">
+                                            <h4>17- تحليل الاختراق</h4>
+                                        </td>
+                                        <td style="width: 40%;">
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula17.TypeAll" class="form-check-input" onchange="toggleFormula17(this, @i)" />
+                                                <label class="form-check-label">الكل</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula17.TypeGreater" class="form-check-input" onchange="toggleFormula17(this, @i)" />
+                                                <label class="form-check-label">أكبر</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input asp-for="Formulas[i].Formula17.TypeLess" class="form-check-input" onchange="toggleFormula17(this, @i)" />
+                                                <label class="form-check-label">أقل</label>
+                                            </div>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <div class="mb-2">
+                                                <label class="form-label">من أيام</label>
+                                                <input asp-for="Formulas[i].Formula17.FromDays" class="form-control vtext" type="number" min="1" />
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">إلى أيام</label>
+                                                <input asp-for="Formulas[i].Formula17.ToDays" class="form-control vtext" type="number" min="1" />
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">أكبر من</label>
+                                                <input asp-for="Formulas[i].Formula17.GreaterThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="form-label">أصغر من</label>
+                                                <input asp-for="Formulas[i].Formula17.LessThan" class="form-control vtext" placeholder="%" type="number" step="0.01" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+           
+            <hr />
+            <button type="submit" class="btn btn-success btn-lg" style="width: 120px;">@(isEdit ? "تعديل" : "إنشاء")</button>
+        </form>
+        <div class="mb-3">
+                <form asp-action="AddDay" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-primary">
+                        <span>إضافة يوم تداول جديد</span>
+                    </button>
+                </form>
+            </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const pickr = Pickr.create({
+            el: '#colorPicker',
+            theme: 'classic',
+            swatches: [
+                '#F44336', '#E91E63', '#9C27B0', '#673AB7',
+                '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4'
+            ],
+            components: {
+                preview: true,
+                opacity: true,
+                hue: true,
+                interaction: {
+                    hex: true,
+                    rgba: true,
+                    input: true,
+                    save: true
+                }
+            }
+        });
+
+        pickr.on('save', (color) => {
+            $('#colorPickerValue').val(color.toHEXA().toString());
+        });
+
+        function toggleFormula1(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula1__TypeAll`);
+            const typePositive = $(`#Formulas_${index}__Formula1__TypePositive`);
+            const typeNegative = $(`#Formulas_${index}__Formula1__TypeNegative`);
+            const typeNoChange = $(`#Formulas_${index}__Formula1__TypeNoChange`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typePositive.prop('checked', false);
+                typeNegative.prop('checked', false);
+                typeNoChange.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typePositive.prop('checked') && !typeNegative.prop('checked') && !typeNoChange.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula3(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula3__TypeAll`);
+            const typeHigherGap = $(`#Formulas_${index}__Formula3__TypeHigherGap`);
+            const typeLowerGap = $(`#Formulas_${index}__Formula3__TypeLowerGap`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typeHigherGap.prop('checked', false);
+                typeLowerGap.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typeHigherGap.prop('checked') && !typeLowerGap.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula4(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula4__TypeAll`);
+            const typeHigher = $(`#Formulas_${index}__Formula4__TypeHigher`);
+            const typeLower = $(`#Formulas_${index}__Formula4__TypeLower`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typeHigher.prop('checked', false);
+                typeLower.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typeHigher.prop('checked') && !typeLower.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula5(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula5__TypeAll`);
+            const typeHigherGap = $(`#Formulas_${index}__Formula5__TypeHigherGap`);
+            const typeLowerGap = $(`#Formulas_${index}__Formula5__TypeLowerGap`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typeHigherGap.prop('checked', false);
+                typeLowerGap.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typeHigherGap.prop('checked') && !typeLowerGap.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula9(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula9__TypeAll`);
+            const typePositive = $(`#Formulas_${index}__Formula9__TypePositive`);
+            const typeNegative = $(`#Formulas_${index}__Formula9__TypeNegative`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typePositive.prop('checked', false);
+                typeNegative.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typePositive.prop('checked') && !typeNegative.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula11Max(checkbox, index) {
+            const maxAll = $(`#Formulas_${index}__Formula11__MaximumAll`);
+            const maxGreater = $(`#Formulas_${index}__Formula11__MaximumGreater`);
+            const maxLess = $(`#Formulas_${index}__Formula11__MaximumLess`);
+
+            if (checkbox.id.includes('MaximumAll') && checkbox.checked) {
+                maxGreater.prop('checked', false);
+                maxLess.prop('checked', false);
+            } else if (checkbox.checked) {
+                maxAll.prop('checked', false);
+            } else if (!maxGreater.prop('checked') && !maxLess.prop('checked')) {
+                maxAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula11Min(checkbox, index) {
+            const minAll = $(`#Formulas_${index}__Formula11__MinimumAll`);
+            const minGreater = $(`#Formulas_${index}__Formula11__MinimumGreater`);
+            const minLess = $(`#Formulas_${index}__Formula11__MinimumLess`);
+
+            if (checkbox.id.includes('MinimumAll') && checkbox.checked) {
+                minGreater.prop('checked', false);
+                minLess.prop('checked', false);
+            } else if (checkbox.checked) {
+                minAll.prop('checked', false);
+            } else if (!minGreater.prop('checked') && !minLess.prop('checked')) {
+                minAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula12(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula12__TypeAll`);
+            const typeGreater = $(`#Formulas_${index}__Formula12__TypeGreater`);
+            const typeLess = $(`#Formulas_${index}__Formula12__TypeLess`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typeGreater.prop('checked', false);
+                typeLess.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typeGreater.prop('checked') && !typeLess.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula13(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula13__TypeAll`);
+            const typePositive = $(`#Formulas_${index}__Formula13__TypePositive`);
+            const typeNegative = $(`#Formulas_${index}__Formula13__TypeNegative`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typePositive.prop('checked', false);
+                typeNegative.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typePositive.prop('checked') && !typeNegative.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula14(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula14__TypeAll`);
+            const typeGreater = $(`#Formulas_${index}__Formula14__TypeGreater`);
+            const typeLess = $(`#Formulas_${index}__Formula14__TypeLess`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typeGreater.prop('checked', false);
+                typeLess.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typeGreater.prop('checked') && !typeLess.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula16(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula16__TypeAll`);
+            const typePositive = $(`#Formulas_${index}__Formula16__TypePositive`);
+            const typeNegative = $(`#Formulas_${index}__Formula16__TypeNegative`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typePositive.prop('checked', false);
+                typeNegative.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typePositive.prop('checked') && !typeNegative.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+
+        function toggleFormula17(checkbox, index) {
+            const typeAll = $(`#Formulas_${index}__Formula17__TypeAll`);
+            const typeGreater = $(`#Formulas_${index}__Formula17__TypeGreater`);
+            const typeLess = $(`#Formulas_${index}__Formula17__TypeLess`);
+
+            if (checkbox.id.includes('TypeAll') && checkbox.checked) {
+                typeGreater.prop('checked', false);
+                typeLess.prop('checked', false);
+            } else if (checkbox.checked) {
+                typeAll.prop('checked', false);
+            } else if (!typeGreater.prop('checked') && !typeLess.prop('checked')) {
+                typeAll.prop('checked', true);
+            }
+        }
+    </script>
+}

@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="ar" >
+<html lang="ar">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
@@ -11,20 +11,18 @@
 
     <!-- CSS -->
     <link rel="shortcut icon" type="image/x-icon" href="~/assets/img/favicon.png">
-
     <link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
-
     <link rel="stylesheet" href="~/assets/css/bootstrap-datetimepicker.min.css">
-
     <link rel="stylesheet" href="~/assets/css/animate.css">
-
     <link rel="stylesheet" href="~/assets/plugins/select2/css/select2.min.css">
     <link href="~/assets/datatable/datatables.min.css" rel="stylesheet" />
-
     <link rel="stylesheet" href="~/assets/plugins/fontawesome/css/fontawesome.min.css">
     <link rel="stylesheet" href="~/assets/plugins/fontawesome/css/all.min.css">
-
+    <link href="~/assets/css/picker.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/assets/css/style.css">
+
+    <!-- Render Styles section from child views -->
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <div id="global-loader">
@@ -32,9 +30,7 @@
     </div>
 
     <div class="main-wrapper">
-
         <div class="header">
-
             <div class="header-left active">
                 <a href="~/index.html" class="logo">
                     <img src="~/assets/img/logo.png" alt="">
@@ -42,11 +38,10 @@
                 <a href="~/index.html" class="logo-small">
                     <img src="~/assets/img/logo-small.png" alt="">
                 </a>
-                <a id="toggle_btn" href="~/javascript:void(0);">
-                </a>
+                <a id="toggle_btn" href="javascript:void(0);"></a>
             </div>
 
-            <a id="mobile_btn" class="mobile_btn" href="~/#sidebar">
+            <a id="mobile_btn" class="mobile_btn" href="#sidebar">
                 <span class="bar-icon">
                     <span></span>
                     <span></span>
@@ -55,10 +50,9 @@
             </a>
 
             <ul class="nav user-menu">
-
                 <li class="nav-item">
                     <div class="top-nav-search">
-                        <a href="~/javascript:void(0);" class="responsive-search">
+                        <a href="javascript:void(0);" class="responsive-search">
                             <i class="fa fa-search"></i>
                         </a>
                         <form action="#">
@@ -73,41 +67,39 @@
                     </div>
                 </li>
 
-
                 <li class="nav-item dropdown has-arrow flag-nav">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="~/javascript:void(0);" role="button">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" role="button">
                         <img src="~/assets/img/flags/us1.png" alt="" height="20">
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a href="~/javascript:void(0);" class="dropdown-item">
+                        <a href="javascript:void(0);" class="dropdown-item">
                             <img src="~/assets/img/flags/us.png" alt="" height="16"> الإنجليزية
                         </a>
-                        <a href="~/javascript:void(0);" class="dropdown-item">
+                        <a href="javascript:void(0);" class="dropdown-item">
                             <img src="~/assets/img/flags/fr.png" alt="" height="16"> الفرنسية
                         </a>
-                        <a href="~/javascript:void(0);" class="dropdown-item">
+                        <a href="javascript:void(0);" class="dropdown-item">
                             <img src="~/assets/img/flags/es.png" alt="" height="16"> الإسبانية
                         </a>
-                        <a href="~/javascript:void(0);" class="dropdown-item">
+                        <a href="javascript:void(0);" class="dropdown-item">
                             <img src="~/assets/img/flags/de.png" alt="" height="16"> الألمانية
                         </a>
                     </div>
                 </li>
 
-
                 <li class="nav-item dropdown">
-                    <a href="~/javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+                    <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
                         <img src="~/assets/img/icons/notification-bing.svg" alt="img"> <span class="badge rounded-pill">4</span>
                     </a>
                     <div class="dropdown-menu notifications">
                         <div class="topnav-dropdown-header">
                             <span class="notification-title">الإشعارات</span>
-                            <a href="~/javascript:void(0)" class="clear-noti"> مسح الكل </a>
+                            <a href="javascript:void(0)" class="clear-noti"> مسح الكل </a>
                         </div>
                         <div class="noti-content">
                             <ul class="notification-list">
                                 <li class="notification-message">
-                                    <a href="~/activities.html">
+                                    <a href="activities.html">
                                         <div class="media d-flex">
                                             <span class="avatar flex-shrink-0">
                                                 <img alt="" src="~/assets/img/profiles/avatar-02.jpg">
@@ -120,7 +112,7 @@
                                     </a>
                                 </li>
                                 <li class="notification-message">
-                                    <a href="~/activities.html">
+                                    <a href="activities.html">
                                         <div class="media d-flex">
                                             <span class="avatar flex-shrink-0">
                                                 <img alt="" src="~/assets/img/profiles/avatar-03.jpg">
@@ -133,7 +125,7 @@
                                     </a>
                                 </li>
                                 <li class="notification-message">
-                                    <a href="~/activities.html">
+                                    <a href="activities.html">
                                         <div class="media d-flex">
                                             <span class="avatar flex-shrink-0">
                                                 <img alt="" src="~/assets/img/profiles/avatar-06.jpg">
@@ -146,7 +138,7 @@
                                     </a>
                                 </li>
                                 <li class="notification-message">
-                                    <a href="~/activities.html">
+                                    <a href="activities.html">
                                         <div class="media d-flex">
                                             <span class="avatar flex-shrink-0">
                                                 <img alt="" src="~/assets/img/profiles/avatar-17.jpg">
@@ -159,7 +151,7 @@
                                     </a>
                                 </li>
                                 <li class="notification-message">
-                                    <a href="~/activities.html">
+                                    <a href="activities.html">
                                         <div class="media d-flex">
                                             <span class="avatar flex-shrink-0">
                                                 <img alt="" src="~/assets/img/profiles/avatar-13.jpg">
@@ -174,13 +166,13 @@
                             </ul>
                         </div>
                         <div class="topnav-dropdown-footer">
-                            <a href="~/activities.html">عرض جميع الإشعارات</a>
+                            <a href="activities.html">عرض جميع الإشعارات</a>
                         </div>
                     </div>
                 </li>
 
                 <li class="nav-item dropdown has-arrow main-drop">
-                    <a href="~/javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
+                    <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
                         <span class="user-img">
                             <img src="~/assets/img/profiles/avator1.jpg" alt="">
                             <span class="status online"></span>
@@ -199,29 +191,24 @@
                                 </div>
                             </div>
                             <hr class="m-0">
-                            <a class="dropdown-item" href="~/profile.html"> <i class="me-2" data-feather="user"></i> ملفي الشخصي</a>
-                            <a class="dropdown-item" href="~/generalsettings.html"><i class="me-2" data-feather="settings"></i>الإعدادات</a>
+                            <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> ملفي الشخصي</a>
+                            <a class="dropdown-item" href="generalsettings.html"><i class="me-2" data-feather="settings"></i>الإعدادات</a>
                             <hr class="m-0">
-                            <a class="dropdown-item logout pb-0" href="~/signin.html"><img src="~/assets/img/icons/log-out.svg" class="me-2" alt="img">تسجيل الخروج</a>
+                            <a class="dropdown-item logout pb-0" href="signin.html"><img src="~/assets/img/icons/log-out.svg" class="me-2" alt="img">تسجيل الخروج</a>
                         </div>
                     </div>
                 </li>
             </ul>
 
-
             <div class="dropdown mobile-user-menu">
-                <a href="~/javascript:void(0);" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                <a href="javascript:void(0);" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="~/profile.html">ملفي الشخصي</a>
-                    <a class="dropdown-item" href="~/generalsettings.html">الإعدادات</a>
-                    <a class="dropdown-item" href="~/signin.html">تسجيل الخروج</a>
+                    <a class="dropdown-item" href="profile.html">ملفي الشخصي</a>
+                    <a class="dropdown-item" href="generalsettings.html">الإعدادات</a>
+                    <a class="dropdown-item" href="signin.html">تسجيل الخروج</a>
                 </div>
             </div>
-
         </div>
-
-        
-
 
         <div class="sidebar" id="sidebar">
             <div class="sidebar-inner slimscroll">
@@ -231,13 +218,11 @@
                             <a href="Default.aspx"><i class="fas fa-house"></i><span> الرئيسية</span></a>
                         </li>
                         <li>
-                            <a href="Default.aspx"> <i class="fas fa-cogs"></i><span> إنشاء استراتيجية</span></a>
+                            <a asp-action="Manage" asp-controller="Criteria"> <i class="fas fa-cogs"></i><span> إنشاء استراتيجية</span></a>
                         </li>
                         <li>
                             <a asp-action="FormulasSettingIndex" asp-controller="FormulasSetting"><i class="fas fa-chess"></i><span> الاستراتيجيات</span></a>
-
                         </li>
-
                         <li class="submenu">
                             <a href="javascript:void(0);"><i class="fas fa-chart-line"></i><span> متابعة السوق</span><span class="menu-arrow"></span></a>
                             <ul>
@@ -255,10 +240,10 @@
                         <li>
                             <a href="SpecialFollowList.aspx"><i class="fas fa-bookmark"></i><span> قوائم المتابعة</span></a>
                         </li>
-                        <li  id="menuUploadFile">
+                        <li id="menuUploadFile">
                             <a asp-action="UploadFileIndex" asp-controller="UploadFile"><i class="fas fa-upload"></i><span> تحميل البيانات</span></a>
                         </li>
-                        <li  id="menuStrategicAnalysis">
+                        <li id="menuStrategicAnalysis">
                             <a href="StrategicAnalysis.aspx"><i class="fas fa-chart-pie"></i><span> التحليل الاستراتيجي</span></a>
                         </li>
                         <li>
@@ -281,28 +266,21 @@
             </div>
         </div>
 
-
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
-
-
-
     </div>
-    <partial name="_ValidationScriptsPartial" />
 
     <partial name="_ValidationScriptsPartial" />
-    <!-- jQuery أولاً -->
+
+    <!-- jQuery first -->
     <script src="~/assets/js/jquery-3.6.0.min.js"></script>
-
     <!-- Bootstrap -->
     <script src="~/assets/js/bootstrap.bundle.min.js"></script>
-
     <!-- DataTables -->
     <script src="~/assets/datatable/datatables.bundle.js"></script>
     <script src="~/assets/js/my.js"></script>
-
-    <!-- بقية السكربتات -->
+    <!-- Other scripts -->
     <script src="~/assets/js/feather.min.js"></script>
     <script src="~/assets/js/jquery.slimscroll.min.js"></script>
     <script src="~/assets/js/moment.min.js"></script>
@@ -311,10 +289,9 @@
     <script src="~/assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
     <script src="~/assets/plugins/sweetalert/sweetalerts.min.js"></script>
     <script src="~/assets/js/signalr.min.js"></script>
-    <!-- سكربتك المخصص -->
+    <script src="~/assets/js/pickr.min.js"></script>
+    <!-- Custom script -->
     <script src="~/assets/js/script.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
-
-
 </body>
 </html>

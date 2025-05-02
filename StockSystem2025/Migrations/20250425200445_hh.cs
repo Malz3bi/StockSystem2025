@@ -128,9 +128,9 @@ namespace StockSystem2025.Migrations
                     DayNo = table.Column<int>(type: "int", nullable: false),
                     Sname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Sopen = table.Column<double>(type: "float", nullable: true),
-                    SHigh = table.Column<double>(type: "float", nullable: true),
-                    SLow = table.Column<double>(type: "float", nullable: true),
-                    SClose = table.Column<double>(type: "float", nullable: true),
+                    Shigh = table.Column<double>(type: "float", nullable: true),
+                    Slow = table.Column<double>(type: "float", nullable: true),
+                    Sclose = table.Column<double>(type: "float", nullable: true),
                     Svol = table.Column<double>(type: "float", nullable: true),
                     ExpectedOpen = table.Column<double>(type: "float", nullable: true),
                     Createddate = table.Column<DateTime>(type: "datetime2", nullable: true)

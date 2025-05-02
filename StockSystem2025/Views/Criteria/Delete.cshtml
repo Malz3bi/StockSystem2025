@@ -1,0 +1,58 @@
+﻿@model IEnumerable<StockSystem2025.ViewModels.CriteriaManageViewModel>
+@{
+    ViewData["Title"] = "قائمة الاستراتيجيات";
+}
+
+
+
+    <style>
+        .box {
+            box-shadow: 0 0 5px rgba(71, 95, 123, 0.5);
+            padding: 15px;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+
+    <div class="container mt-4">
+        <h2>قائمة الاستراتيجيات</h2>
+        <div class="box mb-3">
+            <form asp-action="Index" method="get">
+                <div class="input-group">
+                    <input type="text" name="searchString" class="form-control" placeholder="ابحث باسم أو فئة..." value="@ViewData["CurrentFilter"]" />
+                    <button type="submit" class="btn btn-primary">بحث</button>
+                </div>
+            </form>
+        </div>
+        <p>
+            <a asp-action="Manage" class="btn btn-success">إنشاء استراتيجية جديدة</a>
+        </p>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">اسم الاستراتيجية</a>
+                    </th>
+                    <th>الفئة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Type</td>
+                        <td>
+                            <a asp-action="Manage" asp-route-id="@item.Id" class="btn btn-primary btn-sm">تعديل</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">حذف</a>
+                            <a asp-action="Clone" asp-route-id="@item.Id" class="btn btn-info btn-sm">نسخ</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    

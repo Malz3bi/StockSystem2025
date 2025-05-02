@@ -2,6 +2,8 @@
 using StockSystem2025.Hubs;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using StockSystem2025.Models;
+using StockSystem2025.Services;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +23,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddMemoryCache();
-
-// Configure sessions
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -30,7 +30,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
 
 // Configure database
 var connectionString = builder.Configuration.GetConnectionString("SQLConn");
@@ -54,6 +53,12 @@ builder.Services.AddLogging(logging =>
     logging.AddDebug();
 });
 
+// Add services
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICriteriaService, CriteriaService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<StockService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -70,13 +75,13 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCors("AllowAll"); // Apply CORS after routing
+app.UseCors("AllowAll");
 app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapHub<ProgressHub>("/progressHub"); // Map SignalR hub
+app.MapHub<ProgressHub>("/progressHub");
 
 app.Run();

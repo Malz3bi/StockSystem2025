@@ -57,7 +57,7 @@ namespace StockSystem2025.Controllers
                 {
                     ContentTitle = "عرض التوصيات",
                     Criteria = new List<CriteriaViewModel>(),
-                    GeneralIndicators = await _context.StockPrevDayViews
+                    GeneralIndicators = await _context.StockPrevDayViews  //حذف
                         .AsNoTracking()
                         .Where(x => x.Sticker == "TASI" && x.DayNo == 1)
                         .Select(x => new StockPrevDayView
@@ -491,14 +491,26 @@ namespace StockSystem2025.Controllers
                                         if (formula5.TypeLowerGap)
                                         {
                                             stockResult = stockResult
-                                                .Where(x => x.Sopen <= x.PrevSopen && x.Sopen <= x.PrevSclose && x.Sopen >= x.PrevSlow)
-                                                .ToList();
+                                                .Where(x => x != null &&
+                                                        x.Sopen.HasValue &&
+                                                        x.PrevSopen.HasValue &&
+                                                        x.PrevSclose.HasValue &&
+                                                        x.PrevSlow.HasValue &&
+                                                        x.Sopen.Value <= x.PrevSopen.Value &&
+                                                        x.Sopen.Value <= x.PrevSclose.Value &&
+                                                        x.Sopen.Value >= x.PrevSlow.Value).ToList();
                                         }
                                         else if (formula5.TypeHigherGap)
                                         {
                                             stockResult = stockResult
-                                                .Where(x => x.Sopen >= x.PrevSopen && x.Sopen >= x.PrevSclose && x.Sopen <= x.PrevShigh)
-                                                .ToList();
+                                                .Where(x => x != null &&
+                                                        x.Sopen.HasValue &&
+                                                        x.PrevSopen.HasValue &&
+                                                        x.PrevSclose.HasValue &&
+                                                        x.PrevShigh.HasValue &&
+                                                        x.Sopen.Value >= x.PrevSopen.Value &&
+                                                        x.Sopen.Value >= x.PrevSclose.Value &&
+                                                        x.Sopen.Value <= x.PrevShigh.Value).ToList();
                                         }
                                         break;
 
