@@ -96,6 +96,8 @@ public partial class StockdbContext : DbContext
 
             entity.ToTable("CompanyTable");
 
+            entity.HasIndex(e => e.ParentIndicator, "IX_CompanyTable_ParentIndicator");
+
             entity.Property(e => e.CompanyCode)
                 .HasMaxLength(4)
                 .IsUnicode(false);
@@ -437,9 +439,9 @@ public partial class StockdbContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.Sclose).HasColumnName("Sclose");
-            entity.Property(e => e.Shigh).HasColumnName("Shigh");
-            entity.Property(e => e.Slow).HasColumnName("Slow");
+            entity.Property(e => e.Sclose).HasColumnName("SClose");
+            entity.Property(e => e.Shigh).HasColumnName("SHigh");
+            entity.Property(e => e.Slow).HasColumnName("SLow");
             entity.Property(e => e.Sname).HasMaxLength(50);
         });
 

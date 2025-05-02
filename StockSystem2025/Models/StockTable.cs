@@ -5,15 +5,15 @@ namespace StockSystem2025.Models;
 
 public partial class StockTable
 {
+    public string Sticker { get; set; } = null!;
+
+    public string Sdate { get; set; } = null!;
+
     public int Id { get; set; }
 
     public int DayNo { get; set; }
 
-    public string Sticker { get; set; } = null!;
-
     public string? Sname { get; set; }
-
-    public string Sdate { get; set; } = null!;
 
     public double? Sopen { get; set; }
 
