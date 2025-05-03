@@ -21,12 +21,12 @@ namespace StockSystem2025.Services
             _currentUserService = currentUserService;
         }
 
-        public async Task<RecommendationResultViewModel> GetRecommendationResultAsync(int? criteriaId, DateTime? selectedDate, int viewIndex, string sortColumn, string sortOrder)
+        public async Task<RecommendationResultViewModel> GetRecommendationResultAsync(int? criteriaId, DateTime? selectedDate, int viewIndex, string sortColumn, string sortOrder, List<string>? CompaniesSticer)
         {
             //var user = await _currentUserService.GetCurrentUserAsync();
             var userId = 1;
            
-            selectedDate = (selectedDate ?? await GetLastDateAsync()).AddDays(-1);
+            selectedDate = (selectedDate ?? await GetLastDateAsync());
           var model = new RecommendationResultViewModel
             {
                 SelectedDate = selectedDate ?? await GetLastDateAsync(),
@@ -160,7 +160,7 @@ namespace StockSystem2025.Services
 
             // Recommendations
             List<StockPrevDayView> criteriaResult = criteriaId.HasValue
-                ? await GetCriteriaRecommendationResultAsync(criteriaId.Value, selectedDate)
+                ? await GetCriteriaRecommendationResultAsync(criteriaId.Value, selectedDate, CompaniesSticer)
                 : new List<StockPrevDayView>();
 
             var stickers = criteriaResult.Select(x => x.Sticker).Distinct().ToList();
@@ -240,6 +240,7 @@ namespace StockSystem2025.Services
             // Sorting
             recommendations = SortRecommendations(recommendations, model.SortColumn, model.SortOrder);
             model.Recommendations = recommendations;
+            model.CompaniesSticer = CompaniesSticer;
 
             return model;
         }
@@ -311,7 +312,7 @@ namespace StockSystem2025.Services
                 .FirstOrDefaultAsync() ?? companyCode;
         }
 
-        private async Task<List<StockPrevDayView>> GetCriteriaRecommendationResultAsync(int criteriaId, DateTime? selectedDate)
+        private async Task<List<StockPrevDayView>> GetCriteriaRecommendationResultAsync(int criteriaId, DateTime? selectedDate, List<string>? CompaniesSticer)
         {
             var criteria = await _criteriaService.GetCriteriaByIdAsync(criteriaId);
             if (criteria == null) return new List<StockPrevDayView>();
@@ -319,17 +320,20 @@ namespace StockSystem2025.Services
             var dayNo = await GetDayNumberByDateAsync(selectedDate);
             if (dayNo == 0) return new List<StockPrevDayView>();
 
-            var query = _db.StockPrevDayViews.AsNoTracking()
-                .Where(s => s.DayNo == dayNo);
-
-            foreach (var formula in criteria.Formulas)
+            var query = new List<StockPrevDayView>().AsQueryable();
+            if (CompaniesSticer!=null)
             {
-                if (formula.FormulaValues.Contains("ChangeRate > 0"))
-                {
-                    query = query.Where(s => s.ChangeRate > 0);
-                }
-                // Add more formula conditions as needed
+                query = _db.StockPrevDayViews.Where(c => CompaniesSticer.Contains(c.Sticker)|| c.IsIndicator).AsNoTracking()
+                .Where(s => s.DayNo == dayNo);
             }
+            else
+            {
+                query = _db.StockPrevDayViews.Where(c => c.IsIndicator).AsNoTracking()
+              .Where(s => s.DayNo == dayNo);
+            }
+
+
+              
 
             return await query.ToListAsync();
         }

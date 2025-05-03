@@ -18,6 +18,7 @@
         public SupportTargetSettingsViewModel SupportTargetSettings { get; set; }
         public string SortColumn { get; set; }
         public string SortOrder { get; set; }
+        public List<string>? CompaniesSticer { get; set; }
     }
 
     public class StockPrevDayViewModel

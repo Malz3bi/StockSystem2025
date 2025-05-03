@@ -21,12 +21,12 @@ namespace StockSystem2025.Controllers
             _cache = cache;
         }
 
-        public async Task<IActionResult> FormulasSettingIndex(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> FormulasSettingIndex(int page = 1, int pageSize = 50)
         {
             return View(await LoadData(page, pageSize));
         }
 
-        private async Task<FormulasSettingViewModel> LoadData(int page = 1, int pageSize = 10)
+        private async Task<FormulasSettingViewModel> LoadData(int page = 1, int pageSize = 50)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -335,7 +335,7 @@ namespace StockSystem2025.Controllers
                             int formulaDayNo = startDayNo + groupItem.First().Day - 1;
                             var stockStickers = new HashSet<string>(stockResult.Select(y => y.Sticker));
                             var res = stockPrevDayViews
-                                .Where(x => x.Key.DayNo == formulaDayNo && stockStickers.Any(s => x.Key.Sticker.StartsWith(s)))
+                                .Where(x => x.Key.DayNo == formulaDayNo && stockStickers.Contains(x.Key.Sticker))
                                 .Select(x => x.Value)
                                 .ToList();
 
@@ -974,7 +974,7 @@ namespace StockSystem2025.Controllers
 
                                             // تصفية البيانات باستخدام StartsWith مع تطابق البادئة الكاملة
                                             var filteredRecommendations = recommendationsList
-                                                .Where(x => listOfCodes.Any(c => x.Sticker.StartsWith(c)))
+                                                .Where(x => listOfCodes.Contains(x.Sticker))
                                                 .ToList();
 
                                             var recommendationsDict = filteredRecommendations
@@ -1052,7 +1052,7 @@ namespace StockSystem2025.Controllers
 
                                             var finalStickers = penetrationPointResult.Select(x => x.StockItem.Sticker).Distinct().ToList();
                                             stockResult = stockPrevDayViews
-                                                .Where(x => x.Key.DayNo == formulaDayNo && finalStickers.Any(s => x.Key.Sticker.StartsWith(s)))
+                                                .Where(x => x.Key.DayNo == formulaDayNo && finalStickers.Contains(x.Key.Sticker))
                                                 .Select(x => x.Value)
                                                 .ToList();
                                         }
@@ -1092,12 +1092,14 @@ namespace StockSystem2025.Controllers
                         }
 
                         int companiesCount = stockResultSortedList.Count(x => !x.IsIndicator);
+                        var CompaniesSticer = stockResultSortedList.Where(x => !x.IsIndicator).Select(x=> x.Sticker).ToList();
                         if (companiesCount == 0)
                         {
                             companiesCount = stockResultSortedList.Count(x => x.IsIndicator);
                         }
 
                         oneCriteriaVM.CompaniesCount = companiesCount;
+                        oneCriteriaVM.CompaniesSticer = CompaniesSticer;
                         criteriaList.Add(oneCriteriaVM);
                     });
                 }

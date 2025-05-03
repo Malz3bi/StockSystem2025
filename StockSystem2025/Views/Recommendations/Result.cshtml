@@ -94,6 +94,7 @@
     </style>
 }
 
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
     <script>
@@ -154,8 +155,8 @@
                 @foreach (var indicator in Model.GeneralIndicators)
                 {
                     <tr class="rdSubHeader">
-                        <td><a href="CompanyDetails?code=@indicator.Sticker">@indicator.Sticker</a></td>
-                        <td><a href="CompanyDetails?code=@indicator.Sticker">@indicator.Sname</a></td>
+                        <td><a asp-action="IndexChart" asp-route-sticer="@indicator.Sticker">@indicator.Sticker</a></td>
+                        <td><a asp-action="IndexChart" asp-route-sticer="@indicator.Sticker" >@indicator.Sname</a></td>
                         <td>@ConvertHelper.FormatDouble(indicator.Sopen)</td>
                         <td>@ConvertHelper.FormatDouble(indicator.Shigh)</td>
                         <td>@ConvertHelper.FormatDouble(indicator.Slow)</td>
@@ -194,28 +195,20 @@
                 <b>نتائج توصيات يوم:</b>
                 <form asp-action="ChangeDate" method="post">
                     <input type="date" asp-for="SelectedDate" min="@Model.MinDate?.ToString("yyyy-MM-dd")" max="@Model.MaxDate?.ToString("yyyy-MM-dd")" class="form-control d-inline-block w-auto" />
-                    <input type="hidden" asp-for="Criteria.Index" />
-                    <input type="hidden" value="0" name="ViewIndex" />   
+                    <input type="hidden" name="criteriaId" value="@Model.Criteria.Index" />
+                    <input type="hidden" value="0" name="ViewIndex" />
                     <input type="hidden" asp-for="SortColumn" />
                     <input type="hidden" asp-for="SortOrder" />
+                    @if (Model.CompaniesSticer != null)
+                    {
+                        @foreach (var item in Model.CompaniesSticer)
+                        {
+                            <input type="hidden" value="@item" name="CompaniesSticer" />
+                        }
+                    }
                     <button type="submit" class="btn btn-primary btn-sm">تحديث</button>
                 </form>
-                <form asp-action="NextDate" method="post" class="d-inline">
-                    <input type="hidden" asp-for="SelectedDate" />
-                    <input type="hidden" asp-for="Criteria.Index" />
-                    <input type="hidden" value="0" name="ViewIndex" />
-                    <input type="hidden" asp-for="SortColumn" />
-                    <input type="hidden" asp-for="SortOrder" />
-                    <button type="submit" class="btn btn-secondary btn-sm">▲</button>
-                </form>
-                <form asp-action="PreviousDate" method="post" class="d-inline">
-                    <input type="hidden" asp-for="SelectedDate" />
-                    <input type="hidden" asp-for="Criteria.Index" />
-                    <input type="hidden" value="0" name="ViewIndex" />
-                    <input type="hidden" asp-for="SortColumn" />
-                    <input type="hidden" asp-for="SortOrder" />
-                    <button type="submit" class="btn btn-secondary btn-sm">▼</button>
-                </form>
+
                 @if (Model.ShowError)
                 {
                     <span class="text-danger">يرجى إدخال تاريخ صحيح</span>
@@ -272,9 +265,17 @@
             <form asp-action="SwitchView" method="post" class="d-inline">
                 <input type="hidden" name="CriteriaId" value="@Model.Criteria.Index" />
                 <input type="hidden" asp-for="SelectedDate" />
-                <input type="hidden" value="1" name="ViewIndex" /> 
+                <input type="hidden" value="1" name="ViewIndex" />
                 <input type="hidden" asp-for="SortColumn" />
                 <input type="hidden" asp-for="SortOrder" />
+                @if (Model.CompaniesSticer != null)
+                {
+                    @foreach (var item in Model.CompaniesSticer)
+                    {
+                        <input type="hidden" value="@item" name="CompaniesSticer" />
+                    }
+                }
+
                 <button type="submit" class="btn btn-info mb-3">عرض الدعوم والمقاومات</button>
             </form>
             <table class="table table-bordered grid">
@@ -287,35 +288,88 @@
                         <th colspan="3" class="left-b-thick">الحد الأدنى</th>
                         <th colspan="3" class="left-b-thick">الإغلاق</th>
                     </tr>
+                    @{
+                        var companiesParams = string.Join("&", Model.CompaniesSticer?.Select(s => $"CompaniesSticer={s}") ?? new List<string>());
+                    }
+
                     <tr>
                         <th>م</th>
-                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sticker" asp-route-sortOrder="@(Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sname" asp-route-sortOrder="@(Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th>
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sticker", sortOrder = (Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th>
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sname", sortOrder = (Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                         <th class="left-b-thick">سعر التوصية</th>
                         <th class="f-17">المتوقع</th>
-                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="ExpectedOpenValue" asp-route-sortOrder="@(Model.SortColumn == "ExpectedOpenValue" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "ExpectedOpenValue" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="ExpectedOpenPercent" asp-route-sortOrder="@(Model.SortColumn == "ExpectedOpenPercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "ExpectedOpenPercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ExpectedOpenValue", sortOrder = (Model.SortColumn == "ExpectedOpenValue" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                القيمة @(Model.SortColumn == "ExpectedOpenValue" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th class="left-b-thick f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ExpectedOpenPercent", sortOrder = (Model.SortColumn == "ExpectedOpenPercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                النسبة @(Model.SortColumn == "ExpectedOpenPercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                         <th class="f-17">الإفتتاح</th>
-                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="SOpen" asp-route-sortOrder="@(Model.SortColumn == "SOpen" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "SOpen" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="OpeningGapRate" asp-route-sortOrder="@(Model.SortColumn == "OpeningGapRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "OpeningGapRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "SOpen", sortOrder = (Model.SortColumn == "SOpen" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                القيمة @(Model.SortColumn == "SOpen" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th class="left-b-thick f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "OpeningGapRate", sortOrder = (Model.SortColumn == "OpeningGapRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                النسبة @(Model.SortColumn == "OpeningGapRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                         <th class="f-17">الأعلى</th>
-                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Shigh" asp-route-sortOrder="@(Model.SortColumn == "Shigh" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Shigh" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="UpperLimitRate" asp-route-sortOrder="@(Model.SortColumn == "UpperLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "UpperLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Shigh", sortOrder = (Model.SortColumn == "Shigh" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                القيمة @(Model.SortColumn == "Shigh" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th class="left-b-thick f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "UpperLimitRate", sortOrder = (Model.SortColumn == "UpperLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                النسبة @(Model.SortColumn == "UpperLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                         <th class="f-17">الأدنى</th>
-                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Slow" asp-route-sortOrder="@(Model.SortColumn == "Slow" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Slow" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="LowerLimitRate" asp-route-sortOrder="@(Model.SortColumn == "LowerLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "LowerLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Slow", sortOrder = (Model.SortColumn == "Slow" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                القيمة @(Model.SortColumn == "Slow" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th class="left-b-thick f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "LowerLimitRate", sortOrder = (Model.SortColumn == "LowerLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                النسبة @(Model.SortColumn == "LowerLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                         <th class="f-17">الإغلاق</th>
-                        <th class="f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sclose" asp-route-sortOrder="@(Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th class="left-b-thick f-17"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="ChangeRate" asp-route-sortOrder="@(Model.SortColumn == "ChangeRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "ChangeRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th class="f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sclose", sortOrder = (Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th class="left-b-thick f-17">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ChangeRate", sortOrder = (Model.SortColumn == "ChangeRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                النسبة @(Model.SortColumn == "ChangeRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                     </tr>
+
                 </thead>
                 <tbody>
                     @foreach (var rec in Model.Recommendations.Select((value, i) => new { value, i }))
                     {
                         <tr class="@(rec.value.IsIndicator ? "rdSubHeader" : "company-row")" style="@(rec.value.IsSpecial ? $"background-color: {Model.SpecialCompanyColor};" : "")">
                             <td style="@(!string.IsNullOrEmpty(rec.value.FollowListColor) ? $"background-color: #{rec.value.FollowListColor};" : "")">@(rec.i + 1)</td>
-                            <td><a href="CompanyDetails?code=@rec.value.Sticker" id="company-code-@rec.i">@rec.value.Sticker</a></td>
-                            <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a href="CompanyDetails?code=@rec.value.Sticker" target="_blank">@rec.value.Sname</a></td>
+                            <td><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker">@rec.value.Sticker</a></td>
+                            <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker">@rec.value.Sname</a></td>
                             <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Sclose, rec.value.NextSclose))</td>
                             <td class="f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.ExpectedOpen, rec.value.Sclose))</td>
                             <td class="f-17">@Html.Raw(ControlHelper.GetExpectedOpenControlWithCompareValuesAndControlValue(rec.value.ExpectedOpen, rec.value.Sclose, rec.value.ExpectedOpenValue, false, rec.value.ExpectedOpen))</td>
@@ -345,7 +399,14 @@
                 <input type="hidden" value="0" name="ViewIndex" />
                 <input type="hidden" asp-for="SortColumn" />
                 <input type="hidden" asp-for="SortOrder" />
-                <button type="submit"  class="btn btn-info mb-3">عرض نسبة الأرباح والخسائر</button>
+                <button type="submit" class="btn btn-info mb-3">عرض نسبة الأرباح والخسائر</button>
+                @if (Model.CompaniesSticer != null)
+                {
+                    @foreach (var item in Model.CompaniesSticer)
+                    {
+                        <input type="hidden" value="@item" name="CompaniesSticer" />
+                    }
+                }
             </form>
             <table class="table table-bordered grid">
                 <thead class="rdHeader">
@@ -361,10 +422,22 @@
                         <th colspan="2" class="left-b-thick">هدف يومي محقق</th>
                         <th colspan="2" class="left-b-thick">هدف أسبوعي محقق</th>
                     </tr>
+                    @{
+                        var companiesParams = string.Join("&", Model.CompaniesSticer?.Select(s => $"CompaniesSticer={s}") ?? new List<string>());
+                    }
+
                     <tr>
                         <th>م</th>
-                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sticker" asp-route-sortOrder="@(Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sname" asp-route-sortOrder="@(Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th>
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sticker", sortOrder = (Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th>
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sname", sortOrder = (Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                         <th class="left-b-thick">سعر التوصية</th>
                         <th style="background-color: @Model.SupportTargetSettings.StopLossColor">@Model.SupportTargetSettings.StopLossValue%</th>
                         <th style="background-color: @Model.SupportTargetSettings.SecondSupportColor">@Model.SupportTargetSettings.SecondSupportValue%</th>
@@ -373,11 +446,20 @@
                         <th style="background-color: @Model.SupportTargetSettings.SecondTargetColor">@Model.SupportTargetSettings.SecondTargetValue%</th>
                         <th class="left-b-thick" style="background-color: @Model.SupportTargetSettings.ThirdTargetColor">@Model.SupportTargetSettings.ThirdTargetValue%</th>
                         <th class="left-b-thick">السعر الحالي</th>
-                        <th><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="Sclose" asp-route-sortOrder="@(Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
-                        <th class="left-b-thick"><a asp-action="Result" asp-route-id="@Model.Criteria?.Index" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" asp-route-viewIndex="@Model.ViewIndex" asp-route-sortColumn="SclosePercent" asp-route-sortOrder="@(Model.SortColumn == "SclosePercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC")">النسبة @(Model.SortColumn == "SclosePercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")</a></th>
+                        <th>
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sclose", sortOrder = (Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
+                        <th class="left-b-thick">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "SclosePercent", sortOrder = (Model.SortColumn == "SclosePercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                                النسبة @(Model.SortColumn == "SclosePercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
+                            </a>
+                        </th>
                         <th>القيمة</th>
                         <th>النسبة</th>
                     </tr>
+                  
                 </thead>
                 <tbody>
                     @foreach (var rec in Model.Recommendations.Select((value, i) => new { value, i }))
@@ -391,8 +473,8 @@
 
                         <tr class="@(rec.value.IsIndicator ? "rdSubHeader" : "company-row")" style="@(rec.value.IsSpecial ? $"background-color: {Model.SpecialCompanyColor};" : "")">
                             <td style="@(!string.IsNullOrEmpty(rec.value.FollowListColor) ? $"background-color: #{rec.value.FollowListColor};" : "")">@(rec.i + 1)</td>
-                            <td><a href="CompanyDetails?code=@rec.value.Sticker" id="company-code-@rec.i">@rec.value.Sticker</a></td>
-                            <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a href="CompanyDetails?code=@rec.value.Sticker" target="_blank">@rec.value.Sname</a></td>
+                        <td><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker" >@rec.value.Sticker</a></td>
+                        <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker" >@rec.value.Sname</a></td>
                             <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Sclose, rec.value.NextSclose))</td>
                             <td style="background-color: @Model.SupportTargetSettings.StopLossColor">@Html.Raw(ControlHelper.GetStopLossChangeValueColor(stopLossValue, rec.value.MinClose ?? 0))</td>
                             <td style="background-color: @Model.SupportTargetSettings.SecondSupportColor">@Html.Raw(ControlHelper.GetSupportChangeValueColor(secondSupportValue, rec.value.MinLow ?? 0))</td>

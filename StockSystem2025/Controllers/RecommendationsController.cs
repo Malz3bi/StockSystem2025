@@ -18,9 +18,9 @@ namespace StockSystem2025.Controllers
         }
 
        
-        public async Task<IActionResult> Result(int? id, DateTime? date, int viewIndex = 1, string sortColumn = "Sticker", string sortOrder = "ASC")
+        public async Task<IActionResult> Result(List<string>?    CompaniesSticer, int? id, DateTime? date, int viewIndex = 1, string sortColumn = "Sticker", string sortOrder = "ASC")
         {
-            var model = await _stockService.GetRecommendationResultAsync(id, date, viewIndex, sortColumn, sortOrder);
+            var model = await _stockService.GetRecommendationResultAsync(id, date, viewIndex, sortColumn, sortOrder, CompaniesSticer);
             return View(model);
         }
 
@@ -32,60 +32,85 @@ namespace StockSystem2025.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ChangeDate(DateTime newDate, int? criteriaId, int viewIndex, string sortColumn, string sortOrder)
+        public async Task<IActionResult> ChangeDate(DateTime SelectedDate, int? criteriaId, int viewIndex, string sortColumn, string sortOrder, List<string>? CompaniesSticer)
         {
-            if (await _stockService.CheckIfDateExistsAsync(newDate))
+            if (await _stockService.CheckIfDateExistsAsync(SelectedDate))
             {
-                return RedirectToAction("Result", new { id = criteriaId, date = newDate, viewIndex, sortColumn, sortOrder });
+                return RedirectToAction("Result", new { id = criteriaId, date = SelectedDate, viewIndex, sortColumn, sortOrder, CompaniesSticer });
             }
-            var model = await _stockService.GetRecommendationResultAsync(criteriaId, null, viewIndex, sortColumn, sortOrder);
+            var model = await _stockService.GetRecommendationResultAsync(criteriaId, null, viewIndex, sortColumn, sortOrder, CompaniesSticer);
             model.ShowError = true;
             return View("Result", model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> NextDate(DateTime? currentDate, int? criteriaId, int viewIndex, string sortColumn, string sortOrder)
+        public async Task<IActionResult> NextDate(DateTime? currentDate, int? criteriaId, int viewIndex, string sortColumn, string sortOrder,List<string>?    CompaniesSticer)
         {
             var nextDate = await _stockService.GetNextDateAsync(currentDate);
             if (nextDate.HasValue && await _stockService.CheckIfDateExistsAsync(nextDate.Value))
             {
                 return RedirectToAction("Result", new { id = criteriaId, date = nextDate, viewIndex, sortColumn, sortOrder });
             }
-            var model = await _stockService.GetRecommendationResultAsync(criteriaId, currentDate, viewIndex, sortColumn, sortOrder);
+            var model = await _stockService.GetRecommendationResultAsync(criteriaId, currentDate, viewIndex, sortColumn, sortOrder, CompaniesSticer);
             model.ShowError = true;
             return View("Result", model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PreviousDate(DateTime? currentDate, int? criteriaId, int viewIndex, string sortColumn, string sortOrder)
+        public async Task<IActionResult> PreviousDate(DateTime? currentDate, int? criteriaId, int viewIndex, string sortColumn, string sortOrder, List<string>? CompaniesSticer)
         {
             var prevDate = await _stockService.GetPreviousDateAsync(currentDate);
             if (prevDate.HasValue && await _stockService.CheckIfDateExistsAsync(prevDate.Value))
             {
                 return RedirectToAction("Result", new { id = criteriaId, date = prevDate, viewIndex, sortColumn, sortOrder });
             }
-            var model = await _stockService.GetRecommendationResultAsync(criteriaId, currentDate, viewIndex, sortColumn, sortOrder);
+            var model = await _stockService.GetRecommendationResultAsync(criteriaId, currentDate, viewIndex, sortColumn, sortOrder, CompaniesSticer);
             model.ShowError = true;
             return View("Result", model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SwitchView(int? CriteriaId, DateTime? SelectedDate, int ViewIndex, string SortColumn, string sortOrder)
+        public async Task<IActionResult> SwitchView(int? CriteriaId, DateTime? SelectedDate, int ViewIndex, string SortColumn, string sortOrder, List<string>? CompaniesSticer)
         {
             int newViewIndex = ViewIndex == 0 ? 1 : 0;
-            return RedirectToAction("Result", new { id = CriteriaId, SelectedDate, viewIndex = ViewIndex, SortColumn, sortOrder });
+            return RedirectToAction("Result", new { id = CriteriaId, SelectedDate, viewIndex = ViewIndex, SortColumn, sortOrder, CompaniesSticer });
         }
 
 
 
-        public IActionResult IndexChart()
+
+        public IActionResult IndexChart(string? sticer)
         {
-            var stickers = _context.StockTables
-                .Select(s => s.Sticker)
-                .Distinct()
-                .ToList();
-            ViewBag.Stickers = stickers;
-            return View();
+            int parsedNumber;
+            bool isNumeric = int.TryParse(sticer, out parsedNumber);
+
+            if (!isNumeric)
+            {
+
+                var companis = _context.CompanyTables.Where(v => v.ParentIndicator == sticer).Select(c => c.CompanyCode).ToList();
+
+                var stickers = _context.StockTables.Where(c => companis.Contains( c.Sticker))
+                    .Select(s => s.Sname)
+                    .Distinct()
+                    .ToList();
+
+                ViewBag.Stickers = stickers;
+                return View();
+
+            }
+            else
+            {
+                var stickers = _context.StockTables.Where(c =>  sticer == null || c.Sticker == sticer)
+                     .Select(s => s.Sname)
+                     .Distinct()
+                     .ToList();
+                ViewBag.Stickers = stickers;
+                return View();
+
+            }
+          
+
+          
         }
 
         [HttpGet]
@@ -97,7 +122,7 @@ namespace StockSystem2025.Controllers
             }
 
             var stockDataQuery = _context.StockTables
-                .Where(s => s.Sticker == sticker)
+                .Where(s => s.Sname == sticker)
                 .OrderBy(s => s.Sdate)
                 .Select(s => new
                 {

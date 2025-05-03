@@ -19,6 +19,7 @@ namespace StockSystem2025.ViewModel
     {
         public Criteria Criteria { get; set; }
         public int CompaniesCount { get; set; }
+        public List<string> CompaniesSticer { get; set; }
     }
 
 public class Formula1

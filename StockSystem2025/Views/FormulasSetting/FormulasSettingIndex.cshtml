@@ -68,12 +68,15 @@
                                             <a class="me-3 confirm-text" href="javascript:void(0);" onclick="confirmDelete(@item.Criteria.Id, this)">
                                                 <i class="fas fa-trash-alt icon-size icon-delete"></i>
                                             </a>
-                                            <a href="/RecommendationResult/Index?id=@item.Criteria.Id" class="btn btn-sm btn-primary">عرض</a>
+                                            @{
+                                                var query = string.Join("&", item.CompaniesSticer.Select(c => $"CompaniesSticer={c}"));
+                                                var url = Url.Action("Result", "Recommendations", new { id = item.Criteria.Id, viewIndex = 1 });
+                                                url = $"{url}&{query}";
+                                            }
+                                            <a href="@url" class="btn btn-sm btn-primary">عرض</a>
                                         </td>
                                         <td>@item.CompaniesCount</td>
-                                        <td>
-                                            <a href="/Recommendations/Result?id=@item.Criteria.Id" class="btn btn-sm btn-primary">عرض</a>
-                                        </td>
+                                       
                                     </tr>
                                 }
                             }
