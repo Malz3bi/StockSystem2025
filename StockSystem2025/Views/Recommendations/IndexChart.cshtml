@@ -68,7 +68,6 @@
                     overflow-x: auto;
                 }
             </style>
-
             <script src="~/assets/js/lightweight-charts.standalone.production.js.js"></script>
             <script>
                 const chartContainer = document.getElementById('chartContainer');
@@ -90,12 +89,13 @@
                 });
 
                 const candlestickSeries = chart.addCandlestickSeries({
-                    upColor: '#ffffff',
-                    downColor: '#ff0000',
-                    borderUpColor: '#000000',
-                    borderDownColor: '#ff0000',
-                    wickUpColor: '#000000',
-                    wickDownColor: '#ff0000',
+                    // Default colors, will be overridden per candle
+                    upColor: '#26a69a',
+                    downColor: '#ef5350',
+                    borderUpColor: '#26a69a',
+                    borderDownColor: '#ef5350',
+                    wickUpColor: '#26a69a',
+                    wickDownColor: '#ef5350',
                 });
 
                 const liquiditySeries = liquidityChart.addHistogramSeries({
@@ -104,7 +104,7 @@
                     priceScaleId: 'volume',
                 });
                 liquidityChart.priceScale('volume').applyOptions({
-                    scaleMargins: { top: 0.7, bottom: 0 }, // Adjusted for longer bars
+                    scaleMargins: { top: 0.7, bottom: 0 },
                 });
 
                 // Sync time scales
@@ -130,19 +130,58 @@
                                     return;
                                 }
 
-                                const candlestickData = validData.map(d => ({
-                                    time: Number(d.time),
-                                    open: Number(d.open),
-                                    high: Number(d.high),
-                                    low: Number(d.low),
-                                    close: Number(d.close),
-                                }));
+                                const candlestickData = validData.map((d, index) => {
+                                    const isBullish = Number(d.close) > Number(d.open);
+                                    const prevClose = index > 0 ? Number(validData[index - 1].close) : Number(d.open); // Fallback to open for first candle
+                                    const closedAbovePrev = Number(d.close) > prevClose;
+                                    const closedBelowPrev = Number(d.close) < prevClose;
+
+                                    let candleStyle = {};
+                                    if (isBullish && closedAbovePrev) {
+                                        // Green Hollow: Bullish and price moved up
+                                        candleStyle = {
+                                            color: 'rgba(0, 0, 0, 0)', // Transparent for hollow
+                                            borderColor: '#26a69a', // Green border
+                                            wickColor: '#26a69a', // Green wick
+                                        };
+                                    } else if (!isBullish && closedAbovePrev) {
+                                        // Green Filled: Bearish but closed above previous close
+                                        candleStyle = {
+                                            color: '#26a69a', // Solid green
+                                            borderColor: '#26a69a',
+                                            wickColor: '#26a69a',
+                                        };
+                                    } else if (!isBullish && closedBelowPrev) {
+                                        // Red Filled: Bearish and price moved down
+                                        candleStyle = {
+                                            color: '#ef5350', // Solid red
+                                            borderColor: '#ef5350',
+                                            wickColor: '#ef5350',
+                                        };
+                                    } else if (isBullish && closedBelowPrev) {
+                                        // Red Hollow: Bullish but closed below previous close
+                                        candleStyle = {
+                                            color: 'rgba(0, 0, 0, 0)', // Transparent for hollow
+                                            borderColor: '#ef5350', // Red border
+                                            wickColor: '#ef5350', // Red wick
+                                        };
+                                    }
+
+                                    return {
+                                        time: Number(d.time),
+                                        open: Number(d.open),
+                                        high: Number(d.high),
+                                        low: Number(d.low),
+                                        close: Number(d.close),
+                                        ...candleStyle,
+                                    };
+                                });
 
                                 // Store raw liquidity data for dynamic scaling
                                 rawLiquidityData = validData.map(d => ({
                                     time: Number(d.time),
                                     value: Number(d.volume),
-                                    color: d.close > d.open ? '#26a69a' : '#ef5350',
+                                    color: Number(d.close) > Number(d.open) ? '#26a69a' : '#ef5350',
                                 }));
 
                                 // Initial scaling of liquidity data
@@ -168,33 +207,28 @@
                 }
 
                 function updateLiquidityData() {
-                    // Get the visible range
                     const visibleRange = chart.timeScale().getVisibleLogicalRange();
                     if (!visibleRange) return;
 
-                    // Filter liquidity data to the visible range
                     const visibleLiquidityData = rawLiquidityData.filter(d => {
                         const time = d.time;
                         return time >= visibleRange.from && time <= visibleRange.to;
                     });
 
-                    // Calculate max value in the visible range
                     const maxVisibleValue = visibleLiquidityData.length > 0 ? Math.max(...visibleLiquidityData.map(d => d.value)) : 1;
                     const minVisibleValue = visibleLiquidityData.length > 0 ? Math.min(...visibleLiquidityData.filter(d => d.value > 0).map(d => d.value)) : 1;
 
-                    // Dynamic scaling with a minimum value to ensure bars are tall
-                    const scaleFactor = maxVisibleValue > 0 ? 5000 / maxVisibleValue : 1; // Increased scale for taller bars
-                    const minHeightFactor = 100; // Minimum height for visibility
+                    const scaleFactor = maxVisibleValue > 0 ? 5000 / maxVisibleValue : 1;
+                    const minHeightFactor = 100;
                     const scaledLiquidityData = rawLiquidityData.map(d => ({
                         time: d.time,
-                        value: Math.max(scaleFactor * d.value, minHeightFactor), // Ensure minimum height
+                        value: Math.max(scaleFactor * d.value, minHeightFactor),
                         color: d.color,
                     }));
 
                     liquiditySeries.setData(scaledLiquidityData);
                 }
 
-                // Update liquidity bars on zoom or pan
                 chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
                     updateLiquidityData();
                 });
@@ -216,7 +250,6 @@
                         tbody.appendChild(row);
                     });
 
-                    // Force table rendering
                     requestAnimationFrame(() => {
                         const tableContainer = document.getElementById('tableContainer');
                         tableContainer.style.opacity = '0';
