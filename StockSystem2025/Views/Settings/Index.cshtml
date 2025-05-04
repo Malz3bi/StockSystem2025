@@ -1,0 +1,177 @@
+﻿@model StockSystem2025.Models.SettingsViewModel
+
+@{
+    ViewData["Title"] = "إعدادات البرنامج";
+}
+
+<div class="page-wrapper">
+    <div class="content">
+    <h2 class="mb-4 text-secondary border-bottom pb-2">@ViewData["Title"]</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="settings-tab" data-bs-toggle="tab" href="#settings" role="tab">إعدادات</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="manage-companies-tab" href="@Url.Action("ManageCompanies")" role="tab">إدارة القطاعات والشركات</a>
+        </li>
+    </ul>
+
+    <div class="page-wrapper">
+        <div class="tab-content" id="settingsTabsContent">
+            <div class="tab-pane fade show active" id="settings" role="tabpanel">
+                <form asp-action="Save" method="post">
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            @if (ViewBag.IsAdmin)
+                            {
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label">اسم البرنامج</label>
+                                    <div class="col-sm-10">
+                                        <input asp-for="SiteName" class="form-control w-50" />
+                                        <span asp-validation-for="SiteName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (ViewBag.IsAdmin || ViewBag.IsSupervisor)
+                            {
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label">إعدادات عرض عام</label>
+                                    <div class="col-sm-10">
+                                        <div class="mb-3 row">
+                                            <label class="col-sm-2 col-form-label">إعداد RSI (أيام)</label>
+                                            <div class="col-sm-10">
+                                                <input asp-for="RSIDays" class="form-control w-25" type="number" min="0" />
+                                                <span asp-validation-for="RSIDays" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-sm-2 col-form-label">إعداد Williams (أيام)</label>
+                                            <div class="col-sm-10">
+                                                <input asp-for="Williams" class="form-control w-25" type="number" min="0" />
+                                                <span asp-validation-for="Williams" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-sm-2 col-form-label">إعداد أيام التداول</label>
+                                            <div class="col-sm-10">
+                                                <select asp-for="StockDays" class="form-control w-25">
+                                                    @for (int i = 1; i <= 15; i++)
+                                                    {
+                                                        <option value="@i">@i</option>
+                                                    }
+                                                </select>
+                                                <span asp-validation-for="StockDays" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">إعدادات الرسم البياني (أيام)</label>
+                                <div class="col-sm-10">
+                                    <input asp-for="ChartDays" class="form-control w-25" type="number" min="0" />
+                                    <span asp-validation-for="ChartDays" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                          
+                            @if (ViewBag.IsAdmin || ViewBag.IsSupervisor)
+                            {
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label">اسم الصفحة في ملف الإكسل</label>
+                                    <div class="col-sm-10">
+                                        <input asp-for="ExcelSheetName" class="form-control w-25" />
+                                        <span asp-validation-for="ExcelSheetName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">تحديث تلقائي كل</label>
+                                <div class="col-sm-10">
+                                    <select asp-for="InstantUpdateValue" class="form-control w-25">
+                                        @for (int i = 0; i <= 10; i++)
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    </select>
+                                    <span>دقائق</span>
+                                    <span asp-validation-for="InstantUpdateValue" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">أرقام الأعمدة في ملف التحديث اللحظي</label>
+                                <div class="col-sm-10">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>رمز الشركة</th>
+                                                <th>اسم الشركة</th>
+                                                <th>الافتتاح</th>
+                                                <th>الأعلى</th>
+                                                <th>الأدنى</th>
+                                                <th>الإغلاق</th>
+                                                <th>حجم التداول</th>
+                                                <th>الإفتتاح المتوقع</th>
+                                                <th>التاريخ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><input asp-for="StickerColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="SnameColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="SopenColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="SHighColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="SLowColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="SCloseColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="SvolColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="ExpectedOpenColNo" class="form-control" type="number" min="1" /></td>
+                                                <td><input asp-for="SDateColNo" class="form-control" type="number" min="1" /></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            @if (ViewBag.IsAdmin)
+                            {
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label">إعدادات أخرى</label>
+                                    <div class="col-sm-10">
+                                        <div class="form-check">
+                                            <input asp-for="ClearData" class="form-check-input" type="checkbox" />
+                                            <label class="form-check-label">مسح جميع بيانات البرنامج</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input asp-for="ShowCompaniesCount" class="form-check-input" type="checkbox" />
+                                            <label class="form-check-label">إظهار عدد الشركات في عرض التوصيات ونتائج التوصيات</label>
+                                        </div>
+                                      
+                                    </div>
+                                </div>
+                            }
+
+                            <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
