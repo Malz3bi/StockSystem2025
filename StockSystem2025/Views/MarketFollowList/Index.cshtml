@@ -7,78 +7,78 @@
 }
 
 @section Styles {
-<style>
-    .loading-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    z-index: 1000;
-    }
+    <style>
+        .loading-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+        }
 
-    .loading-modal-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
-    }
+        .loading-modal-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
 
-    .stats-div {
-    margin: 20px 0;
-    }
+        .stats-div {
+            margin: 20px 0;
+        }
 
-    .stats {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    }
+        .stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .up-down-btn {
-    padding: 5px 10px;
-    margin: 2px;
-    }
+        .up-down-btn {
+            padding: 5px 10px;
+            margin: 2px;
+        }
 
-    .context-menu {
-    display: none;
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-    z-index: 1000;
-    }
+        .context-menu {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
 
-    .context-menu li {
-    padding: 8px 12px;
-    cursor: pointer;
-    }
+            .context-menu li {
+                padding: 8px 12px;
+                cursor: pointer;
+            }
 
-    .context-menu li:hover {
-    background: #f0f0f0;
-    }
+                .context-menu li:hover {
+                    background: #f0f0f0;
+                }
 
-    .rd-sub-header {
-    background: #f8f9fa;
-    text-align: center;
-    }
+        .rd-sub-header {
+            background: #f8f9fa;
+            text-align: center;
+        }
 
-    .left-b-thick {
-    border-left: 2px solid #000;
-    }
+        .left-b-thick {
+            border-left: 2px solid #000;
+        }
 
-    .tooltip:hover::after {
-    content: attr(title);
-    position: absolute;
-    background: #333;
-    color: white;
-    padding: 5px;
-    border-radius: 3px;
-    z-index: 1000;
-    }
+        .tooltip:hover::after {
+            content: attr(title);
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            z-index: 1000;
+        }
 
         .main-wrapper {
             padding-right: 0;
@@ -86,37 +86,7 @@
             transition: padding-right 0.3s ease;
         }
 
-        #stockGrid {
-            width: 100% !important;
-        }
-
-            #stockGrid th {
-                white-space: normal !important;
-                word-break: break-word;
-            }
-
-            #stockGrid th, #stockGrid td {
-                white-space: normal !important;
-                word-break: break-word;
-                vertical-align: middle;
-            }
-
-            /* لتغليف النص داخل عناوين الأعمدة والخلايا */
-            #stockGrid th,
-            #stockGrid td,
-            .dataTables_scrollHead th {
-                white-space: normal !important;
-                word-break: break-word;
-                vertical-align: middle;
-            }
-
-        #stockGrid {
-            width: 100% !important;
-            table-layout: auto !important;
-        }
-
-
-</style>
+    </style>
 }
 <div class="page-wrapper">
 
@@ -156,7 +126,7 @@
         </div>
     </div>
     @{
-      
+
 
     }
     <form asp-action="ChangeDate" method="post">
@@ -179,7 +149,7 @@
                 مؤشرات رئيسية
             </a>
 
-          
+
             <!-- عناصر الفورم -->
             <input type="date" id="criteriaStartDate"
                    min="@Model.MinDate.ToString("yyyy-MM-dd")"
@@ -198,7 +168,7 @@
 
 
     <div class="stats">
-      
+
 
 
 
@@ -214,41 +184,59 @@
 
         <div class="col-lg-12">
             <table id="stockGrid" class="table table-bordered">
+                <colgroup>
+                    <col style="width: 50px;">  <!-- م -->
+                    <col style="width: 80px;">  <!-- رمز -->
+                    <col style="width: 100px;"> <!-- اسم الشركة -->
+                    <col style="width: 80px;">  <!-- آخر سعر -->
+                    <col style="width: 80px;">  <!-- قيمة التغيير -->
+                    <col style="width: 80px;">  <!-- نسبة التغيير -->
+                    <col style="width: 80px;">  <!-- كمية التداول -->
+                    <col style="width: 80px;">  <!-- الإفتتاح -->
+                    <col style="width: 80px;">  <!-- الأعلى -->
+                    <col style="width: 80px;">  <!-- الأدنى -->
+                    <col style="width: 80px;">  <!-- وقف خسارة -->
+                    <col style="width: 80px;">  <!-- دعم ثاني -->
+                    <col style="width: 80px;">  <!-- دعم أول -->
+                    <col style="width: 80px;">  <!-- هدف أول -->
+                    <col style="width: 80px;">  <!-- هدف ثاني -->
+                    <col style="width: 80px;">  <!-- هدف ثالث -->
+                    <col style="width: 80px;">  <!-- القيمة (يومي) -->
+                    <col style="width: 80px;">  <!-- النسبة (يومي) -->
+                    <col style="width: 80px;">  <!-- القيمة (أسبوعي) -->
+                    <col style="width: 80px;">  <!-- النسبة (أسبوعي) -->
+                    <col style="width: 80px;">  <!-- عرض السيولة -->
+                </colgroup>
                 <thead>
                     <tr class="rd-sub-header">
-                        <th colspan="10">البيانات الأساسية</th>
-                        @*  <th colspan="2">المستويات السعرية</th>*@   
-                        <th colspan="5">الدعم والمقاومة</th>
-                        <th colspan="2">هدف يومي محقق</th>
-                        <th colspan="2">هدف أسبوعي محقق</th>
+                        <th colspan="10" class="section-divider">البيانات الأساسية</th>
+                        <th colspan="6" class="section-divider">الدعم والمقاومة</th>
+                        <th colspan="2" class="section-divider">هدف يومي محقق</th>
+                        <th colspan="2" class="section-divider">هدف أسبوعي محقق</th>
                         <th>عرض السيولة</th>
                     </tr>
                     <tr class="rd-sub-header">
-                        <th>م</th>
-                        <th>رمز</th>
-                        <th>اسم الشركة</th>
-                        <th>آخر سعر</th>
-                        <th>قيمة التغيير</th>
-                        <th>نسبة التغيير</th>
-                        <th>كمية التداول</th>
-                        <th>الإفتتاح</th>
-                        <th>الأعلى</th>
-                        <th>الأدنى</th>
-                        @*  <th>التنبيهات الرقمية</th>
-                            <th>Williams %</th>
-                            <th>Prices1</th>
-                            <th>Prices2</th> *@
-                        <th>وقف خسارة</th>
-                        <th>دعم ثاني</th>
-                        <th>دعم أول</th>
-                        <th>هدف أول</th>
-                        <th>هدف ثاني</th>
-                        <th>هدف ثالث</th>
-                        <th>القيمة</th>
-                        <th>النسبة</th>
-                        <th>القيمة</th>
-                        <th>النسبة</th>
-                        <th>عرض السيولة</th>
+                        <th class="rotate vertical-header section-divider"><div>م</div></th>
+                        <th class="rotate vertical-header section-divider"><div>رمز</div></th>
+                        <th class="rotate vertical-header section-divider"><div>اسم الشركة</div></th>
+                        <th class="rotate vertical-header section-divider"><div>آخر سعر</div></th>
+                        <th class="rotate vertical-header section-divider"><div>قيمة التغيير</div></th>
+                        <th class="rotate vertical-header section-divider"><div>نسبة التغيير</div></th>
+                        <th class="rotate vertical-header section-divider"><div>كمية التداول</div></th>
+                        <th class="rotate vertical-header section-divider"><div>الإفتتاح</div></th>
+                        <th class="rotate vertical-header section-divider"><div>الأعلى</div></th>
+                        <th class="rotate vertical-header section-divider"><div>الأدنى</div></th>
+                        <th class="rotate vertical-header section-divider"><div>وقف خسارة</div></th>
+                        <th class="rotate vertical-header section-divider"><div>دعم ثاني</div></th>
+                        <th class="rotate vertical-header section-divider"><div>دعم أول</div></th>
+                        <th class="rotate vertical-header section-divider"><div>هدف أول</div></th>
+                        <th class="rotate vertical-header section-divider"><div>هدف ثاني</div></th>
+                        <th class="rotate vertical-header section-divider"><div>هدف ثالث</div></th>
+                        <th class="rotate vertical-header section-divider"><div>القيمة</div></th>
+                        <th class="rotate vertical-header section-divider"><div>النسبة</div></th>
+                        <th class="rotate vertical-header section-divider"><div>القيمة</div></th>
+                        <th class="rotate vertical-header section-divider"><div>النسبة</div></th>
+                        <th class="rotate vertical-header"><div>عرض السيولة</div></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -259,34 +247,32 @@
                         var followListColor = Model.FollowListCompanies.ContainsKey(item.Sticker) ? Model.FollowListCompanies[item.Sticker].Color : "";
                         var followListTitle = Model.FollowListCompanies.ContainsKey(item.Sticker) ? Model.FollowListCompanies[item.Sticker].Title : "";
                         <tr class="@isIndicator company-row" data-code="@item.Sticker" style="@(string.IsNullOrEmpty(followListColor) ? "" : $"background-color: {followListColor};")">
-                            <td>@(Model.Stocks.IndexOf(item) + 1)</td>
-                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip")" title="@followListTitle">
-                                <a href="/Company/Details?code=@item.Sticker">@item.Sticker</a>
+                            <td class="section-divider">@(Model.Stocks.IndexOf(item) + 1)</td>
+                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip") section-divider" title="@followListTitle">
+                                <a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@item.Sticker">@item.Sticker</a>
                                 <span style="display: none;" class="company-code">@item.Sticker</span>
                             </td>
-                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip")" title="@followListTitle" style="@(string.IsNullOrEmpty(specialColor) ? "" : $"background-color: {specialColor};")">
-                                <a href="/Company/Details?code=@item.Sticker">@item.Sname</a>
+                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip") section-divider" title="@followListTitle" style="@(string.IsNullOrEmpty(specialColor) ? "" : $"background-color: {specialColor};")">
+                                <a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@item.Sticker">@item.Sname</a>
                             </td>
-                            <td>@Html.Raw(ConvertHelper.CompareValues(item.Sclose, item.PrevSclose))</td>
-                            <td>@Html.Raw(ConvertHelper.ChangeValue(item.ChangeValue))</td>
-                            <td>@Html.Raw(ConvertHelper.ChangeValuePercent(item.ChangeRate))</td>
-                            <td>@item.Svol</td>
-                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Sopen))</td>
-                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Shigh))</td>
-                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Slow))</td>
-                            @*    <td>..</td>
-                            <td>..</td>
-                            <td></td>
-                            <td></td> *@
-                            <td>@Html.Raw(ConvertHelper.StopLoss(item.Sclose, item.Slow, Model.StopLossValue))</td>
-                            <td>@Html.Raw(ConvertHelper.SecondSupport(item.Sclose, item.Slow, Model.SecondSupportValue))</td>
-                            <td>@Html.Raw(ConvertHelper.FirstSupport(item.Sclose, item.Slow, Model.FirstSupportValue))</td>
-                            <td>@Html.Raw(ConvertHelper.FirstTarget(item.Sclose, item.Slow, Model.FirstTargetValue))</td>
-                            <td>@Html.Raw(ConvertHelper.SecondTarget(item.Sclose, item.Slow, Model.SecondTargetValue))</td>
-                            <td>@Html.Raw(ConvertHelper.ThirdTarget(item.Sclose, item.Slow, Model.ThirdTargetValue))</td>
-                            <td>@Html.Raw(ConvertHelper.CompareValues(item.PrevShigh, item.Sclose))</td>
-                            <td>@(Model.WeeklyValues.ContainsKey(item.Sticker) ? Html.Raw(ConvertHelper.CompareValues(Model.WeeklyValues[item.Sticker].MaxHigh, item.Sclose)) : "0")</td>
-                            <td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.CompareValues(item.Sclose, item.PrevSclose))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.ChangeValue(item.ChangeValue))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.ChangeValuePercent(item.ChangeRate))</td>
+                            <td class="section-divider">@item.Svol</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.FormatDouble(item.Sopen))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.FormatDouble(item.Shigh))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.FormatDouble(item.Slow))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.StopLoss(item.Sclose, item.Slow, Model.StopLossValue))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.SecondSupport(item.Sclose, item.Slow, Model.SecondSupportValue))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.FirstSupport(item.Sclose, item.Slow, Model.FirstSupportValue))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.FirstTarget(item.Sclose, item.Slow, Model.FirstTargetValue))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.SecondTarget(item.Sclose, item.Slow, Model.SecondTargetValue))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.ThirdTarget(item.Sclose, item.Slow, Model.ThirdTargetValue))</td>
+                            <td class="section-divider">@Html.Raw(ConvertHelper.CompareValues(item.PrevShigh, item.Sclose))</td>
+                            <td class="section-divider">
+                                @(Model.WeeklyValues.ContainsKey(item.Sticker) ? Html.Raw(ConvertHelper.CompareValues(Model.WeeklyValues[item.Sticker].MaxHigh, item.Sclose)) : "0")
+                            </td>
+                            <td class="section-divider">
                                 @(item.PrevShigh.HasValue && item.Sclose.HasValue && item.Sclose != 0
                                     ? Html.Raw(ConvertHelper.CompareValuesAndControlValue(
                                     item.PrevShigh,
@@ -295,7 +281,7 @@
                                     true))
                                     : "0.00%")
                             </td>
-                            <td>
+                            <td class="section-divider">
                                 @(Model.WeeklyValues.ContainsKey(item.Sticker) && Model.WeeklyValues[item.Sticker].MaxHigh != 0 && item.Sclose.HasValue && item.Sclose != 0
                                     ? Html.Raw(ConvertHelper.CompareValuesAndControlValue(
                                     Model.WeeklyValues[item.Sticker].MaxHigh,
@@ -315,24 +301,19 @@
 </div>
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            // $('#generalIndicatorGrid').DataTable({
-            //     paging: false,
-            //     searching: false,
-            //     info: false
-            // });
-                const table = $('#stockGrid').DataTable({
-            scrollX: true,
-            scrollY: '700px',
-            scrollCollapse: true,
-            fixedColumns: {
-                leftColumns: 3
-            },
-            paging: false,
-            ordering: true
-        });
 
-        table.columns.adjust().draw(); // إعادة ضبط العرض
+
+        $(document).ready(function () {
+            $('#stockGrid').DataTable({
+                scrollX: true,
+                scrollY: '900px',
+                scrollCollapse: true,
+                fixedColumns: {
+                    leftColumns: 3
+                },
+                paging: false,
+                ordering: true
+            });
 
 
 
@@ -374,6 +355,8 @@
             $('.company-row').contextmenu(function (e) {
                 e.preventDefault();
                 var companyCode = $(this).data('code');
+
+
                 $('#contextMenu').data('companyCode', companyCode).css({
                     top: e.pageY + 'px',
                     left: e.pageX + 'px'
@@ -433,6 +416,8 @@
             function hideLoading() {
                 $('#loadingModal').hide();
             }
+
         });
+
     </script>
 }
