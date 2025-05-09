@@ -57,7 +57,8 @@ builder.Services.AddLogging(logging =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICriteriaService, CriteriaService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<StockService>();
+builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<RecommendationsStockService>();
 
 var app = builder.Build();
 

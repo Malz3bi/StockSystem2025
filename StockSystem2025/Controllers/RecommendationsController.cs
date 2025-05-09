@@ -9,9 +9,9 @@ namespace StockSystem2025.Controllers
 {
     public class RecommendationsController : Controller
     {
-        private readonly StockService _stockService;
+        private readonly RecommendationsStockService _stockService;
         private readonly StockdbContext _context;
-        public RecommendationsController(StockService stockService, StockdbContext context)
+        public RecommendationsController(RecommendationsStockService stockService, StockdbContext context)
         {
             _stockService = stockService;
             _context = context;

@@ -1,0 +1,438 @@
+﻿@model StockSystem2025.ViewModels.MarketFollowListViewModel
+@using StockSystem2025.AppCode
+
+@{
+    ViewData["Title"] = "متابعة السوق";
+    Layout = "~/Views/Shared/_LayoutMarket.cshtml";
+}
+
+@section Styles {
+<style>
+    .loading-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    z-index: 1000;
+    }
+
+    .loading-modal-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    }
+
+    .stats-div {
+    margin: 20px 0;
+    }
+
+    .stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    }
+
+    .up-down-btn {
+    padding: 5px 10px;
+    margin: 2px;
+    }
+
+    .context-menu {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    }
+
+    .context-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+    }
+
+    .context-menu li:hover {
+    background: #f0f0f0;
+    }
+
+    .rd-sub-header {
+    background: #f8f9fa;
+    text-align: center;
+    }
+
+    .left-b-thick {
+    border-left: 2px solid #000;
+    }
+
+    .tooltip:hover::after {
+    content: attr(title);
+    position: absolute;
+    background: #333;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    z-index: 1000;
+    }
+
+        .main-wrapper {
+            padding-right: 0;
+            padding-left: 0 !important;
+            transition: padding-right 0.3s ease;
+        }
+
+        #stockGrid {
+            width: 100% !important;
+        }
+
+            #stockGrid th {
+                white-space: normal !important;
+                word-break: break-word;
+            }
+
+            #stockGrid th, #stockGrid td {
+                white-space: normal !important;
+                word-break: break-word;
+                vertical-align: middle;
+            }
+
+            /* لتغليف النص داخل عناوين الأعمدة والخلايا */
+            #stockGrid th,
+            #stockGrid td,
+            .dataTables_scrollHead th {
+                white-space: normal !important;
+                word-break: break-word;
+                vertical-align: middle;
+            }
+
+        #stockGrid {
+            width: 100% !important;
+            table-layout: auto !important;
+        }
+
+
+</style>
+}
+<div class="page-wrapper">
+
+    <div class="row">
+        <div class="col-lg-12">
+            <table id="generalIndicatorGrid" class="table table-bordered">
+                <thead>
+                    <tr class="rd-sub-header">
+                        <th>رمز</th>
+                        <th>المؤشر</th>
+                        <th>القيمة</th>
+                        <th>قيمة التغيير</th>
+                        <th>نسبة التغيير</th>
+                        <th>كمية التداول</th>
+                        <th>الإفتتاح</th>
+                        <th>الأعلى</th>
+                        <th>الأدنى</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.GeneralIndicators)
+                    {
+                        <tr>
+                            <td><a href="/Company/Details?code=@item.Sticker">@item.Sticker</a></td>
+                            <td><a href="/Company/Details?code=@item.Sticker">@item.Sname</a></td>
+                            <td>@Html.Raw(ConvertHelper.CompareValues(item.Sclose, item.PrevSclose))</td>
+                            <td dir="ltr">@Html.Raw(ConvertHelper.ChangeValue(item.ChangeValue))</td>
+                            <td dir="ltr">@Html.Raw(ConvertHelper.ChangeValuePercent(item.ChangeRate))</td>
+                            <td>@item.Svol</td>
+                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Sopen))</td>
+                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Shigh))</td>
+                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Slow))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @{
+      
+
+    }
+    <form asp-action="ChangeDate" method="post">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+
+            <!-- روابط القائمة كأزرار -->
+            <a class="btn btn-outline-dark btn-sm" asp-action="index" asp-controller="home">
+                <span>الرئيسية</span> <i class="fas fa-house"></i>
+            </a>
+
+            <a class="btn btn-outline-dark btn-sm" asp-action="index" asp-controller="MarketFollowList" asp-route-q="1">
+                جميع الأسهم (بدون قطاعات)
+            </a>
+
+            <a class="btn btn-outline-dark btn-sm" asp-action="index" asp-controller="MarketFollowList" asp-route-q="2">
+                مؤشرات رئيسية (قطاعات وأسهم)
+            </a>
+
+            <a class="btn btn-outline-dark btn-sm" asp-action="index" asp-controller="MarketFollowList" asp-route-q="3">
+                مؤشرات رئيسية
+            </a>
+
+          
+            <!-- عناصر الفورم -->
+            <input type="date" id="criteriaStartDate"
+                   min="@Model.MinDate.ToString("yyyy-MM-dd")"
+                   max="@Model.MaxDate.ToString("yyyy-MM-dd")"
+                   value="@Model.CriteriaStartDate.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm w-auto" />
+
+            <span id="wrongDateLabel" style="color: red; display: none;">يرجى إدخال تاريخ صحيح</span>
+
+            <a id="criteriaNextDate" class="btn btn-secondary btn-sm">▲</a>
+            <a id="criteriaPrevDate" class="btn btn-secondary btn-sm">▼</a>
+
+            <button type="submit" class="btn btn-primary btn-sm">تحديث</button>
+        </div>
+    </form>
+
+
+    <div class="stats">
+      
+
+
+
+
+
+        <ul id="contextMenu" class="context-menu">
+            @foreach (var followList in Model.FollowLists)
+            {
+                var color = !string.IsNullOrEmpty(followList.Color) ? $"#{followList.Color.Substring(3)}75" : "#ffffff75";
+                <li style="background-color: @color;" data-id="@followList.Id"><a href="#" data-action="add;@followList.Id">@followList.Name</a></li>
+            }
+        </ul>
+
+        <div class="col-lg-12">
+            <table id="stockGrid" class="table table-bordered">
+                <thead>
+                    <tr class="rd-sub-header">
+                        <th colspan="10">البيانات الأساسية</th>
+                        @*  <th colspan="2">المستويات السعرية</th>*@   
+                        <th colspan="5">الدعم والمقاومة</th>
+                        <th colspan="2">هدف يومي محقق</th>
+                        <th colspan="2">هدف أسبوعي محقق</th>
+                        <th>عرض السيولة</th>
+                    </tr>
+                    <tr class="rd-sub-header">
+                        <th>م</th>
+                        <th>رمز</th>
+                        <th>اسم الشركة</th>
+                        <th>آخر سعر</th>
+                        <th>قيمة التغيير</th>
+                        <th>نسبة التغيير</th>
+                        <th>كمية التداول</th>
+                        <th>الإفتتاح</th>
+                        <th>الأعلى</th>
+                        <th>الأدنى</th>
+                        @*  <th>التنبيهات الرقمية</th>
+                            <th>Williams %</th>
+                            <th>Prices1</th>
+                            <th>Prices2</th> *@
+                        <th>وقف خسارة</th>
+                        <th>دعم ثاني</th>
+                        <th>دعم أول</th>
+                        <th>هدف أول</th>
+                        <th>هدف ثاني</th>
+                        <th>هدف ثالث</th>
+                        <th>القيمة</th>
+                        <th>النسبة</th>
+                        <th>القيمة</th>
+                        <th>النسبة</th>
+                        <th>عرض السيولة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Stocks)
+                    {
+                        var isIndicator = item.IsIndicator ? "rd-sub-header top-b-thick" : "";
+                        var specialColor = item.IsSpecial ? Model.SpecialCompanyColor : "";
+                        var followListColor = Model.FollowListCompanies.ContainsKey(item.Sticker) ? Model.FollowListCompanies[item.Sticker].Color : "";
+                        var followListTitle = Model.FollowListCompanies.ContainsKey(item.Sticker) ? Model.FollowListCompanies[item.Sticker].Title : "";
+                        <tr class="@isIndicator company-row" data-code="@item.Sticker" style="@(string.IsNullOrEmpty(followListColor) ? "" : $"background-color: {followListColor};")">
+                            <td>@(Model.Stocks.IndexOf(item) + 1)</td>
+                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip")" title="@followListTitle">
+                                <a href="/Company/Details?code=@item.Sticker">@item.Sticker</a>
+                                <span style="display: none;" class="company-code">@item.Sticker</span>
+                            </td>
+                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip")" title="@followListTitle" style="@(string.IsNullOrEmpty(specialColor) ? "" : $"background-color: {specialColor};")">
+                                <a href="/Company/Details?code=@item.Sticker">@item.Sname</a>
+                            </td>
+                            <td>@Html.Raw(ConvertHelper.CompareValues(item.Sclose, item.PrevSclose))</td>
+                            <td>@Html.Raw(ConvertHelper.ChangeValue(item.ChangeValue))</td>
+                            <td>@Html.Raw(ConvertHelper.ChangeValuePercent(item.ChangeRate))</td>
+                            <td>@item.Svol</td>
+                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Sopen))</td>
+                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Shigh))</td>
+                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Slow))</td>
+                            @*    <td>..</td>
+                            <td>..</td>
+                            <td></td>
+                            <td></td> *@
+                            <td>@Html.Raw(ConvertHelper.StopLoss(item.Sclose, item.Slow, Model.StopLossValue))</td>
+                            <td>@Html.Raw(ConvertHelper.SecondSupport(item.Sclose, item.Slow, Model.SecondSupportValue))</td>
+                            <td>@Html.Raw(ConvertHelper.FirstSupport(item.Sclose, item.Slow, Model.FirstSupportValue))</td>
+                            <td>@Html.Raw(ConvertHelper.FirstTarget(item.Sclose, item.Slow, Model.FirstTargetValue))</td>
+                            <td>@Html.Raw(ConvertHelper.SecondTarget(item.Sclose, item.Slow, Model.SecondTargetValue))</td>
+                            <td>@Html.Raw(ConvertHelper.ThirdTarget(item.Sclose, item.Slow, Model.ThirdTargetValue))</td>
+                            <td>@Html.Raw(ConvertHelper.CompareValues(item.PrevShigh, item.Sclose))</td>
+                            <td>@(Model.WeeklyValues.ContainsKey(item.Sticker) ? Html.Raw(ConvertHelper.CompareValues(Model.WeeklyValues[item.Sticker].MaxHigh, item.Sclose)) : "0")</td>
+                            <td>
+                                @(item.PrevShigh.HasValue && item.Sclose.HasValue && item.Sclose != 0
+                                    ? Html.Raw(ConvertHelper.CompareValuesAndControlValue(
+                                    item.PrevShigh,
+                                    item.Sclose,
+                                    Math.Round(((item.PrevShigh.Value - item.Sclose.Value) / item.Sclose.Value) * 100, 2),
+                                    true))
+                                    : "0.00%")
+                            </td>
+                            <td>
+                                @(Model.WeeklyValues.ContainsKey(item.Sticker) && Model.WeeklyValues[item.Sticker].MaxHigh != 0 && item.Sclose.HasValue && item.Sclose != 0
+                                    ? Html.Raw(ConvertHelper.CompareValuesAndControlValue(
+                                    Model.WeeklyValues[item.Sticker].MaxHigh,
+                                    item.Sclose,
+                                    Math.Round(((Model.WeeklyValues[item.Sticker].MaxHigh - item.Sclose.Value) / item.Sclose.Value) * 100, 2),
+                                    true))
+                                    : "0.00%")
+                            </td>
+                            <td>@Html.Raw(ConvertHelper.FormatDouble(item.Svol))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // $('#generalIndicatorGrid').DataTable({
+            //     paging: false,
+            //     searching: false,
+            //     info: false
+            // });
+                const table = $('#stockGrid').DataTable({
+            scrollX: true,
+            scrollY: '700px',
+            scrollCollapse: true,
+            fixedColumns: {
+                leftColumns: 3
+            },
+            paging: false,
+            ordering: true
+        });
+
+        table.columns.adjust().draw(); // إعادة ضبط العرض
+
+
+
+
+            $('#criteriaNextDate').click(function () {
+                $.ajax({
+                    url: '/MarketFollowList/NextDate',
+                    data: { currentDate: $('#criteriaStartDate').val() },
+                    beforeSend: showLoading,
+                    success: function (result) {
+                        if (result.success) {
+                            $('#criteriaStartDate').val(result.newDate);
+                            reloadData();
+                        } else {
+                            $('#wrongDateLabel').show();
+                        }
+                    },
+                    complete: hideLoading
+                });
+            });
+
+            $('#criteriaPrevDate').click(function () {
+                $.ajax({
+                    url: '/MarketFollowList/PreviousDate',
+                    data: { currentDate: $('#criteriaStartDate').val() },
+                    beforeSend: showLoading,
+                    success: function (result) {
+                        if (result.success) {
+                            $('#criteriaStartDate').val(result.newDate);
+                            reloadData();
+                        } else {
+                            $('#wrongDateLabel').show();
+                        }
+                    },
+                    complete: hideLoading
+                });
+            });
+
+            $('.company-row').contextmenu(function (e) {
+                e.preventDefault();
+                var companyCode = $(this).data('code');
+                $('#contextMenu').data('companyCode', companyCode).css({
+                    top: e.pageY + 'px',
+                    left: e.pageX + 'px'
+                }).show();
+            });
+
+            $('#contextMenu li').click(function () {
+                var action = $(this).find('a').data('action');
+                var companyCode = $('#contextMenu').data('companyCode');
+                var params = action.split(';');
+                if (params[0] === 'add') {
+                    $.ajax({
+                        url: '/MarketFollowList/AddToFollowList',
+                        method: 'POST',
+                        data: {
+                            companyCode: companyCode,
+                            followListId: params[1]
+                        },
+                        beforeSend: showLoading,
+                        success: function () {
+                            reloadData();
+                        },
+                        complete: hideLoading
+                    });
+                }
+                $('#contextMenu').hide();
+            });
+
+            $(document).click(function () {
+                $('#contextMenu').hide();
+            });
+
+            function updateDate(date) {
+                $.ajax({
+                    url: '/MarketFollowList/UpdateDate',
+                    data: { date: date },
+                    beforeSend: showLoading,
+                    success: function (result) {
+                        if (result.success) {
+                            reloadData();
+                        } else {
+                            $('#wrongDateLabel').show();
+                        }
+                    },
+                    complete: hideLoading
+                });
+            }
+
+            function reloadData() {
+                window.location.reload();
+            }
+
+            function showLoading() {
+                $('#loadingModal').show();
+            }
+
+            function hideLoading() {
+                $('#loadingModal').hide();
+            }
+        });
+    </script>
+}

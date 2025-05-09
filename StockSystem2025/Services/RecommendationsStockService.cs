@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace StockSystem2025.Services
 {
-    public class StockService
+    public class RecommendationsStockService
     {
         private readonly StockdbContext _db;
         private readonly ICriteriaService _criteriaService;
         private readonly ICurrentUserService _currentUserService;
 
-        public StockService(StockdbContext db, ICriteriaService criteriaService, ICurrentUserService currentUserService)
+        public RecommendationsStockService(StockdbContext db, ICriteriaService criteriaService, ICurrentUserService currentUserService)
         {
             _db = db;
             _criteriaService = criteriaService;
