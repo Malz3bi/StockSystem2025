@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="ar">
+<html lang="ar"ئ>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
@@ -31,23 +31,7 @@
 
     <div class="main-wrapper">
         <div class="header">
-            <div class="header-left active">
-                <a href="~/index.html" class="logo">
-                    <img src="~/assets/img/logo.png" alt="">
-                </a>
-                <a href="~/index.html" class="logo-small">
-                    <img src="~/assets/img/logo-small.png" alt="">
-                </a>
-                <a id="toggle_btn" href="javascript:void(0);"></a>
-            </div>
-
-            <a id="mobile_btn" class="mobile_btn" href="#sidebar">
-                <span class="bar-icon">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </span>
-            </a>
+           
 
             <ul class="nav user-menu">
                 <li class="nav-item">
@@ -210,21 +194,21 @@
             </div>
         </div>
 
-        <div class="sidebar" id="sidebar">
+        <div class="sidebar" id="sidebar" dir="ltr" style="background-color:antiquewhite">
             <div class="sidebar-inner slimscroll">
-                <div id="sidebar-menu" class="sidebar-menu">
+                <div id="sidebar-menu" class="sidebar-menu" >
                     <ul>
-                        <li class="active">
-                            <a href="Default.aspx"><i class="fas fa-house"></i><span> الرئيسية</span></a>
+                        <li >
+                            <a class="btn btn-outline-dark" asp-action="index" asp-controller="home"><span> الرئيسية</span><i class="fas fa-house "></i></a>
                         </li>
                         <li>
-                            <a asp-action="Manage" asp-controller="Criteria"> <i class="fas fa-cogs"></i><span> إنشاء استراتيجية</span></a>
+                            <a class="btn btn-outline-dark" asp-action="Manage" asp-controller="Criteria"> <span> إنشاء استراتيجية</span><i class="fas fa-cogs"></i></a>
                         </li>
                         <li>
-                            <a asp-action="FormulasSettingIndex" asp-controller="FormulasSetting"><i class="fas fa-chess"></i><span> الاستراتيجيات</span></a>
+                            <a class="btn btn-outline-dark" asp-action="FormulasSettingIndex" asp-controller="FormulasSetting"><span> الاستراتيجيات</span><i class="fas fa-chess"></i></a>
                         </li>
                         <li class="submenu">
-                            <a href="javascript:void(0);"><i class="fas fa-chart-line"></i><span> متابعة السوق</span><span class="menu-arrow"></span></a>
+                            <a class="btn btn-outline-dark" href="javascript:void(0);"><span> متابعة السوق</span><i class="fas fa-chart-line"></i></a>
                             <ul>
                                 <li><a href="MarketFollowList.aspx?q=1">جميع الأسهم (بدون قطاعات)</a></li>
                                 <li><a href="MarketFollowList.aspx?q=2">مؤشرات رئيسية (قطاعات وأسهم)</a></li>
@@ -238,28 +222,28 @@
                             </ul>
                         </li>
                         <li>
-                            <a href="SpecialFollowList.aspx"><i class="fas fa-bookmark"></i><span> قوائم المتابعة</span></a>
+                            <a class="btn btn-outline-dark" href="SpecialFollowList.aspx"><span> قوائم المتابعة</span><i class="fas fa-bookmark"></i></a>
                         </li>
                         <li id="menuUploadFile">
-                            <a asp-action="UploadFileIndex" asp-controller="UploadFile"><i class="fas fa-upload"></i><span> تحميل البيانات</span></a>
+                            <a class="btn btn-outline-dark" asp-action="UploadFileIndex" asp-controller="UploadFile"><span> تحميل البيانات</span><i class="fas fa-upload"></i></a>
                         </li>
                         <li id="menuStrategicAnalysis">
-                            <a href="StrategicAnalysis.aspx"><i class="fas fa-chart-pie"></i><span> التحليل الاستراتيجي</span></a>
+                            <a class="btn btn-outline-dark" href="StrategicAnalysis.aspx"><span> التحليل الاستراتيجي</span><i class="fas fa-chart-pie"></i></a>
                         </li>
                         <li>
-                            <a asp-action="index" asp-controller="Settings"><i class="fas fa-tools"></i><span> إعدادات البرنامج</span></a>
+                            <a class="btn btn-outline-dark" asp-action="index" asp-controller="Settings"><span> إعدادات البرنامج</span><i class="fas fa-tools"></i></a>
                         </li>
                         <li>
-                            <a href="Instructions.aspx"><i class="fas fa-info-circle"></i><span> تعليمات البرنامج</span></a>
+                            <a class="btn btn-outline-dark" href="Instructions.aspx"><span> تعليمات البرنامج</span><i class="fas fa-info-circle"></i></a>
                         </li>
                         <li>
-                            <a href="About.aspx"><i class="fas fa-info"></i><span> عن البرنامج</span></a>
+                            <a class="btn btn-outline-dark" href="About.aspx"><span> عن البرنامج</span><i class="fas fa-info"></i></a>
                         </li>
                         <li>
-                            <a href="EconomicLinks.aspx"><i class="fas fa-link"></i><span> روابط اقتصادية</span></a>
+                            <a class="btn btn-outline-dark" href="EconomicLinks.aspx"><span> روابط اقتصادية</span><i class="fas fa-link"></i></a>
                         </li>
                         <li>
-                            <a href="Loginpage.aspx"><i class="fas fa-sign-out-alt"></i><span> خروج</span></a>
+                            <a class="btn btn-outline-dark" href="Loginpage.aspx"><span> خروج</span><i class="fas fa-sign-out-alt"></i></a>
                         </li>
                     </ul>
                 </div>

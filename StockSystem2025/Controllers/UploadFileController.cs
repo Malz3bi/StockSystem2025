@@ -102,174 +102,153 @@ namespace StockSystem2025.Controllers
             var existingCompanies = await _context.CompanyTables
                 .ToDictionaryAsync(x => x.CompanyCode, x => x);
 
-            var stockRecordsToAdd = new List<StockTable>();
-            var companyRecordsToAdd = new List<CompanyTable>();
-            var companiesToUpdate = new List<CompanyTable>();
-            var processedCompanyCodes = new HashSet<string>(); // Track processed CompanyCodes
             int counter = 0;
             int totalLines = lines.Length;
-
-            // Phase 1: Processing lines (20% of progress)
+            const int chunkSize = 5000; // Process 200 lines per chunk
             const double processingPhasePercentage = 20.0;
-            for (int i = 0; i < totalLines; i++)
+
+            // Process lines in chunks
+            for (int chunkStart = 0; chunkStart < totalLines; chunkStart += chunkSize)
             {
+                var chunkLines = lines.Skip(chunkStart).Take(chunkSize).ToArray();
+                var stockRecordsToAdd = new List<StockTable>();
+                var companyRecordsToAdd = new List<CompanyTable>();
+                var companiesToUpdate = new List<CompanyTable>();
+                var processedCompanyCodes = new HashSet<string>();
+
+                // Phase 1: Processing lines in chunk
+                for (int i = 0; i < chunkLines.Length; i++)
+                {
+                    try
+                    {
+                        var line = chunkLines[i];
+                        var words = line.Split(',');
+
+                        // Parse date (words[3] = yyyymmdd)
+                        string sdate = words[3];
+                        if (!int.TryParse(sdate.Substring(0, 4), out int year) ||
+                            !int.TryParse(sdate.Substring(4, 2), out int month) ||
+                            !int.TryParse(sdate.Substring(6, 2), out int day))
+                        {
+                            _logger.LogWarning($"تنسيق تاريخ غير صالح في السطر {chunkStart + i + 1}: {line}");
+                            continue;
+                        }
+                        var createdDate = new DateTime(year, month, day);
+
+                        string sticker = words[0];
+                        sdate = $"{year}/{month:D2}/{day:D2}";
+
+                        // Check if stock exists; skip if it does
+                        if (stockLookup.Contains($"{sticker}|{sdate}"))
+                        {
+                            continue;
+                        }
+
+                        // Create new StockTable record for non-existing stock
+                        string companyName = words[1];
+                        if (existingCompanies.TryGetValue(sticker, out var company))
+                        {
+                            companyName = string.IsNullOrEmpty(words[1]) ? company.CompanyName ?? string.Empty : words[1];
+                        }
+
+                        stockRecordsToAdd.Add(new StockTable
+                        {
+                            DayNo = 0, // Will be updated in SortStockTables
+                            Sticker = sticker,
+                            Sname = companyName,
+                            Sdate = sdate,
+                            Sopen = Convert.ToDouble(words[4]),
+                            Shigh = Convert.ToDouble(words[5]),
+                            Slow = Convert.ToDouble(words[6]),
+                            Sclose = Convert.ToDouble(words[7]),
+                            Svol = Convert.ToDouble(words[8]),
+                            Createddate = createdDate
+                        });
+
+                        // Handle CompanyTables (only if necessary)
+                        if (!existingCompanies.ContainsKey(sticker) && !string.IsNullOrEmpty(words[1]) && processedCompanyCodes.Add(sticker))
+                        {
+                            bool isNumeric = int.TryParse(sticker, out _);
+                            companyRecordsToAdd.Add(new CompanyTable
+                            {
+                                CompanyCode = sticker,
+                                CompanyName = words[1],
+                                Follow = true,
+                                IsIndicator = !isNumeric
+                            });
+                        }
+                        else if (existingCompanies.TryGetValue(sticker, out var existingCompany) && string.IsNullOrEmpty(existingCompany.CompanyName))
+                        {
+                            existingCompany.CompanyName = words[1];
+                            if (!companiesToUpdate.Any(c => c.CompanyCode == sticker))
+                            {
+                                companiesToUpdate.Add(existingCompany);
+                            }
+                        }
+
+                        counter++;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, $"خطأ في معالجة السطر {chunkStart + i + 1}: {chunkLines[i]}");
+                    }
+                }
+
+                // Phase 2: Saving to database for this chunk
+                const double savingPhasePercentage = 40.0;
                 try
                 {
-                    var line = lines[i];
-                    var words = line.Split(',');
+                    // Send initial saving progress for chunk
+                    double chunkProgress = (double)(chunkStart + chunkLines.Length) / totalLines * processingPhasePercentage;
+                    await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, chunkProgress, $"جاري معالجة الجزء {chunkStart / chunkSize + 1} من الملف {fileName}: {chunkStart + chunkLines.Length} من {totalLines} سطر");
 
-                    // Parse date (words[3] = yyyymmdd)
-                    string sdate = words[3];
-                    if (!int.TryParse(sdate.Substring(0, 4), out int year) ||
-                        !int.TryParse(sdate.Substring(4, 2), out int month) ||
-                        !int.TryParse(sdate.Substring(6, 2), out int day))
+                    // Increase command timeout to 120 seconds
+                    _context.Database.SetCommandTimeout(120);
+
+                    // Save stockRecordsToAdd
+                    if (stockRecordsToAdd.Any())
                     {
-                        _logger.LogWarning($"تنسيق تاريخ غير صالح في السطر {i + 1}: {line}");
-                        continue;
-                    }
-                    var createdDate = new DateTime(year, month, day);
-
-                    string sticker = words[0];
-                    sdate = $"{year}/{month:D2}/{day:D2}";
-
-                    // Check if stock exists; skip if it does
-                    if (stockLookup.Contains($"{sticker}|{sdate}"))
-                    {
-                        continue;
+                        _logger.LogInformation($"Saving {stockRecordsToAdd.Count} stock records for chunk {chunkStart / chunkSize + 1}...");
+                        await _context.BulkInsertAsync(stockRecordsToAdd);
                     }
 
-                    // Create new StockTable record for non-existing stock
-                    string companyName = words[1];
-                    if (existingCompanies.TryGetValue(sticker, out var company))
+                    // Save companyRecordsToAdd
+                    if (companyRecordsToAdd.Any())
                     {
-                        companyName = string.IsNullOrEmpty(words[1]) ? company.CompanyName ?? string.Empty : words[1];
+                        _logger.LogInformation($"Saving {companyRecordsToAdd.Count} company records for chunk {chunkStart / chunkSize + 1}...");
+                        await _context.BulkInsertAsync(companyRecordsToAdd);
                     }
 
-                    stockRecordsToAdd.Add(new StockTable
+                    // Save companiesToUpdate
+                    if (companiesToUpdate.Any())
                     {
-                        DayNo = 0, // سيتم تحديثه في SortStockTables
-                        Sticker = sticker,
-                        Sname = companyName,
-                        Sdate = sdate,
-                        Sopen = Convert.ToDouble(words[4]),
-                        Shigh = Convert.ToDouble(words[5]),
-                        Slow = Convert.ToDouble(words[6]),
-                        Sclose = Convert.ToDouble(words[7]),
-                        Svol = Convert.ToDouble(words[8]),
-                        Createddate = createdDate
-                    });
-
-                    // Handle CompanyTables (only if necessary)
-                    if (!existingCompanies.ContainsKey(sticker) && !string.IsNullOrEmpty(words[1]) && processedCompanyCodes.Add(sticker))
-                    {
-                        bool isNumeric = int.TryParse(sticker, out _);
-                        companyRecordsToAdd.Add(new CompanyTable
-                        {
-                            CompanyCode = sticker,
-                            CompanyName = words[1],
-                            Follow = true,
-                            IsIndicator = !isNumeric
-                        });
-                    }
-                    else if (existingCompanies.TryGetValue(sticker, out var existingCompany) && string.IsNullOrEmpty(existingCompany.CompanyName))
-                    {
-                        existingCompany.CompanyName = words[1];
-                        if (!companiesToUpdate.Any(c => c.CompanyCode == sticker))
-                        {
-                            companiesToUpdate.Add(existingCompany);
-                        }
+                        _logger.LogInformation($"Updating {companiesToUpdate.Count} company records for chunk {chunkStart / chunkSize + 1}...");
+                        await _context.BulkUpdateAsync(companiesToUpdate);
                     }
 
-                    counter++;
+                    // Update progress after saving
+                    double saveProgress = processingPhasePercentage + ((double)(chunkStart + chunkLines.Length) / totalLines) * (savingPhasePercentage / 2);
+                    await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, saveProgress, $"تم حفظ الجزء {chunkStart / chunkSize + 1} من الملف {fileName}");
 
-                    // Send progress update for processing phase (up to 20%)
-                    if ((i + 1) % Math.Max(totalLines / 100, 10000) == 0 || i + 1 == totalLines)
-                    {
-                        double processingProgress = (double)(i + 1) / totalLines * processingPhasePercentage;
-                        await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingProgress, $"جاري معالجة الملف {fileName}: {i + 1} من {totalLines} سطر");
-                    }
+                    // Clear memory
+                    stockRecordsToAdd.Clear();
+                    companyRecordsToAdd.Clear();
+                    companiesToUpdate.Clear();
+                    processedCompanyCodes.Clear();
+                    GC.Collect(); // Force garbage collection to free memory
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, $"خطأ في معالجة السطر {i + 1}: {lines[i]}");
+                    _logger.LogError(ex, $"خطأ أثناء حفظ الجزء {chunkStart / chunkSize + 1} من الملف {fileName}");
+                    await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingPhasePercentage, $"حدث خطأ أثناء حفظ الجزء {chunkStart / chunkSize + 1}: {ex.Message}");
+                    throw;
                 }
             }
 
-            // Phase 2: Saving to database (40% of progress, from 20% to 60%)
-            const double savingPhasePercentage = 40.0;
-            try
-            {
-                // Send initial saving progress (20%)
-                await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingPhasePercentage, $"جاري حفظ البيانات في قاعدة البيانات...");
-
-                // Increase command timeout to 120 seconds
-                _context.Database.SetCommandTimeout(120);
-
-                // Batch processing for BulkInsert
-                const int batchSize = 5000; // Adjust based on testing
-                int totalSaveOperations = 0;
-                int completedOperations = 0;
-
-                // Calculate total operations
-                totalSaveOperations += (stockRecordsToAdd.Any() ? (stockRecordsToAdd.Count + batchSize - 1) / batchSize : 0);
-                totalSaveOperations += (companyRecordsToAdd.Any() ? (companyRecordsToAdd.Count + batchSize - 1) / batchSize : 0);
-                totalSaveOperations += (companiesToUpdate.Any() ? (companiesToUpdate.Count + batchSize - 1) / batchSize : 0);
-
-                // Save stockRecordsToAdd in batches
-                if (stockRecordsToAdd.Any())
-                {
-                    _logger.LogInformation($"Saving {stockRecordsToAdd.Count} stock records in batches...");
-                    for (int i = 0; i < stockRecordsToAdd.Count; i += batchSize)
-                    {
-                        var batch = stockRecordsToAdd.Skip(i).Take(batchSize).ToList();
-                        await _context.BulkInsertAsync(batch);
-                        completedOperations++;
-                        double saveProgress = processingPhasePercentage + (double)completedOperations / totalSaveOperations * savingPhasePercentage;
-                        await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, saveProgress, $"تم حفظ دفعة من الأسهم ({completedOperations}/{totalSaveOperations})...");
-                    }
-                }
-
-                // Save companyRecordsToAdd in batches
-                if (companyRecordsToAdd.Any())
-                {
-                    _logger.LogInformation($"Saving {companyRecordsToAdd.Count} company records in batches...");
-                    for (int i = 0; i < companyRecordsToAdd.Count; i += batchSize)
-                    {
-                        var batch = companyRecordsToAdd.Skip(i).Take(batchSize).ToList();
-                        await _context.BulkInsertAsync(batch);
-                        completedOperations++;
-                        double saveProgress = processingPhasePercentage + (double)completedOperations / totalSaveOperations * savingPhasePercentage;
-                        await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, saveProgress, $"تم حفظ دفعة من الشركات الجديدة ({completedOperations}/{totalSaveOperations})...");
-                    }
-                }
-
-                // Save companiesToUpdate in batches
-                if (companiesToUpdate.Any())
-                {
-                    _logger.LogInformation($"Updating {companiesToUpdate.Count} company records in batches...");
-                    for (int i = 0; i < companiesToUpdate.Count; i += batchSize)
-                    {
-                        var batch = companiesToUpdate.Skip(i).Take(batchSize).ToList();
-                        await _context.BulkUpdateAsync(batch);
-                        completedOperations++;
-                        double saveProgress = processingPhasePercentage + (double)completedOperations / totalSaveOperations * savingPhasePercentage;
-                        await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, saveProgress, $"تم تحديث دفعة من الشركات ({completedOperations}/{totalSaveOperations})...");
-                    }
-                }
-
-                // Ensure saving phase ends at 60%
-                await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingPhasePercentage + savingPhasePercentage, $"اكتمل حفظ البيانات للملف {fileName}!");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ أثناء الحفظ الجماعي");
-                await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingPhasePercentage, $"حدث خطأ أثناء حفظ البيانات: {ex.Message}");
-                throw;
-            }
-
+            // Final progress update for processing and saving
+            await _progressHub.Clients.All.SendAsync("ReceiveProgress", processId, processingPhasePercentage + 40.0, $"اكتمل حفظ البيانات للملف {fileName}!");
             return counter;
         }
-
         private async Task SortStockTables(string processId, string fileName)
         {
             const double sortingPhasePercentage = 40.0;

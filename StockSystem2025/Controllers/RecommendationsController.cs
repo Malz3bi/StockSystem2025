@@ -17,10 +17,22 @@ namespace StockSystem2025.Controllers
             _context = context;
         }
 
-       
+        [HttpPost]
         public async Task<IActionResult> Result(List<string>?    CompaniesSticer, int? id, DateTime? date, int viewIndex = 1, string sortColumn = "Sticker", string sortOrder = "ASC")
         {
             var model = await _stockService.GetRecommendationResultAsync(id, date, viewIndex, sortColumn, sortOrder, CompaniesSticer);
+            return View(model);
+        }
+
+        public async Task<IActionResult> Result(string? CompaniesSticer, int? id, DateTime? date, int viewIndex = 1, string sortColumn = "Sticker", string sortOrder = "ASC")
+        {
+            List<string>? Companiesplited = null;
+            if (CompaniesSticer != null)
+                Companiesplited= CompaniesSticer.Split(",").ToList();
+
+            
+
+                var model = await _stockService.GetRecommendationResultAsync(id, date, viewIndex, sortColumn, sortOrder, Companiesplited);
             return View(model);
         }
 

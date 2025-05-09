@@ -68,12 +68,21 @@
                                             <a class="me-3 confirm-text" href="javascript:void(0);" onclick="confirmDelete(@item.Criteria.Id, this)">
                                                 <i class="fas fa-trash-alt icon-size icon-delete"></i>
                                             </a>
-                                            @{
-                                                var query = string.Join("&", item.CompaniesSticer.Select(c => $"CompaniesSticer={c}"));
-                                                var url = Url.Action("Result", "Recommendations", new { id = item.Criteria.Id, viewIndex = 1 });
-                                                url = $"{url}&{query}";
-                                            }
-                                            <a href="@url" class="btn btn-sm btn-primary">عرض</a>
+
+                                            <form asp-controller="Recommendations" asp-action="Result" method="post">
+                                                <input type="hidden" value="@item.Criteria.Id" name="id" />
+                                                <input type="hidden" value="1" name="viewIndex" />
+                                                @if (item.CompaniesSticer != null)
+                                                {
+                                                    @foreach (var item in item.CompaniesSticer)
+                                                    {
+                                                        <input type="hidden" value="@item" name="CompaniesSticer" />
+                                                      
+                                                    }
+                                                }
+                                                <button type="submit"  class="btn btn-primary btn-sm">عرض</button>
+                                            </form>
+
                                         </td>
                                         <td>@item.CompaniesCount</td>
                                        

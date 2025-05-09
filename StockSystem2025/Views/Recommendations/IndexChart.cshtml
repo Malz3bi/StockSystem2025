@@ -214,7 +214,7 @@
                     const maxVisibleValue = visibleLiquidityData.length > 0 ? Math.max(...visibleLiquidityData.map(d => d.value)) : 1;
                     const minVisibleValue = visibleLiquidityData.length > 0 ? Math.min(...visibleLiquidityData.filter(d => d.value > 0).map(d => d.value)) : 1;
 
-                    const scaleFactor = maxVisibleValue > 0 ? 5000 / maxVisibleValue : 1;
+                    const scaleFactor = maxVisibleValue > 0 ? 20000 / maxVisibleValue : 1;
                     const minHeightFactor = 100;
                     const scaledLiquidityData = rawLiquidityData.map(d => ({
                         time: d.time,

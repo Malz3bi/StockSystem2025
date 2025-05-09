@@ -5,93 +5,93 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css" />
-    <style>
-        .grid {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css" />
+<style>
+    .grid {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+    }
 
-        .rdHeader {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            text-align: center;
-            border: 2px solid #dee2e6;
-        }
+    .rdHeader {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid #dee2e6;
+    }
 
-        .rdSubHeader {
-            background-color: #e9ecef;
-            font-weight: bold;
-        }
+    .rdSubHeader {
+    background-color: #e9ecef;
+    font-weight: bold;
+    }
 
-        .left-b-thick {
-            border-left: 2px solid #dee2e6;
-        }
+    .left-b-thick {
+    border-left: 2px solid #dee2e6;
+    }
 
-        .f-17 {
-            font-size: 17px;
-        }
+    .f-17 {
+    font-size: 17px;
+    }
 
-        .tooltip {
-            position: relative;
-        }
+    .tooltip {
+    position: relative;
+    }
 
-            .tooltip::after {
-                content: attr(title);
-                visibility: hidden;
-                position: absolute;
-                background-color: #333;
-                color: #fff;
-                padding: 5px;
-                border-radius: 4px;
-                bottom: 100%;
-                left: 50%;
-                transform: translateX(-50%);
-                white-space: nowrap;
-            }
+    .tooltip::after {
+    content: attr(title);
+    visibility: hidden;
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    }
 
-            .tooltip:hover::after {
-                visibility: visible;
-            }
+    .tooltip:hover::after {
+    visibility: visible;
+    }
 
-        .stats-div {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
+    .stats-div {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    }
 
-        .stats {
-            border: 1px solid #dee2e6;
-            padding: 10px;
-        }
+    .stats {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    }
 
-        .up {
-            color: green;
-        }
+    .up {
+    color: green;
+    }
 
-        .down {
-            color: red;
-        }
+    .down {
+    color: red;
+    }
 
-        .loading-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+    .loading-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    }
 
-        .loading-modal-center {
-            text-align: center;
-            color: white;
-        }
-    </style>
+    .loading-modal-center {
+    text-align: center;
+    color: white;
+    }
+</style>
 }
 
 
@@ -99,37 +99,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
     <script>
         $(document).ready(function () {
-            let companyCode = null;
+        let companyCode = null;
 
-            $.contextMenu({
-                selector: '.company-row, .openmenu',
-                trigger: $('.openmenu').length ? 'left' : 'right',
-                callback: function (key, options) {
-                    const $row = options.$trigger.closest('tr');
-                    const rowIndex = $row.index() - 2; // Adjust for header rows
-                    companyCode = $(`#company-code-${rowIndex}`).text();
-                    const [action, followListId] = key.split(';');
-                    if (action === 'add') {
-                        $.post({
-                            url: '@Url.Action("AddToFollowList")',
-                            data: { followListId, companyCode, criteriaId: '@Model.Criteria?.Index', date: '@Model.SelectedDate?.ToString("yyyy-MM-dd")', viewIndex: '@Model.ViewIndex', sortColumn: '@Model.SortColumn', sortOrder: '@Model.SortOrder' },
-                            success: function () { location.reload(); },
-                            beforeSend: function () { $('#loadingModal').show(); },
-                            complete: function () { $('#loadingModal').hide(); }
-                        });
-                    }
-                },
-                items: {
+        $.contextMenu({
+        selector: '.company-row, .openmenu',
+        trigger: $('.openmenu').length ? 'left' : 'right',
+        callback: function (key, options) {
+        const $row = options.$trigger.closest('tr');
+        const rowIndex = $row.index() - 2; // Adjust for header rows
+        companyCode = $(`#company-code-${rowIndex}`).text();
+        const [action, followListId] = key.split(';');
+        if (action === 'add') {
+        $.post({
+        url: '@Url.Action("AddToFollowList")',
+        data: { followListId, companyCode, criteriaId: '@Model.Criteria?.Index', date: '@Model.SelectedDate?.ToString("yyyy-MM-dd")', viewIndex: '@Model.ViewIndex', sortColumn: '@Model.SortColumn', sortOrder: '@Model.SortOrder' },
+        success: function () { location.reload(); },
+        beforeSend: function () { $('#loadingModal').show(); },
+        complete: function () { $('#loadingModal').hide(); }
+        });
+        }
+        },
+        items: {
         @foreach (var followList in Model.FollowLists)
         {
             var color = string.IsNullOrEmpty(followList.Color) ? "ffffff00" : followList.Color.Substring(3) + "75";
             @($"\"add;{followList.Id}\": {{ name: \"{followList.Name}\", icon: \"add\", style: \"background-color: #{color}\" }},")
         }
-                }
-            });
+        }
+        });
         });
     </script>
 }
+
+
 <div class="page-wrapper">
     <div class="content">
         <h2>@ViewData["Title"]</h2>
@@ -201,10 +203,7 @@
                     <input type="hidden" asp-for="SortOrder" />
                     @if (Model.CompaniesSticer != null)
                     {
-                        @foreach (var item in Model.CompaniesSticer)
-                        {
-                            <input type="hidden" value="@item" name="CompaniesSticer" />
-                        }
+                        <input type="hidden" name="CompaniesSticer" value="@string.Join(",",Model.CompaniesSticer)" />
                     }
                     <button type="submit" class="btn btn-primary btn-sm">تحديث</button>
                 </form>
@@ -270,15 +269,12 @@
                 <input type="hidden" asp-for="SortOrder" />
                 @if (Model.CompaniesSticer != null)
                 {
-                    @foreach (var item in Model.CompaniesSticer)
-                    {
-                        <input type="hidden" value="@item" name="CompaniesSticer" />
-                    }
+                    <input type="hidden" name="CompaniesSticer" value="@string.Join(",", Model.CompaniesSticer)" />
                 }
 
                 <button type="submit" class="btn btn-info mb-3">عرض الدعوم والمقاومات</button>
             </form>
-            <table class="table table-bordered grid">
+            <table class="table table-bordered grid" id="datanew">
                 <thead class="rdHeader">
                     <tr>
                         <th colspan="4" class="left-b-thick">بيان المؤشرات والشركات</th>
@@ -288,75 +284,72 @@
                         <th colspan="3" class="left-b-thick">الحد الأدنى</th>
                         <th colspan="3" class="left-b-thick">الإغلاق</th>
                     </tr>
-                    @{
-                        var companiesParams = string.Join("&", Model.CompaniesSticer?.Select(s => $"CompaniesSticer={s}") ?? new List<string>());
-                    }
 
                     <tr>
                         <th>م</th>
                         <th>
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sticker", sortOrder = (Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sticker", sortOrder = (Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th>
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sname", sortOrder = (Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sname", sortOrder = (Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="left-b-thick">سعر التوصية</th>
                         <th class="f-17">المتوقع</th>
                         <th class="f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ExpectedOpenValue", sortOrder = (Model.SortColumn == "ExpectedOpenValue" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ExpectedOpenValue", sortOrder = (Model.SortColumn == "ExpectedOpenValue" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 القيمة @(Model.SortColumn == "ExpectedOpenValue" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="left-b-thick f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ExpectedOpenPercent", sortOrder = (Model.SortColumn == "ExpectedOpenPercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ExpectedOpenPercent", sortOrder = (Model.SortColumn == "ExpectedOpenPercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC"),         CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 النسبة @(Model.SortColumn == "ExpectedOpenPercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="f-17">الإفتتاح</th>
                         <th class="f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "SOpen", sortOrder = (Model.SortColumn == "SOpen" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "SOpen", sortOrder = (Model.SortColumn == "SOpen" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 القيمة @(Model.SortColumn == "SOpen" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="left-b-thick f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "OpeningGapRate", sortOrder = (Model.SortColumn == "OpeningGapRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "OpeningGapRate", sortOrder = (Model.SortColumn == "OpeningGapRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 النسبة @(Model.SortColumn == "OpeningGapRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="f-17">الأعلى</th>
                         <th class="f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Shigh", sortOrder = (Model.SortColumn == "Shigh" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Shigh", sortOrder = (Model.SortColumn == "Shigh" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 القيمة @(Model.SortColumn == "Shigh" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="left-b-thick f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "UpperLimitRate", sortOrder = (Model.SortColumn == "UpperLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "UpperLimitRate", sortOrder = (Model.SortColumn == "UpperLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 النسبة @(Model.SortColumn == "UpperLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="f-17">الأدنى</th>
                         <th class="f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Slow", sortOrder = (Model.SortColumn == "Slow" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Slow", sortOrder = (Model.SortColumn == "Slow" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 القيمة @(Model.SortColumn == "Slow" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="left-b-thick f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "LowerLimitRate", sortOrder = (Model.SortColumn == "LowerLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "LowerLimitRate", sortOrder = (Model.SortColumn == "LowerLimitRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 النسبة @(Model.SortColumn == "LowerLimitRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="f-17">الإغلاق</th>
                         <th class="f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sclose", sortOrder = (Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sclose", sortOrder = (Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="left-b-thick f-17">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ChangeRate", sortOrder = (Model.SortColumn == "ChangeRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "ChangeRate", sortOrder = (Model.SortColumn == "ChangeRate" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 النسبة @(Model.SortColumn == "ChangeRate" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
@@ -402,12 +395,14 @@
                 <button type="submit" class="btn btn-info mb-3">عرض نسبة الأرباح والخسائر</button>
                 @if (Model.CompaniesSticer != null)
                 {
-                    @foreach (var item in Model.CompaniesSticer)
-                    {
-                        <input type="hidden" value="@item" name="CompaniesSticer" />
-                    }
+                   
+                   
+                        <input type="hidden" name="CompaniesSticer" value="@string.Join(",", @Model.CompaniesSticer)" />
+                    
                 }
             </form>
+
+            
             <table class="table table-bordered grid">
                 <thead class="rdHeader">
                     <tr>
@@ -422,19 +417,16 @@
                         <th colspan="2" class="left-b-thick">هدف يومي محقق</th>
                         <th colspan="2" class="left-b-thick">هدف أسبوعي محقق</th>
                     </tr>
-                    @{
-                        var companiesParams = string.Join("&", Model.CompaniesSticer?.Select(s => $"CompaniesSticer={s}") ?? new List<string>());
-                    }
-
+                  
                     <tr>
                         <th>م</th>
                         <th>
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sticker", sortOrder = (Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sticker", sortOrder = (Model.SortColumn == "Sticker" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 رمز @(Model.SortColumn == "Sticker" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th>
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sname", sortOrder = (Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sname", sortOrder = (Model.SortColumn == "Sname" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 اسم الشركة @(Model.SortColumn == "Sname" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
@@ -447,12 +439,12 @@
                         <th class="left-b-thick" style="background-color: @Model.SupportTargetSettings.ThirdTargetColor">@Model.SupportTargetSettings.ThirdTargetValue%</th>
                         <th class="left-b-thick">السعر الحالي</th>
                         <th>
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sclose", sortOrder = (Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "Sclose", sortOrder = (Model.SortColumn == "Sclose" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 القيمة @(Model.SortColumn == "Sclose" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>
                         <th class="left-b-thick">
-                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "SclosePercent", sortOrder = (Model.SortColumn == "SclosePercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC") })&@companiesParams">
+                            <a href="@Url.Action("Result", "Recommendations", new { id = Model.Criteria?.Index, date = Model.SelectedDate?.ToString("yyyy-MM-dd"), viewIndex = Model.ViewIndex, sortColumn = "SclosePercent", sortOrder = (Model.SortColumn == "SclosePercent" && Model.SortOrder == "ASC" ? "DESC" : "ASC"), CompaniesSticer = string.Join(",", Model.CompaniesSticer ?? new List<string>()) })">
                                 النسبة @(Model.SortColumn == "SclosePercent" ? (Model.SortOrder == "ASC" ? "▲" : "▼") : "")
                             </a>
                         </th>

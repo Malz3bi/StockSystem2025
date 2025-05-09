@@ -72,7 +72,7 @@ namespace StockSystem2025.Controllers
             }
 
             await _criteriaService.SaveCriteriaAsync(criteria);
-            return RedirectToAction("Index", "FormulasSetting");
+            return RedirectToAction("FormulasSettingIndex", "FormulasSetting");
         }
 
         [HttpPost]
