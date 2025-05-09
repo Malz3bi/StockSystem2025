@@ -1,0 +1,289 @@
+﻿@model StockSystem2025.SFLModels.SFLSpecialFollowListViewModel
+@{
+    ViewData["Title"] = "قائمة المتابعة";
+}
+
+<style>
+    .rdBorder-w {
+        border: 4px solid #455f77;
+    }
+
+    .left-b-thick {
+        border-left: 4px solid #455f77;
+    }
+
+    .grid th, .grid td {
+        border-right: 1px solid #6e889f;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .rdHeader {
+        border: 4px solid #455f77;
+        background: linear-gradient(#fcfcfd, #95b6e2);
+    }
+
+    .rdSubHeader {
+        border: 2px solid #5f7c95;
+        font-weight: bold;
+    }
+
+    .up {
+        color: green;
+    }
+
+    .down {
+        color: red;
+    }
+
+    .stats-div {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .imagbtn {
+        background-color: #ffffff;
+        border: 1px solid #6b6b6b;
+        width: 40px;
+        height: 40px;
+        box-shadow: 0 0 5px 0px #69859b;
+        font-size: 20px;
+        line-height: 38px;
+    }
+
+        .imagbtn:hover {
+            cursor: pointer;
+            background-color: #e9eff8;
+        }
+
+    .sort-link:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="content">
+        <h2>@ViewData["Title"]</h2>
+
+        <!-- General Indicator Grid -->
+        <table class="table table-bordered rdBorder-w grid">
+            <thead class="rdHeader">
+                <tr>
+                    <th>رمز الشركة</th>
+                    <th>اسم الشركة</th>
+                    <th>الإفتتاح</th>
+                    <th>الأعلى</th>
+                    <th>الأدنى</th>
+                    <th>الإغلاق</th>
+                    <th>قيمة التغيير</th>
+                    <th>نسبة التغيير</th>
+                    <th>كمية التداول</th>
+                    <th>إيجابي</th>
+                    <th>سلبي</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><a href="/CompanyDetails?code=@Model.SFLGeneralIndicator.Sticker">@Model.SFLGeneralIndicator.Sticker</a></td>
+                    <td><a href="/CompanyDetails?code=@Model.SFLGeneralIndicator.Sticker">@Model.SFLGeneralIndicator.Sname</a></td>
+                    <td>@Model.SFLGeneralIndicator.Sopen?.ToString("N2")</td>
+                    <td>@Model.SFLGeneralIndicator.Shigh?.ToString("N2")</td>
+                    <td>@Model.SFLGeneralIndicator.Slow?.ToString("N2")</td>
+                    <td>@Model.SFLGeneralIndicator.Sclose?.ToString("N2")</td>
+                    <td class="@(Model.SFLGeneralIndicator.ChangeValue >= 0 ? "up" : "down")">@Model.SFLGeneralIndicator.ChangeValue?.ToString("N2")</td>
+                    <td class="@(Model.SFLGeneralIndicator.ChangeRate >= 0 ? "up" : "down")">@Model.SFLGeneralIndicator.ChangeRate?.ToString("N2")%</td>
+                    <td>@Model.SFLGeneralIndicator.Svol</td>
+                    <td>@Model.SFLGeneralIndicator.IndicatorIn?.ToString("N2")</td>
+                    <td>@Model.SFLGeneralIndicator.IndicatorOut?.ToString("N2")</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr />
+
+        <!-- Date Selector -->
+        <div class="stats-div">
+            <form asp-action="SFLChangeDate" method="post" class="d-inline-block">
+                <input type="hidden" name="followListId" value="@Model.SFLFollowListId" />
+                <input type="hidden" name="sortColumn" value="@Model.SFLSortColumn" />
+                <input type="hidden" name="sortOrder" value="@Model.SFLSortOrder" />
+                <label><b>نتائج توصيات يوم:</b></label>
+                <input type="date" name="newDate" value="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" min="@Model.SFLMinDate.ToString("yyyy-MM-dd")" max="@Model.SFLMaxDate.ToString("yyyy-MM-dd")" class="form-control d-inline-block w-auto" />
+                <button type="submit" class="btn btn-primary btn-sm">تحديث</button>
+                <button type="submit" name="direction" value="prev" class="btn btn-secondary btn-sm">▼</button>
+                <button type="submit" name="direction" value="next" class="btn btn-secondary btn-sm">▲</button>
+            </form>
+            @if (TempData["Error"] != null)
+            {
+                <div class="text-danger">@TempData["Error"]</div>
+            }
+        </div>
+
+        <hr />
+
+        <!-- Follow List Selector -->
+        <div class="text-center mb-3">
+            <form asp-action="SFLChangeFollowList" method="post">
+                <input type="hidden" name="recommendationDate" value="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="sortColumn" value="@Model.SFLSortColumn" />
+                <input type="hidden" name="sortOrder" value="@Model.SFLSortOrder" />
+                <label>القائمة</label>
+                <select name="followListId" class="form-control w-25 d-inline-block" onchange="this.form.submit()">
+                    @foreach (var list in Model.SFLFollowLists)
+                    {
+                        <option value="@list.Id" selected="@(list.Id == Model.SFLFollowListId)" style="background-color: @list.Color">@list.Name</option>
+                    }
+                </select>
+            </form>
+        </div>
+
+        <!-- Recommendations Grid -->
+        <h3>توصيات الشركات</h3>
+        <table class="table table-bordered rdBorder-w grid">
+            <thead class="rdHeader">
+                <tr>
+                    <th colspan="4" rowspan="2" class="left-b-thick">
+                        بيان المؤشرات والشركات
+                    </th>
+                    <th colspan="3" class="left-b-thick">الافتتاح المتوقع</th>
+                    <th colspan="3" class="left-b-thick">فجوة الإفتتاح</th>
+                    <th colspan="3" class="left-b-thick">الحد الأعلى</th>
+                    <th colspan="3" class="left-b-thick">الحد الأدنى</th>
+                    <th colspan="3" class="left-b-thick">قيمة التغيير</th>
+                    <th colspan="1" class="left-b-thick">الاجراء</th>
+                </tr>
+                <tr>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="Sclose" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "Sclose" ? Model.SFLSortOrder : "asc")" class="sort-link">سعر التوصية</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="ExpectedOpen" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "ExpectedOpen" ? Model.SFLSortOrder : "asc")" class="sort-link">المتوقع</a></th>
+                    <th class="left-b-thick"><a asp-action="SFLSort" asp-route-sortColumn="ExpectedOpenPercent" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "ExpectedOpenPercent" ? Model.SFLSortOrder : "asc")" class="sort-link">النسبة</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="PrevSopen" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "PrevSopen" ? Model.SFLSortOrder : "asc")" class="sort-link">الإفتتاح</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="OpeningGapValue" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "OpeningGapValue" ? Model.SFLSortOrder : "asc")" class="sort-link">القيمة</a></th>
+                    <th class="left-b-thick"><a asp-action="SFLSort" asp-route-sortColumn="OpeningGapRate" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "OpeningGapRate" ? Model.SFLSortOrder : "asc")" class="sort-link">النسبة</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="PrevShigh" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "PrevShigh" ? Model.SFLSortOrder : "asc")" class="sort-link">الأعلى</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="UpperLimitValue" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "UpperLimitValue" ? Model.SFLSortOrder : "asc")" class="sort-link">القيمة</a></th>
+                    <th class="left-b-thick"><a asp-action="SFLSort" asp-route-sortColumn="UpperLimitRate" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "UpperLimitRate" ? Model.SFLSortOrder : "asc")" class="sort-link">النسبة</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="PrevSlow" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "PrevSlow" ? Model.SFLSortOrder : "asc")" class="sort-link">الأدنى</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="LowerLimitValue" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "LowerLimitValue" ? Model.SFLSortOrder : "asc")" class="sort-link">القيمة</a></th>
+                    <th class="left-b-thick"><a asp-action="SFLSort" asp-route-sortColumn="LowerLimitRate" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "LowerLimitRate" ? Model.SFLSortOrder : "asc")" class="sort-link">النسبة</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="PrevSclose" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "PrevSclose" ? Model.SFLSortOrder : "asc")" class="sort-link">الحالي</a></th>
+                    <th><a asp-action="SFLSort" asp-route-sortColumn="ChangeValue" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "ChangeValue" ? Model.SFLSortOrder : "asc")" class="sort-link">القيمة</a></th>
+                    <th class="left-b-thick"><a asp-action="SFLSort" asp-route-sortColumn="ChangeRate" asp-route-followListId="@Model.SFLFollowListId" asp-route-recommendationDate="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" asp-route-currentSortOrder="@(Model.SFLSortColumn == "ChangeRate" ? Model.SFLSortOrder : "asc")" class="sort-link">النسبة</a></th>
+                    <th class="left-b-thick"> </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SFLRecommendations)
+                {
+                    <tr class="@(item.IsIndicator ? "rdSubHeader" : "")" style="@(item.IsSpecial ? $"background-color: {Model.SFLSpecialCompanyColor}" : "")">
+                        <td>@(Model.SFLRecommendations.IndexOf(item) + 1)</td>
+                        <td><a href="/CompanyDetails?code=@item.Sticker">@item.Sticker</a></td>
+                        <td><a href="/CompanyDetails?code=@item.Sticker">@item.Sname</a></td>
+                        <td class="left-b-thick">@item.Sclose?.ToString("N2")</td>
+                        <td class="left-b-thick"></td>
+                        <td>@item.ExpectedOpen?.ToString("N2")</td>
+                        <td class="left-b-thick">@item.ExpectedOpenPercent?.ToString("N2")%</td>
+                        <td>@item.PrevSopen?.ToString("N2")</td>
+                        <td>@item.OpeningGapValue?.ToString("N2")</td>
+                        <td class="left-b-thick">@item.OpeningGapRate?.ToString("N2")%</td>
+                        <td>@item.PrevShigh?.ToString("N2")</td>
+                        <td>@item.UpperLimitValue?.ToString("N2")</td>
+                        <td class="left-b-thick">@item.UpperLimitRate?.ToString("N2")%</td>
+                        <td>@item.PrevSlow?.ToString("N2")</td>
+                        <td>@item.LowerLimitValue?.ToString("N2")</td>
+                        <td class="left-b-thick">@item.LowerLimitRate?.ToString("N2")%</td>
+                        <td>@item.PrevSclose?.ToString("N2")</td>
+                        <td>@item.ChangeValue?.ToString("N2")</td>
+                        <td class="left-b-thick">@item.ChangeRate?.ToString("N2")%</td>
+                        <td>
+                            <form asp-action="SFLDeleteCompany" method="post">
+                                <input type="hidden" name="companyCode" value="@item.Sticker" />
+                                <input type="hidden" name="followListId" value="@Model.SFLFollowListId" />
+                                <input type="hidden" name="recommendationDate" value="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="sortColumn" value="@Model.SFLSortColumn" />
+                                <input type="hidden" name="sortOrder" value="@Model.SFLSortOrder" />
+                                <button type="submit" class="btn btn-link text-danger">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <hr />
+
+        <!-- Support/Resistance Levels Grid -->
+        <h3>مستويات الدعم والمقاومة</h3>
+        <table class="table table-bordered rdBorder-w grid">
+            <thead class="rdHeader">
+                <tr>
+                    <th colspan="4" rowspan="2" class="left-b-thick">بيان المؤشرات والشركات</th>
+                    <th colspan="1">وقف خسارة</th>
+                    <th colspan="1">دعم ثاني</th>
+                    <th colspan="1" class="left-b-thick">دعم أول</th>
+                    <th colspan="1">هدف أول</th>
+                    <th colspan="1">هدف ثاني</th>
+                    <th colspan="1" class="left-b-thick">هدف ثالث</th>
+                    <th colspan="1" class="left-b-thick">السعر الحالي</th>
+                    <th colspan="2" class="left-b-thick">هدف يومي محقق</th>
+                    <th colspan="2" class="left-b-thick">هدف أسبوعي محقق</th>
+                    <th colspan="1" class="left-b-thick">الاجراء</th>
+                </tr>
+                <tr>
+                    <th style="background-color: @Model.SFLStopLossColor">@Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.StopLoss%</th>
+                    <th style="background-color: @Model.SFLSecondSupportColor">@Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.SecondSupport%</th>
+                    <th style="background-color: @Model.SFLFirstSupportColor" class="left-b-thick">@Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.FirstSupport%</th>
+                    <th style="background-color: @Model.SFLFirstTargetColor">@Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.FirstTarget%</th>
+                    <th style="background-color: @Model.SFLSecondTargetColor">@Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.SecondTarget%</th>
+                    <th style="background-color: @Model.SFLThirdTargetColor" class="left-b-thick">@Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.ThirdTarget%</th>
+                    <th class="left-b-thick"></th>
+                    <th>القيمة</th>
+                    <th class="left-b-thick">النسبة</th>
+                    <th>القيمة</th>
+                    <th class="left-b-thick">النسبة</th>
+                    <th class="left-b-thick"> </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SFLRecommendations)
+                {
+                    var stopLossValue = (item.Sclose ?? 0) - ((item.Sclose ?? 0) * (Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.StopLoss ?? 0) / 100);
+                    var secondSupportValue = (item.Sclose ?? 0) - ((item.Sclose ?? 0) * (Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.SecondSupport ?? 0) / 100);
+                    var firstSupportValue = (item.Sclose ?? 0) - ((item.Sclose ?? 0) * (Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.FirstSupport ?? 0) / 100);
+                    var firstTargetValue = (item.Sclose ?? 0) + ((item.Sclose ?? 0) * (Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.FirstTarget ?? 0) / 100);
+                    var secondTargetValue = (item.Sclose ?? 0) + ((item.Sclose ?? 0) * (Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.SecondTarget ?? 0) / 100);
+                    var thirdTargetValue = (item.Sclose ?? 0) + ((item.Sclose ?? 0) * (Model.SFLFollowLists.FirstOrDefault(x => x.Id == Model.SFLFollowListId)?.ThirdTarget ?? 0) / 100);
+
+                    <tr class="@(item.IsIndicator ? "rdSubHeader" : "")" style="@(item.IsSpecial ? $"background-color: {Model.SFLSpecialCompanyColor}" : "")">
+                        <td>@(Model.SFLRecommendations.IndexOf(item) + 1)</td>
+                        <td><a href="/CompanyDetails?code=@item.Sticker">@item.Sticker</a></td>
+                        <td><a href="/CompanyDetails?code=@item.Sticker">@item.Sname</a></td>
+                        <td class="left-b-thick">@item.Sclose?.ToString("N2")</td>
+                        <td style="background-color: @Model.SFLStopLossColor">@stopLossValue.ToString("N2")</td>
+                        <td style="background-color: @Model.SFLSecondSupportColor">@secondSupportValue.ToString("N2")</td>
+                        <td style="background-color: @Model.SFLFirstSupportColor" class="left-b-thick">@firstSupportValue.ToString("N2")</td>
+                        <td style="background-color: @Model.SFLFirstTargetColor">@firstTargetValue.ToString("N2")</td>
+                        <td style="background-color: @Model.SFLSecondTargetColor">@secondTargetValue.ToString("N2")</td>
+                        <td style="background-color: @Model.SFLThirdTargetColor" class="left-b-thick">@thirdTargetValue.ToString("N2")</td>
+                        <td class="left-b-thick">0</td>
+                        <td>0</td>
+                        <td class="left-b-thick">0%</td>
+                        <td>0</td>
+                        <td class="left-b-thick">0%</td>
+                        <td>
+                            <form asp-action="SFLDeleteCompany" method="post">
+                                <input type="hidden" name="companyCode" value="@item.Sticker" />
+                                <input type="hidden" name="followListId" value="@Model.SFLFollowListId" />
+                                <input type="hidden" name="recommendationDate" value="@Model.SFLRecommendationDate.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="sortColumn" value="@Model.SFLSortColumn" />
+                                <input type="hidden" name="sortOrder" value="@Model.SFLSortOrder" />
+                                <button type="submit" class="btn btn-link text-danger">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

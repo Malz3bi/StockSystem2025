@@ -7,129 +7,137 @@
 }
 
 @section Styles {
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css" />
-<style>
-    .grid {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 10px;
-    }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.css" />
+    <style>
+        .grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
 
-    .rdHeader {
-    background-color: #f8f9fa;
-    font-weight: bold;
-    text-align: center;
-    border: 2px solid #dee2e6;
-    }
+        .rdHeader {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #dee2e6;
+        }
 
-    .rdSubHeader {
-    background-color: #e9ecef;
-    font-weight: bold;
-    }
+        .rdSubHeader {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
 
-    .left-b-thick {
-    border-left: 2px solid #dee2e6;
-    }
+        .left-b-thick {
+            border-left: 2px solid #dee2e6;
+        }
 
-    .f-17 {
-    font-size: 17px;
-    }
+        .f-17 {
+            font-size: 17px;
+        }
 
-    .tooltip {
-    position: relative;
-    }
+        .tooltip {
+            position: relative;
+        }
 
-    .tooltip::after {
-    content: attr(title);
-    visibility: hidden;
-    position: absolute;
-    background-color: #333;
-    color: #fff;
-    padding: 5px;
-    border-radius: 4px;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    }
+            .tooltip::after {
+                content: attr(title);
+                visibility: hidden;
+                position: absolute;
+                background-color: #333;
+                color: #fff;
+                padding: 5px;
+                border-radius: 4px;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                white-space: nowrap;
+            }
 
-    .tooltip:hover::after {
-    visibility: visible;
-    }
+            .tooltip:hover::after {
+                visibility: visible;
+            }
 
-    .stats-div {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    }
+        .stats-div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
 
-    .stats {
-    border: 1px solid #dee2e6;
-    padding: 10px;
-    }
+        .stats {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+        }
 
-    .up {
-    color: green;
-    }
+        .up {
+            color: green;
+        }
 
-    .down {
-    color: red;
-    }
+        .down {
+            color: red;
+        }
 
-    .loading-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    }
+        .loading-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
-    .loading-modal-center {
-    text-align: center;
-    color: white;
-    }
-</style>
+        .loading-modal-center {
+            text-align: center;
+            color: white;
+        }
+
+        .main-wrapper {
+            padding-right: 0;
+            padding-left: 0 !important;
+            transition: padding-right 0.3s ease;
+        }
+    </style>
 }
 
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.9.2/jquery.contextMenu.min.js"></script>
     <script>
-        $(document).ready(function () {
-        let companyCode = null;
+                  $(document).ready(function () {
+            let companyCode = null;
 
-        $.contextMenu({
-        selector: '.company-row, .openmenu',
-        trigger: $('.openmenu').length ? 'left' : 'right',
-        callback: function (key, options) {
-        const $row = options.$trigger.closest('tr');
-        const rowIndex = $row.index() - 2; // Adjust for header rows
-        companyCode = $(`#company-code-${rowIndex}`).text();
-        const [action, followListId] = key.split(';');
-        if (action === 'add') {
-        $.post({
-        url: '@Url.Action("AddToFollowList")',
-        data: { followListId, companyCode, criteriaId: '@Model.Criteria?.Index', date: '@Model.SelectedDate?.ToString("yyyy-MM-dd")', viewIndex: '@Model.ViewIndex', sortColumn: '@Model.SortColumn', sortOrder: '@Model.SortOrder' },
-        success: function () { location.reload(); },
-        beforeSend: function () { $('#loadingModal').show(); },
-        complete: function () { $('#loadingModal').hide(); }
-        });
-        }
-        },
-        items: {
+            $.contextMenu({
+                selector: '.company-row, .openmenu',
+                trigger: $('.openmenu').length ? 'left' : 'right',
+                callback: function (key, options) {
+                    const $row = options.$trigger.closest('tr');
+                    const rowIndex = $row.index() - 2; // Adjust for header rows
+                    companyCode = $(`#company-code-${rowIndex}`).text();
+                    const [action, followListId] = key.split(';');
+                    if (action === 'add') {
+                        $.post({
+                            url: '@Url.Action("AddToFollowList")',
+                            data: { followListId, companyCode, criteriaId: '@Model.Criteria?.Index', date: '@Model.SelectedDate?.ToString("yyyy-MM-dd")', viewIndex: '@Model.ViewIndex', sortColumn: '@Model.SortColumn', sortOrder: '@Model.SortOrder' },
+                            success: function () { location.reload(); },
+                            beforeSend: function () { $('#loadingModal').show(); },
+                            complete: function () { $('#loadingModal').hide(); }
+                        });
+                    }
+                },
+                items: {
         @foreach (var followList in Model.FollowLists)
         {
             var color = string.IsNullOrEmpty(followList.Color) ? "ffffff00" : followList.Color.Substring(3) + "75";
             @($"\"add;{followList.Id}\": {{ name: \"{followList.Name}\", icon: \"add\", style: \"background-color: #{color}\" }},")
         }
-        }
-        });
-        });
+                }
+                });
+                });
+
+
     </script>
 }
 
@@ -160,7 +168,7 @@
                 {
                     <tr class="rdSubHeader">
                         <td><a asp-action="IndexChart" asp-route-sticer="@indicator.Sticker">@indicator.Sticker</a></td>
-                        <td><a asp-action="IndexChart" asp-route-sticer="@indicator.Sticker" >@indicator.Sname</a></td>
+                        <td><a asp-action="IndexChart" asp-route-sticer="@indicator.Sticker">@indicator.Sname</a></td>
                         <td>@ConvertHelper.FormatDouble(indicator.Sopen)</td>
                         <td>@ConvertHelper.FormatDouble(indicator.Shigh)</td>
                         <td>@ConvertHelper.FormatDouble(indicator.Slow)</td>
@@ -200,13 +208,16 @@
                 <form asp-action="ChangeDate" method="post">
                     <input type="date" asp-for="SelectedDate" min="@Model.MinDate?.ToString("yyyy-MM-dd")" max="@Model.MaxDate?.ToString("yyyy-MM-dd")" class="form-control d-inline-block w-auto" />
                     <input type="hidden" name="criteriaId" value="@Model.Criteria.Index" />
-                    <input type="hidden" value="0" name="ViewIndex" />
+                    <input type="hidden" value="@Model.ViewIndex" name="ViewIndex" />
                     <input type="hidden" asp-for="SortColumn" />
                     <input type="hidden" asp-for="SortOrder" />
                     @if (Model.CompaniesSticer != null)
                     {
                         <input type="hidden" name="CompaniesSticer" value="@string.Join(",",Model.CompaniesSticer)" />
                     }
+
+                    <a id="criteriaNextDate" class="btn btn-secondary btn-sm">▲</a>
+                    <a id="criteriaPrevDate" class="btn btn-secondary btn-sm">▼</a>
                     <button type="submit" class="btn btn-primary btn-sm">تحديث</button>
                 </form>
 
@@ -397,14 +408,14 @@
                 <button type="submit" class="btn btn-info mb-3">عرض نسبة الأرباح والخسائر</button>
                 @if (Model.CompaniesSticer != null)
                 {
-                   
-                   
-                        <input type="hidden" name="CompaniesSticer" value="@string.Join(",", @Model.CompaniesSticer)" />
-                    
+
+
+                    <input type="hidden" name="CompaniesSticer" value="@string.Join(",", @Model.CompaniesSticer)" />
+
                 }
             </form>
 
-            
+
             <table class="table table-bordered grid">
                 <thead class="rdHeader">
                     <tr>
@@ -419,7 +430,7 @@
                         <th colspan="2" class="left-b-thick">هدف يومي محقق</th>
                         <th colspan="2" class="left-b-thick">هدف أسبوعي محقق</th>
                     </tr>
-                  
+
                     <tr>
                         <th>م</th>
                         <th>
@@ -453,7 +464,7 @@
                         <th>القيمة</th>
                         <th>النسبة</th>
                     </tr>
-                  
+
                 </thead>
                 <tbody>
                     @foreach (var rec in Model.Recommendations.Select((value, i) => new { value, i }))
@@ -467,8 +478,8 @@
 
                         <tr class="@(rec.value.IsIndicator ? "rdSubHeader" : "company-row")" style="@(rec.value.IsSpecial ? $"background-color: {Model.SpecialCompanyColor};" : "")">
                             <td style="@(!string.IsNullOrEmpty(rec.value.FollowListColor) ? $"background-color: #{rec.value.FollowListColor};" : "")">@(rec.i + 1)</td>
-                        <td><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker" >@rec.value.Sticker</a></td>
-                        <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker" >@rec.value.Sname</a></td>
+                            <td><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker">@rec.value.Sticker</a></td>
+                            <td class="@(!string.IsNullOrEmpty(rec.value.FollowListNames) ? "tooltip" : "")" title="@rec.value.FollowListNames"><a asp-action="IndexChart" asp-route-sticer="@rec.value.Sticker">@rec.value.Sname</a></td>
                             <td class="left-b-thick f-17">@Html.Raw(ControlHelper.GetControlWithCompareValues(rec.value.Sclose, rec.value.NextSclose))</td>
                             <td style="background-color: @Model.SupportTargetSettings.StopLossColor">@Html.Raw(ControlHelper.GetStopLossChangeValueColor(stopLossValue, rec.value.MinClose ?? 0))</td>
                             <td style="background-color: @Model.SupportTargetSettings.SecondSupportColor">@Html.Raw(ControlHelper.GetSupportChangeValueColor(secondSupportValue, rec.value.MinLow ?? 0))</td>

@@ -3,7 +3,7 @@ using StockSystem2025.Hubs;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using StockSystem2025.Models;
 using StockSystem2025.Services;
-using Microsoft.AspNetCore.Http;
+using StockSystem2025.SFLServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,7 +59,9 @@ builder.Services.AddScoped<ICriteriaService, CriteriaService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IStockService, StockService>();
 builder.Services.AddScoped<RecommendationsStockService>();
-
+builder.Services.AddScoped<SFLIFollowListService, SFLFollowListService>();
+builder.Services.AddScoped<SFLIStockService, SFLStockService>();
+builder.Services.AddScoped<SFLISettingsService, SFLSettingsService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
