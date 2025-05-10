@@ -62,6 +62,8 @@ builder.Services.AddScoped<RecommendationsStockService>();
 builder.Services.AddScoped<SFLIFollowListService, SFLFollowListService>();
 builder.Services.AddScoped<SFLIStockService, SFLStockService>();
 builder.Services.AddScoped<SFLISettingsService, SFLSettingsService>();
+builder.Services.AddScoped<INewEconomicLinksService, NewEconomicLinksService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

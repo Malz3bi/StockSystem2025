@@ -1,0 +1,140 @@
+﻿@model StockSystem2025.ViewModel.NewEconomicLinksViewModel
+@{
+    ViewData["Title"] = "روابط اقتصادية";
+}
+@section Styles {
+    <style>
+        body {
+            direction: rtl;
+            text-align: right;
+        }
+        .section {
+            text-align: center;
+            font-size: 17px;
+            font-weight: bold;
+            color: #1B548D;
+            background: #E6F0F3;
+            margin: -10px -10px 0 -10px;
+            padding: 10px 12px;
+            border-bottom: 1px solid #B3CBD6;
+            box-shadow: inset 0px 0px 20px 0px #B3CBD6;
+        }
+        .sephr {
+            width: 70%;
+            margin-top: 10px;
+        }
+        table#col-nums {
+            margin-top: 10px;
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 50%;
+            margin: 0 auto;
+        }
+        #col-nums td, #col-nums th {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+        .crtable {
+            width: 40%;
+            margin-left: 20px;
+            border-left: 2px solid lightgray;
+        }
+        .form-control {
+            text-align: right;
+        }
+    </style>
+}
+<div class="page-wrapper">
+    <h2>@ViewData["Title"]</h2>
+    <fieldset class="border p-3">
+        <legend></legend>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="crtable">
+                    <tr>
+                        <td style="width: 22%;"><b>إضافة جدول جديد</b></td>
+                        <td>
+                            <form asp-action="AddLinkType" method="post">
+                                <div class="input-group">
+                                    <input asp-for="TypeName" class="form-control" placeholder="اسم الجدول" />
+                                    <button type="submit" class="btn btn-primary">إضافة</button>
+                                </div>
+                                <span asp-validation-for="TypeName" class="text-danger"></span>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="padding-left: 11%;">
+                            <hr style="margin-bottom: 5px" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>عنوان الجدول</b></td>
+                        <td>
+                            <select asp-for="SelectedTypeId" class="form-control" asp-items="@(new SelectList(Model.LinkTypes, "Id", "TypeName"))">
+                                <option value="">اختر الجدول</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <form asp-action="@(Model.EditLinkId.HasValue ? "UpdateLink" : "AddLink")" method="post">
+                    <input asp-for="EditLinkId" type="hidden" />
+                    <table class="crtable">
+                        <tr>
+                            <td style="width: 15%;"><b>اسم الموقع</b></td>
+                            <td>
+                                <input asp-for="LinkName" class="form-control" />
+                                <span asp-validation-for="LinkName" class="text-danger"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><b>الرابط</b></td>
+                            <td>
+                                <input asp-for="LinkUrl" class="form-control" />
+                                <span asp-validation-for="LinkUrl" class="text-danger"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td style="text-align: left; padding-right: 10px;">
+                                <button type="submit" class="btn btn-primary">@(Model.EditLinkId.HasValue ? "حفظ" : "إضافة رابط جديد")</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </fieldset>
+
+    @foreach (var group in Model.GroupedLinks)
+    {
+        <table id="col-nums">
+            <tr>
+                <th class="section">@group.Type.TypeName</th>
+                <th class="section" style="width: 10%">
+                    <a href="@Url.Action("DeleteLinkType", new { id = group.Type.Id })" style="color: red; font-weight: normal;">حذف</a>
+                </th>
+            </tr>
+            @foreach (var link in group.Links)
+            {
+                <tr>
+                    <td><a href="@link.Link" target="_blank">@link.Name</a></td>
+                    <td style="width: 20%">
+                        <a href="@Url.Action("EconomicLinks", new { editId = link.Id })" style="color: #052640; font-weight: normal;">تعديل</a>
+
+                        <a href="@Url.Action("DeleteLink", new { id = link.Id })" style="color: red; font-weight: normal;">حذف</a>
+                    </td>
+                </tr>
+            }
+        </table>
+        <hr class="sephr" />
+    }
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

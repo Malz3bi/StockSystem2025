@@ -242,17 +242,21 @@
                 <tbody>
                     @foreach (var item in Model.Stocks)
                     {
+                        if (item.Sticker=="1180")
+                        {
+                         
+                        }
                         var isIndicator = item.IsIndicator ? "rd-sub-header top-b-thick" : "";
                         var specialColor = item.IsSpecial ? Model.SpecialCompanyColor : "";
                         var followListColor = Model.FollowListCompanies.ContainsKey(item.Sticker) ? Model.FollowListCompanies[item.Sticker].Color : "";
                         var followListTitle = Model.FollowListCompanies.ContainsKey(item.Sticker) ? Model.FollowListCompanies[item.Sticker].Title : "";
                         <tr class="@isIndicator company-row" data-code="@item.Sticker" style="@(string.IsNullOrEmpty(followListColor) ? "" : $"background-color: {followListColor};")">
                             <td class="section-divider">@(Model.Stocks.IndexOf(item) + 1)</td>
-                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip") section-divider" title="@followListTitle">
+                            <td  section-divider" title="@followListTitle">
                                 <a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@item.Sticker">@item.Sticker</a>
                                 <span style="display: none;" class="company-code">@item.Sticker</span>
                             </td>
-                            <td class="@(string.IsNullOrEmpty(followListTitle) ? "" : "left-b-thick tooltip") section-divider" title="@followListTitle" style="@(string.IsNullOrEmpty(specialColor) ? "" : $"background-color: {specialColor};")">
+                            <td  section-divider" title="@followListTitle" style="@(string.IsNullOrEmpty(specialColor) ? "" : $"background-color: {specialColor};")">
                                 <a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@item.Sticker">@item.Sname</a>
                             </td>
                             <td class="section-divider">@Html.Raw(ConvertHelper.CompareValues(item.Sclose, item.PrevSclose))</td>
