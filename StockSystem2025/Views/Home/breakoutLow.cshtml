@@ -1,0 +1,95 @@
+﻿@model StockSystem2025.ViewModel.HistoricalLowsViewModel
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h2 class="text-center mb-4">الشركات القريبة من اختراق أحدث قاع تاريخي</h2>
+        <div class="d-flex justify-content-center gap-2">
+            <form asp-action="Index" asp-controller="Low" method="post">
+                <button type="submit" class="btn btn-primary">بحث</button>
+            </form>
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#infoModal">معلومات توضيحية</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">معلومات توضيحية</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <div class="modal-body">
+                <h6>تعريف الحالات:</h6>
+                <ul>
+                    <li><strong>قريب من الاختراق:</strong> الشركات التي يكون سعرها الحالي أعلى من أو يساوي سعر أحدث قاع تاريخي غير مخترق، ولكنه ضمن 5% فوق سعر القاع (أي بين 100% و105% من سعر القاع).</li>
+                    <li><strong>تم الاختراق:</strong> الشركات التي يكون سعرها الحالي أقل من سعر أحدث قاع تاريخي غير مخترق، ولكنه ضمن 5% تحت سعر القاع (أي بين 95% و100% من سعر القاع).</li>
+                </ul>
+                <h6>الأسس المعتمدة لجلب البيانات:</h6>
+                <ol>
+                    <li>يتم جلب بيانات الأسهم من قاعدة البيانات، ويجب أن تحتوي على ما لا يقل عن 181 يومًا من البيانات لتحليل القيعان.</li>
+                    <li>
+                        يتم تحديد القيعان التاريخية غير المخترقة بناءً على:
+                        <ul>
+                            <li>السعر اليومي الأدنى (Slow) هو الأدنى في نافذة ±90 يومًا.</li>
+                            <li>لا يوجد سعر أدنى في النافذة اللاحقة (+90 يومًا).</li>
+                            <li>لا يوجد سعر لاحق يقل عن القاع بأكثر من 5% (أي Slow ≥ سعر القاع × 0.95).</li>
+                        </ul>
+                    </li>
+                    <li>يتم اختيار أحدث قاع تاريخي غير مخترق، ويُتحقق مما إذا كان السعر الحالي بين 95% و105% من سعر القاع.</li>
+                    <li>إذا كان السعر الحالي أقل من القاع بأكثر من 5% وكان القاع ضمن 5% فوق السعر الحالي، تُستبعد الشركة.</li>
+                    <li>إذا لم يكن أحدث قاع مناسبًا، يتم البحث عن القاع السابق غير المخترق الذي يكون السعر الحالي ضمن نطاقه (95% إلى 105%).</li>
+                    <li>يتم إدراج الشركات التي تستوفي النطاق مع عرض: رقم الشركة، اسم الشركة، السعر الحالي، سعر القاع، تاريخ القاع، وحالة الاختراق.</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.BreakoutCompanies.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-3">الشركات القريبة من الاختراق:</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>رقم الشركة</th>
+                            <th>اسم الشركة</th>
+                            <th>السعر الحالي</th>
+                            <th>سعر القاع</th>
+                            <th>تاريخ القاع</th>
+                            <th>نسبة الاختراق</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var company in Model.BreakoutCompanies)
+                        {
+                            <tr>
+                                <td><a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@company.Sticker">@company.Sticker</a></td>
+                                <td><a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@company.Sticker">@company.Name</a></td>
+                                <td>@company.CurrentPrice.ToString("F2")</td>
+                                <td>@company.ClosestLowPrice.ToString("F2")</td>
+                                <td>@company.ClosestLowDate.ToString("dd/MM/yyyy")</td>
+                                <td class="@(company.BreakoutPercentage > 0 ? "bg-success text-white" : "bg-warning text-dark")">
+                                    @(company.BreakoutPercentage > 0 ? "تم الاختراق" : "قريب من الاختراق")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info text-center" role="alert">
+        لا توجد شركات قريبة من اختراق أحدث قاع تاريخي.
+    </div>
+}

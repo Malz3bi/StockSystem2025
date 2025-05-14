@@ -108,6 +108,8 @@
                         <li class="submenu">
                             <a class="btn btn-outline-dark" href="javascript:void(0);"><span> متابعة السوق</span><i class="fas fa-chart-line"></i></a>
                             <ul>
+                                <li><a asp-action="breakout" asp-controller="home">اختراقات القمم التاريخية لليوم</a></li>
+                                <li><a asp-action="breakoutLow" asp-controller="home">اختراقات القيعان التاريخية لليوم</a></li>
                                 <li><a asp-action="index" asp-controller="MarketFollowList" asp-route-q="1">جميع الأسهم (بدون قطاعات)</a></li>
                                 <li><a asp-action="index" asp-controller="MarketFollowList" asp-route-q="2">مؤشرات رئيسية (قطاعات وأسهم)</a></li>
                                 <li><a asp-action="index" asp-controller="MarketFollowList" asp-route-q="3">مؤشرات رئيسية</a></li>

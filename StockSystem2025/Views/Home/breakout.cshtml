@@ -1,0 +1,96 @@
+﻿@model StockSystem2025.ViewModel.HistoricalPeaksViewModel
+<div class="page-wrapper">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h2 class="text-center mb-4">الشركات القريبة من اختراق أحدث قمة تاريخية</h2>
+            <div class="d-flex justify-content-center gap-2">
+                <form asp-action="Index" asp-controller="Home" method="post">
+                    <button type="submit" class="btn btn-primary">بحث</button>
+                </form>
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#infoModal">معلومات توضيحية</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">معلومات توضيحية</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>تعريف الحالات:</h6>
+                    <ul>
+                        <li><strong>قريب من الاختراق:</strong> الشركات التي يكون سعرها الحالي أقل من أو يساوي سعر أحدث قمة تاريخية غير مخترقة، ولكنه ضمن 5% تحت سعر القمة (أي بين 95% و100% من سعر القمة).</li>
+                        <li><strong>تم الاختراق:</strong> الشركات التي يكون سعرها الحالي أعلى من سعر أحدث قمة تاريخية غير مخترقة، ولكنه ضمن 5% فوق سعر القمة (أي بين 100% و105% من سعر القمة).</li>
+                    </ul>
+                    <h6>الأسس المعتمدة لجلب البيانات:</h6>
+                    <ol>
+                        <li>يتم جلب بيانات الأسهم من قاعدة البيانات، ويجب أن تحتوي على ما لا يقل عن 181 يومًا من البيانات لتحليل القمم.</li>
+                        <li>
+                            يتم تحديد القمم التاريخية غير المخترقة بناءً على:
+                            <ul>
+                                <li>السعر اليومي الأعلى (Shigh) هو الأعلى في نافذة ±90 يومًا.</li>
+                                <li>لا يوجد سعر أعلى في النافذة اللاحقة (+90 يومًا).</li>
+                                <li>لا يوجد سعر لاحق يتجاوز القمة بأكثر من 5% (أي Shigh ≤ سعر القمة × 1.05).</li>
+                            </ul>
+                        </li>
+                        <li>يتم اختيار أحدث قمة تاريخية غير مخترقة، ويُتحقق مما إذا كان السعر الحالي بين 95% و105% من سعر القمة.</li>
+                        <li>إذا تجاوز السعر الحالي القمة بأكثر من 5% وكانت القمة ضمن 5% تحت السعر الحالي، تُستبعد الشركة.</li>
+                        <li>إذا لم تكن أحدث قمة مناسبة، يتم البحث عن القمة السابقة غير المخترقة التي يكون السعر الحالي ضمن نطاقها (95% إلى 105%).</li>
+                        <li>يتم إدراج الشركات التي تستوفي النطاق مع عرض: رقم الشركة، اسم الشركة، السعر الحالي، سعر القمة، تاريخ القمة، وحالة الاختراق.</li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.BreakoutCompanies.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <h3 class="mb-3">الشركات القريبة من الاختراق:</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>رقم الشركة</th>
+                                <th>اسم الشركة</th>
+                                <th>السعر الحالي</th>
+                                <th>سعر القمة</th>
+                                <th>تاريخ القمة</th>
+                                <th>نسبة الاختراق</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var company in Model.BreakoutCompanies)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@company.Sticker">@company.Sticker</a></td>
+                                    <td><a asp-controller="Recommendations" asp-action="IndexChart" asp-route-sticer="@company.Sticker">@company.Name</a></td>
+                                    <td>@company.CurrentPrice.ToString("F2")</td>
+                                    <td>@company.ClosestPeakPrice.ToString("F2")</td>
+                                    <td>@company.ClosestPeakDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="@(company.BreakoutPercentage > 0 ? "bg-success text-white" : "bg-warning text-dark")">
+                                        @(company.BreakoutPercentage > 0 ? "تم الاختراق" : "قريب من الاختراق")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center" role="alert">
+            لا توجد شركات قريبة من اختراق أحدث قمة تاريخية.
+        </div>
+    }
+</div>
