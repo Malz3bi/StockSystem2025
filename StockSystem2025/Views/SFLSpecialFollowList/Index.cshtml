@@ -1,0 +1,111 @@
+﻿@model IEnumerable<StockSystem2025.Models.FollowList>
+
+@{
+    ViewData["Title"] = "إدارة قوائم المتابعة";
+}
+
+<div class="page-wrapper">
+    <div class="container mt-5" dir="rtl">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">قوائم المتابعة</h3>
+                        <a asp-action="Create" class="btn btn-light">إنشاء قائمة جديدة</a>
+                        <a asp-action="SFLIndex" class="btn btn-light">الذهاب الى قوائم النتابعة</a>
+                    </div>
+                    <div class="card-body">
+                        @if (!Model.Any())
+                        {
+                            <div class="alert alert-info text-center" role="alert">
+                                لا توجد قوائم متابعة حاليًا. <a asp-action="Create" class="alert-link">أنشئ قائمة جديدة</a>.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">الاسم</th>
+                                            <th scope="col">اللون</th>
+                                            <th scope="col">وقف الخسارة</th>
+                                            <th scope="col">الدعم الأول</th>
+                                            <th scope="col">الدعم الثاني</th>
+                                            <th scope="col">الهدف الأول</th>
+                                            <th scope="col">الهدف الثاني</th>
+                                            <th scope="col">الهدف الثالث</th>
+                                            <th scope="col">الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                                <td>
+                                                    <span style="display: inline-block; width: 20px; height: 20px; background-color: @item.Color; border: 1px solid #ccc;"></span>
+                                                    @Html.DisplayFor(modelItem => item.Color)
+                                                </td>
+                                                <td>@Html.DisplayFor(modelItem => item.StopLoss)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.FirstSupport)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.SecondSupport)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.FirstTarget)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.SecondTarget)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.ThirdTarget)</td>
+                                                <td>
+                                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Id">حذف</button>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Delete Confirmation Modal -->
+                                            <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@item.Id" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="deleteModalLabel-@item.Id">تأكيد الحذف</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            هل أنت متأكد من حذف قائمة "@item.Name"؟ هذا الإجراء لا يمكن التراجع عنه.
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                                            <form asp-action="Delete" asp-route-id="@item.Id" method="post">
+                                                                @Html.AntiForgeryToken()
+                                                                <button type="submit" class="btn btn-danger">حذف</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modals = document.querySelectorAll('.modal');
+            modals.forEach(function (modal) {
+                modal.addEventListener('hidden.bs.modal', function () {
+                    document.body.classList.remove('modal-open');
+                    var backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                });
+            });
+        });
+    </script>
+}

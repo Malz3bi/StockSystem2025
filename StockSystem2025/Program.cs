@@ -117,7 +117,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=AccountCsontroller}/{action=Login}/{id?}");
+    pattern: "{controller=home}/{action=IndexWep}/{id?}");
 app.MapHub<ProgressHub>("/progressHub");
 
 app.Run();

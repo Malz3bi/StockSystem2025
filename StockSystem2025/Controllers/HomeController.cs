@@ -16,7 +16,15 @@ namespace StockSystem2025.Controllers
             _logger = logger;
             _context = context;
         }
-
+     public IActionResult IndexWep()
+        {
+            return View();
+        }
+        
+        public IActionResult Index()
+        {
+            return View();
+        }
         public async Task<IActionResult> breakout()
         {
             var viewModel = new HistoricalPeaksViewModel();
@@ -340,10 +348,7 @@ namespace StockSystem2025.Controllers
         {
             return View();
         }
-          public IActionResult Index()
-        {
-            return View();
-        }
+     
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

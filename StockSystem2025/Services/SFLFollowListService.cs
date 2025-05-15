@@ -42,3 +42,6 @@ namespace StockSystem2025.Services
         }
     }
 }
+
+
+
