@@ -3,15 +3,13 @@ using System.Collections.Generic;
 
 namespace StockSystem2025.Models;
 
-public partial class Medium
+public partial class AspNetUserLogin
 {
-    public int Id { get; set; }
+    public string LoginProvider { get; set; } = null!;
 
-    public int DaysMedium { get; set; }
+    public string ProviderKey { get; set; } = null!;
 
-    public bool ForTable { get; set; }
-
-    public bool ForChart { get; set; }
+    public string? ProviderDisplayName { get; set; }
 
     public string UserId { get; set; } = null!;
 

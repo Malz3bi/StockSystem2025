@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace StockSystem2025.Models;
+namespace StockSystem2025.Models1;
 
 public partial class Medium
 {

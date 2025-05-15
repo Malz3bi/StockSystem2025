@@ -82,7 +82,7 @@ namespace StockSystem2025.Controllers
 
         private async Task<MarketFollowListViewModel> CreateViewModel(string q, string code)
         {
-            var userId = 1 /*_currentUserService.GetCurrentUser().Id*/;
+            var userId = "1" /*_currentUserService.GetCurrentUser().Id*/;
             var recommendationDate = HttpContext.Session.GetRecommendationStartDate() ?? await _stockService.GetLastDate();
             var dayNo = await _stockService.GetDayNumberByDate(recommendationDate);
 

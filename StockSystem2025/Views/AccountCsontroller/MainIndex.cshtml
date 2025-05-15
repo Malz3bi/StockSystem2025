@@ -1,0 +1,40 @@
+﻿@if (!User.IsInRole("مسؤول النظام"))
+{
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h3>Error</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title">عذراً، مسؤول النضام هو المعني بالاعدادات</h4>
+                        <p class="card-text">لا يمكنك التغيير بالنظام .</p>
+                        <a asp-controller="AccountCsontroller" asp-action="Logout" class="btn btn-primary">تسجيل الخروج</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (User.IsInRole("مسؤول النظام"))
+{
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3>wellcome</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title">يمكنك الان الدخول للصلاحبات والتعديل </h4>
+                        <p class="card-text"> يمكنك التغيير بالنظام .</p>
+                        <a asp-controller="AccountCsontroller" asp-action="Index" class="btn btn-primary">الصلاحيات</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

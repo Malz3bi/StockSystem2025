@@ -1,41 +1,37 @@
-﻿using StockSystem2025.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using StockSystem2025.Models;
+using StockSystem2025.Models.AccountModels;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace StockSystem2025.Services
 {
     public interface ICurrentUserService
     {
-        Task<User> GetCurrentUserAsync();
+        Task<ApplicationUser?> GetCurrentUserAsync();
     }
 
     public class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly StockdbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CurrentUserService(IHttpContextAccessor httpContextAccessor, StockdbContext context)
+        public CurrentUserService(IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager)
         {
             _httpContextAccessor = httpContextAccessor;
-            _context = context;
+            _userManager = userManager;
         }
 
-        public async Task<User> GetCurrentUserAsync()
+        public async Task<ApplicationUser?> GetCurrentUserAsync()
         {
-            var userId = _httpContextAccessor.HttpContext.Session.GetInt32("UserId");
-            if (!userId.HasValue)
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user == null || !user.Identity.IsAuthenticated)
             {
-                throw new UnauthorizedAccessException("User not logged in.");
+                return null;
             }
-
-            var user = await _context.Users.FindAsync(userId.Value);
-            if (user == null)
-            {
-                throw new UnauthorizedAccessException("User not found.");
-            }
-
-            return user;
+            return await _userManager.GetUserAsync(user);
         }
+
+     
     }
-
-
 }

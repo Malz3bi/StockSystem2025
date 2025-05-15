@@ -24,7 +24,7 @@ namespace StockSystem2025.Services
         public async Task<RecommendationResultViewModel> GetRecommendationResultAsync(int? criteriaId, DateTime? selectedDate, int viewIndex, string sortColumn, string sortOrder, List<string>? CompaniesSticer)
         {
             //var user = await _currentUserService.GetCurrentUserAsync();
-            var userId = 1;
+            var userId = "1";
            
             selectedDate = (selectedDate ?? await GetLastDateAsync());
           var model = new RecommendationResultViewModel

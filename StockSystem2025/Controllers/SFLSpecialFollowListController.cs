@@ -109,10 +109,10 @@ namespace StockSystem2025.Controllers
             return RedirectToAction("SFLIndex", new { followListId, recommendationDate, sortColumn, sortOrder });
         }
 
-        private int GetCurrentUserId()
+        private string GetCurrentUserId()
         {
             // Implement user ID retrieval (e.g., from claims)
-            return 1; // Placeholder
+            return "1"; // Placeholder
         }
     }
 }

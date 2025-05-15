@@ -4,7 +4,7 @@ namespace StockSystem2025.SFLServices
 {
     public interface SFLIFollowListService
     {
-        Task<List<FollowList>> SFLGetFollowListsAsync(int userId);
+        Task<List<FollowList>> SFLGetFollowListsAsync(string userId);
         Task SFLDeleteCompanyAsync(int followListId, string companyCode);
         Task SFLDeleteAllCompaniesAsync(int followListId);
     }

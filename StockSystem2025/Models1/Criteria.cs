@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace StockSystem2025.Models;
+namespace StockSystem2025.Models1;
 
 public partial class Criteria
 {
@@ -30,9 +30,7 @@ public partial class Criteria
 
     public bool? IsGeneral { get; set; }
 
-    public string UserId { get; set; } 
+    public string UserId { get; set; } = null!;
 
     public virtual ICollection<Formula> Formulas { get; set; } = new List<Formula>();
-
-    public virtual AspNetUser User { get; set; } = null!;
 }

@@ -64,9 +64,9 @@ namespace StockSystem2025.Controllers
             }
 
             var criteria = MapToCriteria(model);
-            //var user = await _currentUserService.GetCurrentUserAsync();
-            criteria.UserId = 1; /*user.Id;*/
-            if (true/*user.Role == 10*/) // Assuming admin role
+            var user = await _currentUserService.GetCurrentUserAsync();
+            criteria.UserId = user.Id;
+            if (User.IsInRole("admin")) // Assuming admin role
             {
                 criteria.IsGeneral = model.IsGeneral;
             }
@@ -259,18 +259,7 @@ namespace StockSystem2025.Controllers
                                 And = double.TryParse(values.ElementAtOrDefault(1), out var a15) ? a15 : null
                             };
                             break;
-                        case 16:
-                            formulaVm.Formula16 = new Formula16
-                            {
-                                TypeAll = bool.TryParse(values.ElementAtOrDefault(0), out var ta16) && ta16,
-                                TypePositive = bool.TryParse(values.ElementAtOrDefault(1), out var tp16) && tp16,
-                                TypeNegative = bool.TryParse(values.ElementAtOrDefault(2), out var tn16) && tn16,
-                                BetweenPositive = double.TryParse(values.ElementAtOrDefault(3), out var bp) ? bp : null,
-                                AndPositive = double.TryParse(values.ElementAtOrDefault(4), out var ap) ? ap : null,
-                                BetweenNegative = double.TryParse(values.ElementAtOrDefault(5), out var bn) ? bn : null,
-                                AndNegative = double.TryParse(values.ElementAtOrDefault(6), out var an) ? an : null
-                            };
-                            break;
+
                         case 17:
                             formulaVm.Formula17 = new Formula17
                             {
@@ -294,7 +283,6 @@ namespace StockSystem2025.Controllers
         {
             var criteria = new Criteria
             {
-                Id = model.Id,
                 Name = model.Name,
                 Type = model.Type,
                 Note = model.Note,
@@ -359,9 +347,6 @@ namespace StockSystem2025.Controllers
                             break;
                         case 15:
                             formulaValues = $"{formulaVm.Formula15.Between};{formulaVm.Formula15.And}";
-                            break;
-                        case 16:
-                            formulaValues = $"{formulaVm.Formula16.TypeAll};{formulaVm.Formula16.TypePositive};{formulaVm.Formula16.TypeNegative};{formulaVm.Formula16.BetweenPositive};{formulaVm.Formula16.AndPositive};{formulaVm.Formula16.BetweenNegative};{formulaVm.Formula16.AndNegative}";
                             break;
                         case 17:
                             formulaValues = $"{formulaVm.Formula17.TypeAll};{formulaVm.Formula17.TypeGreater};{formulaVm.Formula17.TypeLess};{formulaVm.Formula17.FromDays};{formulaVm.Formula17.ToDays};{formulaVm.Formula17.GreaterThan};{formulaVm.Formula17.LessThan}";

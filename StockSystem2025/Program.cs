@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using StockSystem2025.Models;
 using StockSystem2025.Services;
 using StockSystem2025.SFLServices;
+using Microsoft.AspNetCore.Identity;
+using StockSystem2025.Models.AccountModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,28 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConn")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    //Ýí ÍÇá ÇÑÏÊ ÇáÊÚÏíá Úáì ÔÑæØ ÇáÈÇÓæÑÏ 
+
+    options.Password.RequiredUniqueChars = 0;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequiredLength = 6;
+    options.SignIn.RequireConfirmedAccount = true;
+}).AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+
+
+
 
 // Configure database
 var connectionString = builder.Configuration.GetConnectionString("SQLConn");
@@ -93,7 +117,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=AccountCsontroller}/{action=Login}/{id?}");
 app.MapHub<ProgressHub>("/progressHub");
 
 app.Run();

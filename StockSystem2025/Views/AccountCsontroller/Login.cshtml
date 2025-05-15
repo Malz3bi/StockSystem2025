@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - identityApp</title>
+    <link href="~/assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/assets/css/dashbord.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div class="auth-container d-flex">
+
+        <div class="container mx-auto align-self-center">
+
+            <div class="row">
+
+                <div class="col-xxl-4 col-xl-5 col-lg-5 col-md-8 col-12 d-flex flex-column align-self-center mx-auto">
+                    <div class="card mt-3 mb-3">
+                        <div class="card-body">
+
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+
+                                    <h2>تسجيل الدخول</h2>
+                                    <p>ادخل الايميل وكلمة المرور </p>
+                                </div>
+                                <form asp-action="Login">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">الايميل</label>
+                                            <input asp-for="Email" type="email" class="form-control QA_injection">
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-4">
+                                            <label class="form-label">كلمة المرور</label>
+                                            <input type="password" asp-for="password" class="form-control">
+                                            <span asp-validation-for="password" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-4">
+                                            <button class="btn btn-primary w-100" type="submit">تسجيل الدخول</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="col-12 mb-4">
+                                    <div class="">
+                                        <div class="seperator">
+                                            <hr>
+                                            <div class="seperator-text"> <span>وصف معين؟؟</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="text-center">
+                                        <p class="mb-0"> <a asp-action="AccountCsontroller" asp-controller="Login" class="text-warning">الرئيسية</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @model StockSystem2025.ViewModel.RegisterLoginViewModel
+            @{
+                ViewData["Title"] = "Login";
+                Layout = "";
+            }
+            <hr />
+            <div class="row">
+                <div class="col-md-4">
+
+                </div>
+            </div>
+
+
+            @section Scripts {
+                @{
+                    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                }
+            }
+
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            الاعدادات , واجهة مسؤول النظام
+        </div>
+    </footer>
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/js/popper.min.js"></script>
+    <script src="~/assets/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.QA_injection').on('input', function () {
+                var inputValue = $(this).val();
+                var sanitizedValue = sanitizeInput(inputValue);
+                $(this).val(sanitizedValue);
+            });
+
+            function sanitizeInput(input) {
+                // Remove single quotes, double quotes, angle brackets, and parentheses
+                var sanitized = input.replace(/[<>'":;(){}[\]*$]/g, '');
+                return sanitized;
+            }
+        });
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+﻿@model StockSystem2025.ViewModel.RegisterDeleteViewModel
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "_Layout";
+
+}
+
+<div class="layout-px-spacing">
+    <div id="headerWrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-12 text-center">
+                    <h2 class="main-heading">حذف بيانات المستخدم</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="privacyWrapper" class="">
+                    <div class="privacy-container">
+                        <div class="privacyContent">
+                            <div class="d-flex justify-content-between privacy-head">
+                                <div class="privacyHeader">
+                                    <h1>هل انت متاكد حذف بيانات المستخدم</h1>
+                                </div>
+                            </div>
+                                <section>
+                                    <form asp-controller="AccountCsontroller" asp-action="Delete">
+                                        <input type="hidden" asp-for="Id" />
+                                        <input type="submit" value="حذف" class="btn btn-danger" /> |
+                                        <a asp-controller="AccountCsontroller" asp-action="Index" class="btn btn-primary">العودة الى القائمة</a>
+                                    </form>
+                                </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

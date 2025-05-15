@@ -14,7 +14,7 @@ namespace StockSystem2025.Services
             _context = context;
         }
 
-        public async Task<List<FollowList>> SFLGetFollowListsAsync(int userId)
+        public async Task<List<FollowList>> SFLGetFollowListsAsync(string userId)
         {
             return await _context.FollowLists
                 .Where(f => f.UserId == userId)

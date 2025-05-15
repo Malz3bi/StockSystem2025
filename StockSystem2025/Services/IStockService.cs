@@ -17,8 +17,8 @@ namespace StockSystem2025.Services
         Task<string> GetCompanyName(string sticker);
         Task<List<Setting>> GetSettings();
         Task<double?> GetMaxHigh(string sticker, int currentDayNo);
-        Task<List<FollowList>> GetFollowLists(int userId);
-        Task<Dictionary<string, FollowListCompanyInfo>> GetFollowListCompanies(int userId);
+        Task<List<FollowList>> GetFollowLists(string userId);
+        Task<Dictionary<string, FollowListCompanyInfo>> GetFollowListCompanies(string userId);
         Task AddToFollowList(int followListId, string companyCode);
         Task<int> GetDayNumberByDate(DateTime date);
         Task<DateTime> GetLastDate();
@@ -83,14 +83,14 @@ namespace StockSystem2025.Services
                 .MaxAsync(x => x.Shigh);
         }
 
-        public async Task<List<FollowList>> GetFollowLists(int userId)
+        public async Task<List<FollowList>> GetFollowLists(string userId)
         {
             return await _context.FollowLists
                 .Where(f => f.UserId == userId)
                 .ToListAsync();
         }
 
-    public async Task<Dictionary<string, FollowListCompanyInfo>> GetFollowListCompanies(int userId)
+    public async Task<Dictionary<string, FollowListCompanyInfo>> GetFollowListCompanies(string userId)
     {
         var companies = await _context.FollowListCompanies
             .Where(fc => fc.FollowList.UserId == userId)
