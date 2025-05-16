@@ -62,11 +62,71 @@
     <div class="content">
 
 
+ 
 
+        <h3>جلب بيانات جميع الشركات</h3>
+        <button id="fetchAllStocks" class="btn btn-primary mb-3">جلب وحفظ بيانات جميع الشركات</button>
+        <div id="fetchMessage" class="alert" style="display:none;"></div>
+        <div id="failedCompanies" style="display:none;">
+            <h4>الشركات التي فشل جلب بياناتها</h4>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>رمز الشركة</th>
+                        <th>اسم الشركة</th>
+                        <th>سبب الفشل</th>
+                    </tr>
+                </thead>
+                <tbody id="failedCompaniesTable"></tbody>
+            </table>
+        </div>
 
+     
 
+        @section Scripts {
+            <script>
+                $(document).ready(function () {
+                    $("#fetchAllStocks").click(function () {
+                        $(this).prop("disabled", true).text("جاري المعالجة...");
+                        $("#fetchMessage").hide();
+                        $("#failedCompanies").hide();
+                        $("#failedCompaniesTable").empty();
 
+                        $.ajax({
+                            url: '@Url.Action("FetchAndSaveAllCompaniesStocks", "Home")',
+                            type: 'POST',
+                            dataType: 'json',
+                            success: function (response) {
+                                $("#fetchMessage").removeClass("alert-danger alert-success").addClass(response.success ? "alert-success" : "alert-danger");
+                                $("#fetchMessage").text(response.message).show();
 
+                                if (response.failedCompanies && response.failedCompanies.length > 0) {
+                                    $.each(response.failedCompanies, function (index, company) {
+                                        $("#failedCompaniesTable").append(
+                                            "<tr>" +
+                                            "<td>" + company.CompanyCode + "</td>" +
+                                            "<td>" + (company.CompanyName || "غير متوفر") + "</td>" +
+                                            "<td>" + company.Reason + "</td>" +
+                                            "</tr>"
+                                        );
+                                    });
+                                    $("#failedCompanies").show();
+                                }
+
+                                $("#fetchAllStocks").prop("disabled", false).text("جلب وحفظ بيانات جميع الشركات");
+                                setTimeout(function () { $("#fetchMessage").fadeOut(); }, 5000);
+                            },
+                            error: function (xhr, status, error) {
+                                $("#fetchMessage").removeClass("alert-success").addClass("alert-danger");
+                                $("#fetchMessage").text("حدث خطأ أثناء المعالجة: " + (xhr.responseJSON?.message || error)).show();
+                                $("#fetchAllStocks").prop("disabled", false).text("جلب وحفظ بيانات جميع الشركات");
+                                setTimeout(function () { $("#fetchMessage").fadeOut(); }, 5000);
+                            }
+                        });
+                    });
+                });
+            </script>
+        }
      
 
 
