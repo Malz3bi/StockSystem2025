@@ -157,33 +157,47 @@ namespace StockSystem2025.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveCompanies(ManageCompaniesViewModel model)
         {
-            var userRole = GetUserRole();
-            if (userRole != Role.Admin && userRole != Role.Supervisor)
-            {
-                return Forbid();
-            }
+            //var userRole = GetUserRole();
+            //if (userRole != Role.Admin && userRole != Role.Supervisor)
+            //{
+            //    return Forbid();
+            //}
 
-            var existingCompanies = await _context.CompanyTables
-                .Where(c => c.ParentIndicator == model.IndicatorCode)
-                .ToListAsync();
-
-            // Remove companies not in the new list
-            foreach (var company in existingCompanies)
+            var existingCompanies = await _context.CompanyTables.Where(c => c.ParentIndicator == model.IndicatorCode).ToListAsync();
+            if (!string.IsNullOrEmpty(model.SelectedExistingCompanies?.FirstOrDefault()))
             {
-                if (!model.SelectedExistingCompanies.Contains(company.CompanyCode))
+                var  oldcompanyCodes = model.SelectedExistingCompanies.FirstOrDefault().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(code => code.Trim()).ToList();
+
+                // Remove companies not in the new list
+                foreach (var company in existingCompanies)
                 {
-                    company.ParentIndicator = null;
+                    if (!oldcompanyCodes.Contains(company.CompanyCode))
+                    {
+                        company.ParentIndicator = null;
+                    }
                 }
             }
 
-            // Add new companies
-            foreach (var companyCode in model.SelectedRemainingCompanies)
+
+
+
+
+
+            if (!string.IsNullOrEmpty(model.SelectedExistingCompanies?.FirstOrDefault()))
             {
-                var company = await _context.CompanyTables
-                    .FirstOrDefaultAsync(c => c.CompanyCode == companyCode);
-                if (company != null && string.IsNullOrEmpty(company.ParentIndicator))
+                var companyCodes = model.SelectedExistingCompanies.FirstOrDefault()
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(code => code.Trim())
+                    .ToList();
+
+                foreach (var code in companyCodes)
                 {
-                    company.ParentIndicator = model.IndicatorCode;
+                    var company = await _context.CompanyTables
+                        .FirstOrDefaultAsync(c => c.CompanyCode == code);
+                    if (company != null && string.IsNullOrEmpty(company.ParentIndicator))
+                    {
+                        company.ParentIndicator = model.IndicatorCode;
+                    }
                 }
             }
 

@@ -101,6 +101,7 @@ namespace StockSystem2025.Controllers
 
             var existingCompanies = await _context.CompanyTables
                 .ToDictionaryAsync(x => x.CompanyCode, x => x);
+            var CompanyCode = existingCompanies.Select(x => x.Key).ToList();
 
             int counter = 0;
             int totalLines = lines.Length;
@@ -166,7 +167,7 @@ namespace StockSystem2025.Controllers
                         });
 
                         // Handle CompanyTables (only if necessary)
-                        if (!existingCompanies.ContainsKey(sticker) && !string.IsNullOrEmpty(words[1]) && processedCompanyCodes.Add(sticker))
+                        if (!CompanyCode.Contains(sticker) && !string.IsNullOrEmpty(words[1]) && processedCompanyCodes.Add(sticker))
                         {
                             bool isNumeric = int.TryParse(sticker, out _);
                             companyRecordsToAdd.Add(new CompanyTable
@@ -176,6 +177,8 @@ namespace StockSystem2025.Controllers
                                 Follow = true,
                                 IsIndicator = !isNumeric
                             });
+                            CompanyCode.Add(sticker);
+
                         }
                         else if (existingCompanies.TryGetValue(sticker, out var existingCompany) && string.IsNullOrEmpty(existingCompany.CompanyName))
                         {

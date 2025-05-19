@@ -1,4 +1,5 @@
-﻿@model StockSystem2025.ViewModels.CriteriaManageViewModel
+﻿```html
+@model StockSystem2025.ViewModels.CriteriaManageViewModel
 @inject StockSystem2025.Services.ICriteriaService CriteriaService
 @{
     ViewData["Title"] = "إنشاء الاستراتيجيات";
@@ -803,19 +804,91 @@
                         <span>حفظ</span>
                     }
                 </button>
-            @*     <a asp-action="Index" class="btn btn-primary">عودة</a> *@
             </div>
         </form>
-       @*  @if (!isEdit)
-        {
-            <div class="text-center mt-3">
-                <form asp-action="AddDay" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="Id" />
-                    <button type="submit" class="btn btn-primary">إضافة يوم</button>
-                </form>
-            </div>
-        } *@
+
+        <div class="text-center mt-3">
+            <form asp-action="AddDay" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Name" />
+                <input type="hidden" asp-for="Type" />
+                <input type="hidden" asp-for="Note" />
+                <input type="hidden" asp-for="Description" />
+                <input type="hidden" asp-for="Separater" />
+                <input type="hidden" asp-for="OrderNo" />
+                <input type="hidden" asp-for="Color" />
+                <input type="hidden" asp-for="ImageUrl" />
+                <input type="hidden" asp-for="IsIndicator" />
+                <input type="hidden" asp-for="IsGeneral" />
+                <input type="hidden" asp-for="InsertToMarketPage" />
+                @for (int i = 0; i < Model.Formulas.Count; i++)
+                {
+                    <input type="hidden" asp-for="Formulas[i].Day" />
+                    <input type="hidden" asp-for="Formulas[i].FormulaType" />
+                    <input type="hidden" asp-for="Formulas[i].Formula1.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula1.TypePositive" />
+                    <input type="hidden" asp-for="Formulas[i].Formula1.TypeNegative" />
+                    <input type="hidden" asp-for="Formulas[i].Formula1.TypeNoChange" />
+                    <input type="hidden" asp-for="Formulas[i].Formula1.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula1.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula2.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula2.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula3.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula3.TypeHigherGap" />
+                    <input type="hidden" asp-for="Formulas[i].Formula3.TypeLowerGap" />
+                    <input type="hidden" asp-for="Formulas[i].Formula3.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula3.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula4.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula4.TypeHigher" />
+                    <input type="hidden" asp-for="Formulas[i].Formula4.TypeLower" />
+                    <input type="hidden" asp-for="Formulas[i].Formula4.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula4.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula5.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula5.TypeHigherGap" />
+                    <input type="hidden" asp-for="Formulas[i].Formula5.TypeLowerGap" />
+                    <input type="hidden" asp-for="Formulas[i].Formula6.Between" />
+                    <input type="hidden" asp-for="Formulas[i].Formula6.And" />
+                    <input type="hidden" asp-for="Formulas[i].Formula7.Between" />
+                    <input type="hidden" asp-for="Formulas[i].Formula7.And" />
+                    <input type="hidden" asp-for="Formulas[i].Formula8.Between" />
+                    <input type="hidden" asp-for="Formulas[i].Formula8.And" />
+                    <input type="hidden" asp-for="Formulas[i].Formula9.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula9.TypePositive" />
+                    <input type="hidden" asp-for="Formulas[i].Formula9.TypeNegative" />
+                    <input type="hidden" asp-for="Formulas[i].Formula9.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula9.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula10.Between" />
+                    <input type="hidden" asp-for="Formulas[i].Formula10.And" />
+                    <input type="hidden" asp-for="Formulas[i].Formula12.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula12.TypeGreater" />
+                    <input type="hidden" asp-for="Formulas[i].Formula12.TypeLess" />
+                    <input type="hidden" asp-for="Formulas[i].Formula12.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula12.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula13.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula13.TypePositive" />
+                    <input type="hidden" asp-for="Formulas[i].Formula13.TypeNegative" />
+                    <input type="hidden" asp-for="Formulas[i].Formula13.Days" />
+                    <input type="hidden" asp-for="Formulas[i].Formula13.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula13.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula14.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula14.TypeGreater" />
+                    <input type="hidden" asp-for="Formulas[i].Formula14.TypeLess" />
+                    <input type="hidden" asp-for="Formulas[i].Formula14.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula14.LessThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula15.Between" />
+                    <input type="hidden" asp-for="Formulas[i].Formula15.And" />
+                    <input type="hidden" asp-for="Formulas[i].Formula17.TypeAll" />
+                    <input type="hidden" asp-for="Formulas[i].Formula17.TypeGreater" />
+                    <input type="hidden" asp-for="Formulas[i].Formula17.TypeLess" />
+                    <input type="hidden" asp-for="Formulas[i].Formula17.FromDays" />
+                    <input type="hidden" asp-for="Formulas[i].Formula17.ToDays" />
+                    <input type="hidden" asp-for="Formulas[i].Formula17.GreaterThan" />
+                    <input type="hidden" asp-for="Formulas[i].Formula17.LessThan" />
+                }
+                <button type="submit" class="btn btn-primary">إضافة يوم تداول جديد</button>
+            </form>
+        </div>
 
         <!-- Modal لعرض النص التوضيحي -->
         <div class="modal fade" id="formulaInfoModal" tabindex="-1" aria-labelledby="formulaInfoModalLabel" aria-hidden="true">
@@ -872,106 +945,106 @@
         });
 
         // تعريف النصوص التوضيحية لكل معادلة
-                       const formulaDescriptions = {
-                    1: `**نسبة التغيير**\n
+        const formulaDescriptions = {
+            1: `**نسبة التغيير**\n
         **الغرض**: قياس التغير في سعر الإغلاق بين يومين لتحديد قوة الحركة السعرية.\n
         **طريقة الحساب**: يُحسب الفرق بين سعر الإغلاق الحالي والسابق، ثم يُقسم على الإغلاق السابق ويُحول إلى نسبة مئوية.\n
         **المعادلة**:\nنسبة التغيير = ((الإغلاق الحالي - الإغلاق السابق) / الإغلاق السابق) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات التغيير الإيجابي (ارتفاع).\n- تصفية الأسهم ذات التغيير السلبي (انخفاض).\n- تصفية الأسهم بدون تغيير.\n- تحديد نطاق (مثل: أكبر من 2% أو أقل من -1%).`,
 
-                    2: `**نطاق السعر اليومي**\n
+            2: `**نطاق السعر اليومي**\n
         **الغرض**: قياس التذبذب السعري اليومي لتحديد الأسهم ذات الحركة القوية أو المستقرة.\n
         **طريقة الحساب**: يُحسب الفرق بين أعلى وأدنى سعر يومي، ثم يُقسم على سعر الافتتاح ويُحول إلى نسبة مئوية.\n
         **المعادلة**:\nنطاق السعر = ((أعلى سعر - أدنى سعر) / الافتتاح) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات التذبذب العالي (مثل: أكبر من 5%).\n- تصفية الأسهم ذات التذبذب المنخفض (مثل: أقل من 2%).`,
 
-                    3: `**فجوة كاملة**\n
+            3: `**فجوة كاملة**\n
         **الغرض**: تحديد الفجوات السعرية بين يومين، مما يشير إلى حركة قوية أو أحداث سوقية.\n
         **طريقة الحساب**: تُعتبر فجوة عليا إذا كان أدنى سعر اليوم أعلى من أعلى سعر اليوم السابق، والعكس للفجوة السفلى. يُحسب حجم الفجوة كنسبة مئوية.\n
         **المعادلة**:\n- فجوة عليا: ((أدنى سعر اليوم - أعلى سعر السابق) / أعلى سعر السابق) × 100\n- فجوة سفلى: ((أدنى سعر السابق - أعلى سعر اليوم) / أدنى سعر السابق) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات الفجوة العليا.\n- تصفية الأسهم ذات الفجوة السفلى.\n- تحديد نطاق الفجوة (مثل: أكبر من 3%).`,
 
-                    4: `**فجوة الافتتاح فقط**\n
+            4: `**فجوة الافتتاح فقط**\n
         **الغرض**: تحديد الفجوات في سعر الافتتاح مقارنة باليوم السابق لمعرفة اتجاه السوق.\n
         **طريقة الحساب**: تُعتبر فجوة عليا إذا كان الافتتاح أعلى من أعلى سعر اليوم السابق، والسفلى إذا كان أقل من أدنى سعر السابق.\n
         **المعادلة**:\n- فجوة عليا: ((الافتتاح - أعلى سعر السابق) / أعلى سعر السابق) × 100\n- فجوة سفلى: ((أدنى سعر السابق - الافتتاح) / أدنى سعر السابق) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات فجوة افتتاح عليا أو سفلى.\n- تحديد نطاق الفجوة (مثل: أكبر من 2%).`,
 
-                    5: `**افتتاح في نطاق ذيول الشمعة السابقة**\n
+            5: `**افتتاح في نطاق ذيول الشمعة السابقة**\n
         **الغرض**: تحديد الأسهم التي تفتتح ضمن نطاق ذيول الشمعة السابقة للإشارة إلى الاستقرار.\n
         **طريقة الحساب**: يُتحقق مما إذا كان سعر الافتتاح ضمن نطاق (أعلى/أدنى سعر السابق) أو (افتتاح/إغلاق السابق).\n
         **المعادلة**:\nشرط منطقي: الافتتاح الحالي بين (أدنى سعر السابق، أعلى سعر السابق) أو (افتتاح السابق، إغلاق السابق).\n
         **الاستخدام**:\n- تصفية الأسهم التي تفتتح ضمن نطاق ذيول الشمعة.\n- تحديد الأسهم ذات الحركة المستقرة.`,
 
-                    6: `**موقع الافتتاح بالنسبة لنطاق اليوم**\n
+            6: `**موقع الافتتاح بالنسبة لنطاق اليوم**\n
         **الغرض**: قياس موقع سعر الافتتاح ضمن نطاق التذبذب اليومي لتحديد قوة الافتتاح.\n
         **طريقة الحساب**: يُحسب الفرق بين الافتتاح وأدنى سعر اليوم، ثم يُقسم على نطاق التذبذب اليومي.\n
         **المعادلة**:\nموقع الافتتاح = ((الافتتاح - أدنى سعر) / (أعلى سعر - أدنى سعر)) × 100\n
         **الاستخدام**:\n- تصفية الأسهم بناءً على موقع الافتتاح (مثل: بين 20% و40%).\n- تحديد الأسهم ذات الافتتاح القوي أو الضعيف.`,
 
-                    7: `**موقع الإغلاق بالنسبة لنطاق اليوم**\n
+            7: `**موقع الإغلاق بالنسبة لنطاق اليوم**\n
         **الغرض**: قياس موقع سعر الإغلاق ضمن نطاق التذبذب اليومي لتحديد قوة الإغلاق.\n
         **طريقة الحساب**: يُحسب الفرق بين الإغلاق وأدنى سعر اليوم، ثم يُقسم على نطاق التذبذب اليومي.\n
         **المعادلة**:\nموقع الإغلاق = ((الإغلاق - أدنى سعر) / (أعلى سعر - أدنى سعر)) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات الإغلاق القوي (مثل: أكبر من 80%).\n- تصفية الأسهم ذات الإغلاق الضعيف (مثل: أقل من 20%).`,
 
-                    8: `**موقع افتتاح اليوم بالنسبة لتذبذب اليوم السابق**\n
+            8: `**موقع افتتاح اليوم بالنسبة لتذبذب اليوم السابق**\n
         **الغرض**: قياس موقع الافتتاح الحالي مقارنة بنطاق التذبذب السابق.\n
         **طريقة الحساب**: يُحسب الفرق بين الافتتاح الحالي وأدنى سعر السابق، ثم يُقسم على نطاق التذبذب السابق.\n
         **المعادلة**:\nموقع الافتتاح = ((الافتتاح الحالي - أدنى سعر السابق) / (أعلى سعر السابق - أدنى سعر السابق)) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات الافتتاح في الجزء العلوي أو السفلي من النطاق.\n- تحديد اتجاه الافتتاح (مثل: أعلى من 70%).`,
 
-                    9: `**آخر سعر بالنسبة لافتتاح اليوم**\n
+            9: `**آخر سعر بالنسبة لافتتاح اليوم**\n
         **الغرض**: قياس التغير في سعر الإغلاق مقارنة بالافتتاح لتحديد اتجاه اليوم.\n
         **طريقة الحساب**: يُحسب الفرق بين الإغلاق والافتتاح، ثم يُقسم على الافتتاح ويُحول إلى نسبة مئوية.\n
         **المعادلة**:\nالتغيير = ((الإغلاق - الافتتاح) / الافتتاح) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات التغيير الإيجابي (مثل: أكبر من 3%).\n- تصفية الأسهم ذات التغيير السلبي (مثل: أقل من -2%).`,
 
-                    10: `**موقع إغلاق اليوم بالنسبة لتذبذب اليوم السابق**\n
+            10: `**موقع إغلاق اليوم بالنسبة لتذبذب اليوم السابق**\n
         **الغرض**: قياس موقع الإغلاق الحالي مقارنة بنطاق التذبذب السابق.\n
         **طريقة الحساب**: يُحسب الفرق بين الإغلاق الحالي وأدنى سعر السابق، ثم يُقسم على نطاق التذبذب السابق.\n
         **المعادلة**:\nموقع الإغلاق = ((الإغلاق الحالي - أدنى سعر السابق) / (أعلى سعر السابق - أدنى سعر السابق)) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات الإغلاق العالي (مثل: أكبر من 70%).\n- تصفية الأسهم ذات الإغلاق المنخفض (مثل: أقل من 30%).`,
 
-                    12: `**السيولة اليومية**\n
+            12: `**السيولة اليومية**\n
         **الغرض**: قياس التغير في حجم التداول اليومي مقارنة باليوم السابق لتحديد النشاط السوقي.\n
         **طريقة الحساب**: يُحسب الفرق بين حجم التداول الحالي والسابق، ثم يُقسم على الحجم السابق ويُحول إلى نسبة مئوية.\n
         **المعادلة**:\nنسبة التغيير = ((حجم التداول الحالي - حجم التداول السابق) / حجم التداول السابق) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات السيولة المرتفعة (مثل: أكبر من 50%).\n- تصفية الأسهم ذات السيولة المنخفضة (مثل: أقل من 10%).`,
 
-                    13: `**الإغلاق مقابل متوسط الإغلاقات**\n
+            13: `**الإغلاق مقابل متوسط الإغلاقات**\n
         **الغرض**: مقارنة الإغلاق الحالي بمتوسط الإغلاقات لفترة معينة لتحديد الاتجاه.\n
         **طريقة الحساب**: يُحسب متوسط أسعار الإغلاق لعدد أيام محدد، ثم يُقارن الإغلاق الحالي به كنسبة مئوية.\n
         **المعادلة**:\nالفرق = ((الإغلاق الحالي - متوسط الإغلاقات) / متوسط الإغلاقات) × 100\n
         **الاستخدام**:\n- تصفية الأسهم فوق المتوسط (مثل: أكبر من 2%).\n- تصفية الأسهم تحت المتوسط (مثل: أقل من -2%).`,
 
-                    14: `**الإغلاق مقابل نقطة الإرتكاز**\n
+            14: `**الإغلاق مقابل نقطة الإرتكاز**\n
         **الغرض**: مقارنة الإغلاق بنقطة الإرتكاز لتحديد مستويات الدعم أو المقاومة.\n
         **طريقة الحساب**: تُحسب نقطة الإرتكاز كـ (أعلى سعر + أدنى سعر + إغلاق) / 3 لليوم السابق، ثم يُقارن الإغلاق الحالي بها.\n
         **المعادلة**:\nالفرق = ((الإغلاق الحالي - نقطة الإرتكاز) / نقطة الإرتكاز) × 100\n
         **الاستخدام**:\n- تصفية الأسهم فوق نقطة الإرتكاز (مثل: أكبر من 1%).\n- تصفية الأسهم تحت نقطة الإرتكاز (مثل: أقل من -1%).`,
 
-                    15: `**موقع الحد الأعلى لليوم**\n
+            15: `**موقع الحد الأعلى لليوم**\n
         **الغرض**: قياس موقع أعلى سعر اليوم مقارنة بنطاق التذبذب السابق.\n
         **طريقة الحساب**: يُحسب الفرق بين أعلى سعر اليوم وأدنى سعر السابق، ثم يُقسم على نطاق التذبذب السابق.\n
         **المعادلة**:\nموقع الحد الأعلى = ((أعلى سعر اليوم - أدنى سعر السابق) / (أعلى سعر السابق - أدنى سعر السابق)) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات القمم العالية (مثل: أكبر من 100%).\n- تحديد الأسهم التي تتجاوز نطاق اليوم السابق.`,
 
-                    17: `**تقاطع متوسط**\n
+            17: `**تقاطع متوسط**\n
         **الغرض**: تحليل تقاطع المتوسطات المتحركة لتحديد إشارات شراء أو بيع.\n
         **طريقة الحساب**: يُقارن متوسط قصير الأجل (مثل 5 أيام) بمتوسط طويل الأجل (مثل 20 يومًا) كنسبة مئوية.\n
         **المعادلة**:\nالفرق = ((متوسط قصير الأجل - متوسط طويل الأجل) / متوسط طويل الأجل) × 100\n
         **الاستخدام**:\n- تصفية الأسهم ذات التقاطع الإيجابي (مثل: أكبر من 0.5%).\n- تصفية الأسهم ذات التقاطع السلبي (مثل: أقل من -0.5%).`
-                };
+        };
 
         // التعامل مع فتح الـ modal وعرض النص التوضيحي
-          document.querySelectorAll('.btn-outline-info').forEach(button => {
-              button.addEventListener('click', () => {
-                  const formulaType = button.getAttribute('data-formula-type');
-                  const description = formulaDescriptions[formulaType] || 'لا يوجد وصف متاح لهذه المعادلة.';
-                  document.getElementById('formulaDescription').textContent = description;
-              });
-          });
+        document.querySelectorAll('.btn-outline-info').forEach(button => {
+            button.addEventListener('click', () => {
+                const formulaType = button.getAttribute('data-formula-type');
+                const description = formulaDescriptions[formulaType] || 'لا يوجد وصف متاح لهذه المعادلة.';
+                document.getElementById('formulaDescription').textContent = description;
+            });
+        });
 
         function toggleFormula1(element, index) {
             const typeAll = document.querySelector(`input[name='Formulas[${index}].Formula1.TypeAll']`);

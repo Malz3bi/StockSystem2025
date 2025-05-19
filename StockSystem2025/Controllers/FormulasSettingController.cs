@@ -356,6 +356,8 @@ namespace StockSystem2025.Controllers
                             foreach (var groupItem in formulasGroup)
                             {
                                 int formulaDayNo = startDayNo + groupItem.First().Day - 1;
+
+                              
                                 var stockStickers = new HashSet<string>(stockResult.Select(y => y.Sticker));
                                 var res = stockPrevDayViews
                                     .Where(x => x.Key.DayNo == formulaDayNo && stockStickers.Contains(x.Key.Sticker))

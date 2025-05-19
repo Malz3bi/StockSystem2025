@@ -13,6 +13,17 @@
         -ms-transition: all .2s ease;
         transition: all .2s ease;
     }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .error-message {
+        color: #ef5350;
+        font-weight: bold;
+        padding: 10px;
+        text-align: center;
+    }
 </style>
 <div class="page-wrapper">
     <div class="content">
@@ -20,8 +31,6 @@
             <div class="content">
                 <div class="bg-white p-4 shadow-sm rounded-4 border">
                     <h2 class="mb-4 text-secondary border-bottom pb-2">@ViewData["Title"]</h2>
-
-
 
                     <div class="mb-3 d-flex align-items-center">
                         <div class="me-3">
@@ -54,7 +63,7 @@
 
                     <div id="chartContainer" class="mt-3" style="height: 400px;"></div>
                     <div id="liquidityContainer" class="mt-3" style="height: 200px;"></div>
-                    <div id="tableContainer" class="mt-3" style="display: none;">
+                    <div id="tableContainer" class="mt-3 table-container" style="display: none;">
                         <table id="dataTable" class="table table-striped table-bordered">
                             <thead>
                                 <tr>
@@ -65,113 +74,139 @@
                                     <th>الإغلاق</th>
                                     <th>الحجم (السيولة)</th>
                                     <th>تدفق الأموال</th>
+                                    <th>الإشارة</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
                     </div>
+                    <div id="errorContainer" class="error-message" style="display: none;"></div>
 
-                    <style>
-                        .table-container {
-                            overflow-x: auto;
-                        }
-                    </style>
                     <script src="~/assets/js/lightweight-charts.standalone.production.js.js"></script>
                     <script>
-                        const chartContainer = document.getElementById('chartContainer');
-                        const chart = LightweightCharts.createChart(chartContainer, {
-                            width: chartContainer.clientWidth,
-                            height: 400,
-                            layout: { background: { color: '#ffffff' }, textColor: '#333' },
-                            grid: { vertLines: { color: '#e1e1e1' }, horzLines: { color: '#e1e1e1' } },
-                            timeScale: { timeVisible: true, secondsVisible: false },
-                        });
+                        function initializeChart() {
+                            const chartContainer = document.getElementById('chartContainer');
+                            const errorContainer = document.getElementById('errorContainer');
 
-                        const liquidityContainer = document.getElementById('liquidityContainer');
-                        const liquidityChart = LightweightCharts.createChart(liquidityContainer, {
-                            width: liquidityContainer.clientWidth,
-                            height: 200,
-                            layout: { background: { color: '#ffffff' }, textColor: '#333' },
-                            grid: { vertLines: { color: '#e1e1e1' }, horzLines: { color: '#e1e1e1' } },
-                            timeScale: { timeVisible: true, secondsVisible: false },
-                        });
+                            if (!chartContainer) {
+                                errorContainer.style.display = 'block';
+                                errorContainer.textContent = 'خطأ: حاوية المخطط غير موجودة.';
+                                console.error('Chart container not found.');
+                                return;
+                            }
 
-                        const candlestickSeries = chart.addCandlestickSeries({
-                            // Default colors, will be overridden per candle
-                            upColor: '#26a69a',
-                            downColor: '#ef5350',
-                            borderUpColor: '#26a69a',
-                            borderDownColor: '#ef5350',
-                            wickUpColor: '#26a69a',
-                            wickDownColor: '#ef5350',
-                        });
+                            if (!window.LightweightCharts) {
+                                errorContainer.style.display = 'block';
+                                errorContainer.textContent = 'خطأ: مكتبة Lightweight Charts غير متاحة.';
+                                console.error('LightweightCharts is not defined.');
+                                return;
+                            }
 
-                        const liquiditySeries = liquidityChart.addHistogramSeries({
-                            color: '#26a69a',
-                            priceFormat: { type: 'volume', precision: 0 },
-                            priceScaleId: 'volume',
-                        });
-                        liquidityChart.priceScale('volume').applyOptions({
-                            scaleMargins: { top: 0.7, bottom: 0 },
-                        });
+                            const chart = LightweightCharts.createChart(chartContainer, {
+                                width: chartContainer.clientWidth,
+                                height: 400,
+                                layout: { background: { color: '#ffffff' }, textColor: '#333' },
+                                grid: { vertLines: { color: '#e1e1e1' }, horzLines: { color: '#e1e1e1' } },
+                                timeScale: { timeVisible: true, secondsVisible: false },
+                            });
 
-                        // Sync time scales
-                        chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-                            liquidityChart.timeScale().setVisibleLogicalRange(range);
-                        });
-                        liquidityChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-                            chart.timeScale().setVisibleLogicalRange(range);
-                        });
+                            const liquidityContainer = document.getElementById('liquidityContainer');
+                            const liquidityChart = LightweightCharts.createChart(liquidityContainer, {
+                                width: liquidityContainer.clientWidth,
+                                height: 200,
+                                layout: { background: { color: '#ffffff' }, textColor: '#333' },
+                                grid: { vertLines: { color: '#e1e1e1' }, horzLines: { color: '#e1e1e1' } },
+                                timeScale: { timeVisible: true, secondsVisible: false },
+                            });
 
-                        let currentData = [];
-                        let rawLiquidityData = [];
+                            const candlestickSeries = chart.addCandlestickSeries({
+                                upColor: '#26a69a',
+                                downColor: '#ef5350',
+                                borderUpColor: '#26a69a',
+                                borderDownColor: '#ef5350',
+                                wickUpColor: '#26a69a',
+                                wickDownColor: '#ef5350',
+                            });
 
-                        function fetchStockData(sticker, timeframe) {
-                            fetch(`/Recommendations/GetStockData?sticker=${sticker}&timeframe=${timeframe}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        currentData = data.data;
-                                        const validData = currentData.filter(d => d.time && !isNaN(d.time) && d.open != null && d.high != null && d.low != null && d.close != null && d.volume != null);
+                            const liquiditySeries = liquidityChart.addHistogramSeries({
+                                color: '#26a69a',
+                                priceFormat: { type: 'volume', precision: 0 },
+                                priceScaleId: 'volume',
+                            });
+                            liquidityChart.priceScale('volume').applyOptions({
+                                scaleMargins: { top: 0.7, bottom: 0 },
+                            });
+
+                            // Sync time scales
+                            chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                                liquidityChart.timeScale().setVisibleLogicalRange(range);
+                            });
+                            liquidityChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                                chart.timeScale().setVisibleLogicalRange(range);
+                            });
+
+                            let currentData = [];
+                            let rawLiquidityData = [];
+                            let currentSignals = [];
+
+                            function fetchStockData(sticker, timeframe) {
+                                fetch(`/Recommendations/GetStockData?sticker=${encodeURIComponent(sticker)}&timeframe=${timeframe}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (!data.success) {
+                                            errorContainer.style.display = 'block';
+                                            errorContainer.textContent = `خطأ: ${data.message}`;
+                                            console.error('Error fetching data:', data.message);
+                                            return;
+                                        }
+
+                                        currentData = data.data || [];
+                                        currentSignals = data.signals || [];
+
+                                        const validData = currentData.filter(d =>
+                                            d.time && !isNaN(d.time) &&
+                                            d.open != null && d.high != null &&
+                                            d.low != null && d.close != null &&
+                                            d.volume != null
+                                        );
+
                                         if (validData.length === 0) {
+                                            errorContainer.style.display = 'block';
+                                            errorContainer.textContent = 'خطأ: لا توجد بيانات صالحة للعرض.';
                                             console.error('No valid data to display');
                                             return;
                                         }
 
                                         const candlestickData = validData.map((d, index) => {
                                             const isBullish = Number(d.close) > Number(d.open);
-                                            const prevClose = index > 0 ? Number(validData[index - 1].close) : Number(d.open); // Fallback to open for first candle
+                                            const prevClose = index > 0 ? Number(validData[index - 1].close) : Number(d.open);
                                             const closedAbovePrev = Number(d.close) > prevClose;
                                             const closedBelowPrev = Number(d.close) < prevClose;
 
                                             let candleStyle = {};
                                             if (isBullish && closedAbovePrev) {
-                                                // Green Hollow: Bullish and price moved up
                                                 candleStyle = {
-                                                    color: 'rgba(0, 0, 0, 0)', // Transparent for hollow
-                                                    borderColor: '#26a69a', // Green border
-                                                    wickColor: '#26a69a', // Green wick
+                                                    color: 'rgba(0, 0, 0, 0)',
+                                                    borderColor: '#26a69a',
+                                                    wickColor: '#26a69a',
                                                 };
                                             } else if (!isBullish && closedAbovePrev) {
-                                                // Green Filled: Bearish but closed above previous close
                                                 candleStyle = {
-                                                    color: '#26a69a', // Solid green
+                                                    color: '#26a69a',
                                                     borderColor: '#26a69a',
                                                     wickColor: '#26a69a',
                                                 };
                                             } else if (!isBullish && closedBelowPrev) {
-                                                // Red Filled: Bearish and price moved down
                                                 candleStyle = {
-                                                    color: '#ef5350', // Solid red
+                                                    color: '#ef5350',
                                                     borderColor: '#ef5350',
                                                     wickColor: '#ef5350',
                                                 };
                                             } else if (isBullish && closedBelowPrev) {
-                                                // Red Hollow: Bullish but closed below previous close
                                                 candleStyle = {
-                                                    color: 'rgba(0, 0, 0, 0)', // Transparent for hollow
-                                                    borderColor: '#ef5350', // Red border
-                                                    wickColor: '#ef5350', // Red wick
+                                                    color: 'rgba(0, 0, 0, 0)',
+                                                    borderColor: '#ef5350',
+                                                    wickColor: '#ef5350',
                                                 };
                                             }
 
@@ -185,186 +220,210 @@
                                             };
                                         });
 
-                                        // Store raw liquidity data for dynamic scaling
+                                        // Process signals as markers
+                                        const markers = currentSignals.map(signal => {
+                                            const dataPoint = validData.find(d => d.time === signal.time);
+                                            if (!dataPoint) return null;
+
+                                            return {
+                                                time: Number(signal.time),
+                                                position: signal.signal === 'buy' ? 'belowBar' : 'aboveBar',
+                                                color: signal.signal === 'buy' ? '#26a69a' : '#ef5350',
+                                                shape: 'triangle',
+                                                text: signal.signal === 'buy' ? 'شراء' : 'بيع',
+                                                size: 1
+                                            };
+                                        }).filter(marker => marker != null);
+
                                         rawLiquidityData = validData.map(d => ({
                                             time: Number(d.time),
                                             value: Number(d.volume),
                                             color: Number(d.close) > Number(d.open) ? '#26a69a' : '#ef5350',
                                         }));
 
-                                        // Initial scaling of liquidity data
                                         updateLiquidityData();
-
                                         candlestickSeries.setData(candlestickData);
+                                        candlestickSeries.setMarkers(markers);
                                         chart.timeScale().fitContent();
                                         liquidityChart.timeScale().fitContent();
                                         updateTable(validData);
 
-                                        // Force immediate rendering of charts
                                         requestAnimationFrame(() => {
                                             chart.applyOptions({ width: chartContainer.clientWidth });
                                             liquidityChart.applyOptions({ width: liquidityContainer.clientWidth });
                                             chartContainer.style.opacity = '1';
                                             liquidityContainer.style.opacity = '1';
                                         });
-                                    } else {
-                                        console.error('Error fetching data:', data.message);
-                                    }
-                                })
-                                .catch(error => console.error('Fetch error:', error));
-                        }
-
-                        function updateLiquidityData() {
-                            const visibleRange = chart.timeScale().getVisibleLogicalRange();
-                            if (!visibleRange) return;
-
-                            const visibleLiquidityData = rawLiquidityData.filter(d => {
-                                const time = d.time;
-                                return time >= visibleRange.from && time <= visibleRange.to;
-                            });
-
-                            const maxVisibleValue = visibleLiquidityData.length > 0 ? Math.max(...visibleLiquidityData.map(d => d.value)) : 1;
-                            const minVisibleValue = visibleLiquidityData.length > 0 ? Math.min(...visibleLiquidityData.filter(d => d.value > 0).map(d => d.value)) : 1;
-
-                            const scaleFactor = maxVisibleValue > 0 ? 20000 / maxVisibleValue : 1;
-                            const minHeightFactor = 100;
-                            const scaledLiquidityData = rawLiquidityData.map(d => ({
-                                time: d.time,
-                                value: Math.max(scaleFactor * d.value, minHeightFactor),
-                                color: d.color,
-                            }));
-
-                            liquiditySeries.setData(scaledLiquidityData);
-                        }
-
-                        chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
-                            updateLiquidityData();
-                        });
-
-                        function updateTable(data) {
-                            const tbody = document.querySelector('#dataTable tbody');
-                            tbody.innerHTML = '';
-                            data.forEach(item => {
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
-                                    <td>${new Date(item.time * 1000).toLocaleDateString('ar-EG')}</td>
-                                    <td>${Number(item.open).toFixed(2)}</td>
-                                    <td>${Number(item.high).toFixed(2)}</td>
-                                    <td>${Number(item.low).toFixed(2)}</td>
-                                    <td>${Number(item.close).toFixed(2)}</td>
-                                    <td>${Number(item.volume).toLocaleString()}</td>
-                                    <td>${Number(item.moneyFlow).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                                `;
-                                tbody.appendChild(row);
-                            });
-
-                            requestAnimationFrame(() => {
-                                const tableContainer = document.getElementById('tableContainer');
-                                tableContainer.style.opacity = '0';
-                                tableContainer.offsetHeight;
-                                tableContainer.style.opacity = '1';
-                            });
-                        }
-
-                        const tooltip = document.createElement('div');
-                        tooltip.style.position = 'absolute';
-                        tooltip.style.background = 'rgba(255, 255, 255, 0.9)';
-                        tooltip.style.border = '1px solid #ccc';
-                        tooltip.style.padding = '8px';
-                        tooltip.style.borderRadius = '4px';
-                        tooltip.style.pointerEvents = 'none';
-                        tooltip.style.zIndex = '1000';
-                        document.body.appendChild(tooltip);
-
-                        chart.subscribeCrosshairMove(param => {
-                            if (!param.time || !param.point) {
-                                tooltip.style.display = 'none';
-                                return;
+                                    })
+                                    .catch(error => {
+                                        errorContainer.style.display = 'block';
+                                        errorContainer.textContent = 'خطأ: فشل جلب البيانات.';
+                                        console.error('Fetch error:', error);
+                                    });
                             }
 
-                            const dataPoint = currentData.find(d => d.time === param.time);
-                            if (!dataPoint) {
-                                tooltip.style.display = 'none';
-                                return;
+                            function updateLiquidityData() {
+                                const visibleRange = chart.timeScale().getVisibleLogicalRange();
+                                if (!visibleRange) return;
+
+                                const visibleLiquidityData = rawLiquidityData.filter(d => {
+                                    const time = d.time;
+                                    return time >= visibleRange.from && time <= visibleRange.to;
+                                });
+
+                                const maxVisibleValue = visibleLiquidityData.length > 0 ? Math.max(...visibleLiquidityData.map(d => d.value)) : 1;
+                                const minVisibleValue = visibleLiquidityData.length > 0 ? Math.min(...visibleLiquidityData.filter(d => d.value > 0).map(d => d.value)) : 1;
+
+                                const scaleFactor = maxVisibleValue > 0 ? 20000 / maxVisibleValue : 1;
+                                const minHeightFactor = 100;
+                                const scaledLiquidityData = rawLiquidityData.map(d => ({
+                                    time: d.time,
+                                    value: Math.max(scaleFactor * d.value, minHeightFactor),
+                                    color: d.color,
+                                }));
+
+                                liquiditySeries.setData(scaledLiquidityData);
                             }
 
-                            tooltip.style.display = 'block';
-                            tooltip.innerHTML = `
-                                <strong>التاريخ:</strong> ${new Date(dataPoint.time * 1000).toLocaleDateString('ar-EG')}<br/>
-                                <strong>الافتتاح:</strong> ${Number(dataPoint.open).toFixed(2)}<br/>
-                                <strong>الأعلى:</strong> ${Number(dataPoint.high).toFixed(2)}<br/>
-                                <strong>الأدنى:</strong> ${Number(dataPoint.low).toFixed(2)}<br/>
-                                <strong>الإغلاق:</strong> ${Number(dataPoint.close).toFixed(2)}<br/>
-                                <strong>الحجم (السيولة):</strong> ${Number(dataPoint.volume).toLocaleString()}<br/>
-                                <strong>تدفق الأموال:</strong> ${Number(dataPoint.moneyFlow).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                            `;
-
-                            const chartRect = chartContainer.getBoundingClientRect();
-                            tooltip.style.left = `${chartRect.left + param.point.x + 15}px`;
-                            tooltip.style.top = `${chartRect.top + param.point.y + 15}px`;
-                        });
-
-                        chart.subscribeCrosshairMove(param => {
-                            if (!param.time) {
-                                tooltip.style.display = 'none';
-                            }
-                        });
-
-                        const stockSelector = document.getElementById('stockSelector');
-                                let currentTimeframe = '6M';
-                        if (stockSelector.options.length > 0) {
-                            fetchStockData(stockSelector.value, currentTimeframe);
-                        }
-
-                        stockSelector.addEventListener('change', (event) => {
-                            fetchStockData(event.target.value, currentTimeframe);
-                        });
-
-                        document.querySelectorAll('.timeframe-btn').forEach(button => {
-                            button.addEventListener('click', () => {
-                                document.querySelectorAll('.timeframe-btn').forEach(btn => btn.classList.remove('active'));
-                                button.classList.add('active');
-                                currentTimeframe = button.dataset.timeframe;
-                                if (stockSelector.options.length > 0) {
-                                    fetchStockData(stockSelector.value, currentTimeframe);
-                                }
+                            chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
+                                updateLiquidityData();
                             });
-                        });
 
-                        document.getElementById('toggleView').addEventListener('click', () => {
-                            const chartVisible = chartContainer.style.display !== 'none';
-                            const tableVisible = tableContainer.style.display !== 'none';
-                            if (chartVisible) {
-                                chartContainer.style.display = 'none';
-                                liquidityContainer.style.display = 'none';
-                                tableContainer.style.display = 'block';
-                                document.getElementById('toggleView').textContent = 'عرض كرسم بياني';
+                            function updateTable(data) {
+                                const tbody = document.querySelector('#dataTable tbody');
+                                tbody.innerHTML = '';
+                                data.forEach(item => {
+                                    const signal = currentSignals.find(s => s.time === item.time);
+                                    const signalText = signal ? (signal.signal === 'buy' ? 'شراء' : 'بيع') : '-';
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td>${new Date(item.time * 1000).toLocaleDateString('ar-EG')}</td>
+                                        <td>${Number(item.open).toFixed(2)}</td>
+                                        <td>${Number(item.high).toFixed(2)}</td>
+                                        <td>${Number(item.low).toFixed(2)}</td>
+                                        <td>${Number(item.close).toFixed(2)}</td>
+                                        <td>${Number(item.volume).toLocaleString()}</td>
+                                        <td>${Number(item.moneyFlow).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                                        <td>${signalText}</td>
+                                    `;
+                                    tbody.appendChild(row);
+                                });
+
                                 requestAnimationFrame(() => {
+                                    const tableContainer = document.getElementById('tableContainer');
                                     tableContainer.style.opacity = '0';
                                     tableContainer.offsetHeight;
                                     tableContainer.style.opacity = '1';
                                 });
-                            } else if (tableVisible) {
-                                chartContainer.style.display = 'block';
-                                liquidityContainer.style.display = 'block';
-                                tableContainer.style.display = 'none';
-                                document.getElementById('toggleView').textContent = 'عرض كجدول';
-                                requestAnimationFrame(() => {
-                                    chartContainer.style.opacity = '0';
-                                    chartContainer.offsetHeight;
-                                    chartContainer.style.opacity = '1';
-                                    liquidityContainer.style.opacity = '0';
-                                    liquidityContainer.offsetHeight;
-                                    liquidityContainer.style.opacity = '1';
-                                });
                             }
-                        });
 
-                        window.addEventListener('resize', () => {
-                            chart.resize(chartContainer.clientWidth, 400);
-                            liquidityChart.resize(liquidityContainer.clientWidth, 200);
-                            updateLiquidityData();
-                        });
+                            const tooltip = document.createElement('div');
+                            tooltip.style.position = 'absolute';
+                            tooltip.style.background = 'rgba(255, 255, 255, 0.9)';
+                            tooltip.style.border = '1px solid #ccc';
+                            tooltip.style.padding = '8px';
+                            tooltip.style.borderRadius = '4px';
+                            tooltip.style.pointerEvents = 'none';
+                            tooltip.style.zIndex = '1000';
+                            document.body.appendChild(tooltip);
+
+                            chart.subscribeCrosshairMove(param => {
+                                if (!param.time || !param.point) {
+                                    tooltip.style.display = 'none';
+                                    return;
+                                }
+
+                                const dataPoint = currentData.find(d => d.time === param.time);
+                                if (!dataPoint) {
+                                    tooltip.style.display = 'none';
+                                    return;
+                                }
+
+                                const signal = currentSignals.find(s => s.time === param.time);
+                                const signalText = signal ? (signal.signal === 'buy' ? 'شراء' : 'بيع') : 'لا إشارة';
+
+                                tooltip.style.display = 'block';
+                                tooltip.innerHTML = `
+                                    <strong>التاريخ:</strong> ${new Date(dataPoint.time * 1000).toLocaleDateString('ar-EG')}<br/>
+                                    <strong>الافتتاح:</strong> ${Number(dataPoint.open).toFixed(2)}<br/>
+                                    <strong>الأعلى:</strong> ${Number(dataPoint.high).toFixed(2)}<br/>
+                                    <strong>الأدنى:</strong> ${Number(dataPoint.low).toFixed(2)}<br/>
+                                    <strong>الإغلاق:</strong> ${Number(dataPoint.close).toFixed(2)}<br/>
+                                    <strong>الحجم (السيولة):</strong> ${Number(dataPoint.volume).toLocaleString()}<br/>
+                                    <strong>تدفق الأموال:</strong> ${Number(dataPoint.moneyFlow).toLocaleString('en-US', { minimumFractionDigits: 2 })}<br/>
+                                    <strong>الإشارة:</strong> ${signalText}
+                                `;
+
+                                const chartRect = chartContainer.getBoundingClientRect();
+                                tooltip.style.left = `${chartRect.left + param.point.x + 15}px`;
+                                tooltip.style.top = `${chartRect.top + param.point.y + 15}px`;
+                            });
+
+                            chart.subscribeCrosshairMove(param => {
+                                if (!param.time) {
+                                    tooltip.style.display = 'none';
+                                }
+                            });
+
+                            const stockSelector = document.getElementById('stockSelector');
+                            let currentTimeframe = '6M';
+                            if (stockSelector.options.length > 0) {
+                                fetchStockData(stockSelector.value, currentTimeframe);
+                            }
+
+                            stockSelector.addEventListener('change', (event) => {
+                                fetchStockData(event.target.value, currentTimeframe);
+                            });
+
+                            document.querySelectorAll('.timeframe-btn').forEach(button => {
+                                button.addEventListener('click', () => {
+                                    document.querySelectorAll('.timeframe-btn').forEach(btn => btn.classList.remove('active'));
+                                    button.classList.add('active');
+                                    currentTimeframe = button.dataset.timeframe;
+                                    if (stockSelector.options.length > 0) {
+                                        fetchStockData(stockSelector.value, currentTimeframe);
+                                    }
+                                });
+                            });
+
+                            document.getElementById('toggleView').addEventListener('click', () => {
+                                const chartVisible = chartContainer.style.display !== 'none';
+                                const tableVisible = tableContainer.style.display !== 'none';
+                                if (chartVisible) {
+                                    chartContainer.style.display = 'none';
+                                    liquidityContainer.style.display = 'none';
+                                    tableContainer.style.display = 'block';
+                                    document.getElementById('toggleView').textContent = 'عرض كرسم بياني';
+                                    requestAnimationFrame(() => {
+                                        tableContainer.style.opacity = '0';
+                                        tableContainer.offsetHeight;
+                                        tableContainer.style.opacity = '1';
+                                    });
+                                } else if (tableVisible) {
+                                    chartContainer.style.display = 'block';
+                                    liquidityContainer.style.display = 'block';
+                                    tableContainer.style.display = 'none';
+                                    document.getElementById('toggleView').textContent = 'عرض كجدول';
+                                    requestAnimationFrame(() => {
+                                        chartContainer.style.opacity = '0';
+                                        chartContainer.offsetHeight;
+                                        chartContainer.style.opacity = '1';
+                                        liquidityContainer.style.opacity = '0';
+                                        liquidityContainer.offsetHeight;
+                                        liquidityContainer.style.opacity = '1';
+                                    });
+                                }
+                            });
+
+                            window.addEventListener('resize', () => {
+                                chart.resize(chartContainer.clientWidth, 400);
+                                liquidityChart.resize(liquidityContainer.clientWidth, 200);
+                                updateLiquidityData();
+                            });
+                        }
+
+                        // Call initialization
+                        initializeChart();
                     </script>
                 </div>
             </div>
