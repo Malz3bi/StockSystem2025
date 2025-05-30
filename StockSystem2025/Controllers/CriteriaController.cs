@@ -62,10 +62,10 @@ namespace StockSystem2025.Controllers
             {
                 return View(model);
             }
-
+            // عدل هنا
             var criteria = MapToCriteria(model);
             var user = await _currentUserService.GetCurrentUserAsync();
-            criteria.UserId = user.Id;
+            criteria.UserId = "68bf8203-f7ab-494d-bfd8-96fb3a17bd69";
             if (User.IsInRole("admin")) // Assuming admin role
             {
                 criteria.IsGeneral = model.IsGeneral;

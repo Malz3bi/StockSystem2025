@@ -288,12 +288,14 @@
             {
                 <input type="hidden" asp-for="Formulas[i].Day" />
                 <input type="hidden" asp-for="Formulas[i].FormulaType" />
+                <h4 style="color:black">يوم تداول (@Model.Formulas[i].Day)</h4>
 
-                <div class="box-body1">
+                <div class="box-body1" style="@(i % 2 == 0 ? "" : "background-color:antiquewhite")">
                     <!-- معيار شكل الشمعة -->
                     <div class="box mb-3">
                         <div class="box-header with-border">
                             <h4>معيار شكل الشمعة</h4>
+
                         </div>
                         <div class="box-body1">
                             <!-- Formula 1: Change Percentage -->

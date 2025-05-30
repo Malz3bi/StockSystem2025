@@ -98,8 +98,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseDeveloperExceptionPage();
+    //app.UseExceptionHandler("/Home/Error");
+    //app.UseHsts();
 }
 
 
@@ -113,6 +114,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowAll");
 app.UseSession();
+app.UseAuthentication(); // مهم جدًا مع Identity
 app.UseAuthorization();
 
 app.MapControllerRoute(

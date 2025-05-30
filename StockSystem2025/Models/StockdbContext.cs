@@ -174,13 +174,13 @@ public partial class StockdbContext : DbContext
             entity.HasIndex(e => e.ParentIndicator, "IX_CompanyTable_ParentIndicator");
 
             entity.Property(e => e.CompanyCode)
-                .HasMaxLength(4)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.CompanyId).ValueGeneratedOnAdd();
             entity.Property(e => e.CompanyName).HasMaxLength(50);
             entity.Property(e => e.Follow).HasDefaultValue(false);
             entity.Property(e => e.ParentIndicator)
-                .HasMaxLength(4)
+                .HasMaxLength(50)
                 .IsUnicode(false);
 
             entity.HasOne(d => d.ParentIndicatorNavigation).WithMany(p => p.InverseParentIndicatorNavigation)
@@ -270,7 +270,7 @@ public partial class StockdbContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.UserId)
-              
+
                 .HasColumnName("UserID");
 
             entity.HasOne(d => d.User).WithMany(p => p.FollowLists)
@@ -288,7 +288,7 @@ public partial class StockdbContext : DbContext
             entity.Property(e => e.ForChart).HasDefaultValue(true);
             entity.Property(e => e.ForTable).HasDefaultValue(true);
             entity.Property(e => e.UserId)
-              
+
                 .HasColumnName("UserID");
 
             entity.HasOne(d => d.User).WithMany(p => p.Media)
@@ -524,7 +524,7 @@ public partial class StockdbContext : DbContext
             entity.ToTable("StockTable");
 
             entity.Property(e => e.Sticker)
-                .HasMaxLength(4)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Sdate)
                 .HasMaxLength(10)
