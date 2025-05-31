@@ -170,8 +170,11 @@
 
 <div class="page-wrapper">
     <div class="content">
-        <form asp-action="Manage" method="post">
+        <form id="kkk" asp-action="Manage" method="post">
             <input type="hidden" asp-for="Id" />
+
+            <input type="hidden" name="dayNo" />
+
 
             <div class="strategy-section container my-5">
                 <!-- قسم إنشاء الاستراتيجيات -->
@@ -286,9 +289,23 @@
 
             @for (int i = 0; i < Model.Formulas.Count; i++)
             {
+                var dayValue = Model.Formulas[i].Day;
+                if (dayValue != 1)
+                {
+                    <div class="text-center mt-4">
+                        <a class="btn btn-danger me-2"
+                           href="#"
+                           onclick="setDayAndSubmit('@dayValue')">
+                            <span>حذف يوم التداول</span>
+                        </a>
+                    </div>
+                }
+
+
                 <input type="hidden" asp-for="Formulas[i].Day" />
                 <input type="hidden" asp-for="Formulas[i].FormulaType" />
                 <h4 style="color:black">يوم تداول (@Model.Formulas[i].Day)</h4>
+
 
                 <div class="box-body1" style="@(i % 2 == 0 ? "" : "background-color:antiquewhite")">
                     <!-- معيار شكل الشمعة -->
@@ -806,7 +823,7 @@
             }
 
             <div class="text-center mt-4">
-                <button type="submit" class="btn btn-success me-2">
+                <button class="btn btn-success me-2" onclick="document.getElementById('kkk').submit();">
                     @if (isEdit)
                     {
                         <span>تعديل</span>
@@ -924,6 +941,13 @@
 
 @section Scripts {
     <script>
+
+                function setDayAndSubmit(day) {
+            document.querySelector('input[name="dayNo"]').value = day;
+            document.getElementById('kkk').submit();
+        }
+
+
         const pickr = Pickr.create({
             el: '#colorPicker',
             theme: 'classic',

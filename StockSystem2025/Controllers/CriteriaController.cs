@@ -1,23 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StockSystem2025.Models;
 using StockSystem2025.Services;
-using Formula1 = StockSystem2025.ViewModel.Formula1;
-using Formula2 = StockSystem2025.ViewModel.Formula2;
-using Formula3 = StockSystem2025.ViewModel.Formula3;
-using Formula4 = StockSystem2025.ViewModel.Formula4;
-using Formula5 = StockSystem2025.ViewModel.Formula5;
-using Formula6 = StockSystem2025.ViewModel.Formula6;
-using Formula7 = StockSystem2025.ViewModel.Formula7;
-using Formula8 = StockSystem2025.ViewModel.Formula8;
-using Formula9 = StockSystem2025.ViewModel.Formula9;
-using Formula10 = StockSystem2025.ViewModel.Formula10;
-using Formula11 = StockSystem2025.ViewModel.Formula11;
-using Formula12 = StockSystem2025.ViewModel.Formula12;
-using Formula13 = StockSystem2025.ViewModel.Formula13;
-using Formula14 = StockSystem2025.ViewModel.Formula14;
-using Formula15 = StockSystem2025.ViewModel.Formula15;
-using Formula16 = StockSystem2025.ViewModel.Formula16;
-using Formula17 = StockSystem2025.ViewModel.Formula17;
 using StockSystem2025.ViewModel;
 using StockSystem2025.ViewModels;
 
@@ -37,6 +20,7 @@ namespace StockSystem2025.Controllers
         [HttpGet]
         public async Task<IActionResult> Manage(int? id)
         {
+           
             var model = new CriteriaManageViewModel();
             if (id.HasValue)
             {
@@ -54,19 +38,47 @@ namespace StockSystem2025.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var criteria = await _criteriaService.GetCriteriaByIdAsync(id);
+            if (criteria == null)
+            {
+                return NotFound();
+            }
+            var model = MapToViewModel(criteria);
+            ViewData["IsEdit"] = true;
+            return View(model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Manage(CriteriaManageViewModel model)
+        public async Task<IActionResult> Manage(CriteriaManageViewModel model, int? dayNo)
         {
+
+            if (dayNo != null)
+            {
+                model.Formulas.RemoveAll(f => f.Day == dayNo);
+                var day = 1;
+                foreach (var formula in model.Formulas.OrderBy(f => f.Day))
+                {
+                    formula.Day = day++;
+                }
+                ViewData["IsEdit"] = model.Id > 0;
+                return View(model.Id > 0 ? "Edit" : "Manage", model);
+            }
+
+
+
+
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
-            // عدل هنا
             var criteria = MapToCriteria(model);
             var user = await _currentUserService.GetCurrentUserAsync();
-            criteria.UserId = "68bf8203-f7ab-494d-bfd8-96fb3a17bd69";
-            if (User.IsInRole("admin")) // Assuming admin role
+            criteria.UserId = user?.Id ?? "68bf8203-f7ab-494d-bfd8-96fb3a17bd69"; // Fallback to hardcoded ID
+            if (User.IsInRole("admin"))
             {
                 criteria.IsGeneral = model.IsGeneral;
             }
@@ -75,25 +87,20 @@ namespace StockSystem2025.Controllers
             return RedirectToAction("FormulasSettingIndex", "FormulasSetting");
         }
 
+
+      
+
+
         [HttpPost]
         public IActionResult AddDay(CriteriaManageViewModel model)
         {
             var newDay = model.Formulas.Max(f => f.Day) + 1;
             model.Formulas.Add(new FormulaManageViewModel { Day = newDay, FormulaType = newDay });
-            return View("Manage", model);
+            ViewData["IsEdit"] = model.Id > 0;
+            return View(model.Id > 0 ? "Edit" : "Manage", model);
         }
 
-        [HttpPost]
-        public IActionResult DeleteDay(CriteriaManageViewModel model, int dayNo)
-        {
-            model.Formulas.RemoveAll(f => f.Day == dayNo);
-            var day = 1;
-            foreach (var formula in model.Formulas.OrderBy(f => f.Day))
-            {
-                formula.Day = day++;
-            }
-            return View("Manage", model);
-        }
+
 
         private CriteriaManageViewModel MapToViewModel(Criteria criteria)
         {
@@ -259,7 +266,6 @@ namespace StockSystem2025.Controllers
                                 And = double.TryParse(values.ElementAtOrDefault(1), out var a15) ? a15 : null
                             };
                             break;
-
                         case 17:
                             formulaVm.Formula17 = new Formula17
                             {
@@ -283,6 +289,7 @@ namespace StockSystem2025.Controllers
         {
             var criteria = new Criteria
             {
+                Id = model.Id,
                 Name = model.Name,
                 Type = model.Type,
                 Note = model.Note,

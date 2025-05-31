@@ -40,35 +40,48 @@
                                 <th>اسم الإستراتيجية</th>
                                 <th>الفئة</th>
                                 <th>ملاحظات</th>
-                                <th>الفاصل</th>
+                                <th>الشكل</th>
+                                <th>الحالة</th>
                                 <th>حذف/تعديل</th>
                                 <th>عدد الشركات</th>
                                 <th>عرض</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @{
+                                var orderedData = Model.Criteria.OrderBy(c => c.Criteria.OrderNo).ThenBy(c => c.Criteria.Id).ToList();
+                            }
                             @if (Model.Criteria.Any())
                             {
                                 @for (int i = 0; i < Model.Criteria.Count; i++)
                                 {
-                                    var item = Model.Criteria[i];
+                                    var item = orderedData[i];
                                     <tr>
                                         <td>@((page - 1) * pageSize + i + 1)</td>
                                         <td>@(item.Criteria.Name ?? "-")</td>
                                         <td>@(item.Criteria.Type ?? "-")</td>
                                         <td>@(item.Criteria.Note ?? "-")</td>
                                         <td>
-                                            <span class="badges bg-lightgreen">@(item.Criteria.IsIndicator == 1 ? "Active" : "Inactive")</span>
+                                            @if (@item.Criteria.ImageUrl != null)
+                                            {
+                                                <img src="~/assets/img/@item.Criteria.ImageUrl" style="width: 50px; height: 50px;" />
+                                            }
+                                           
                                         </td>
-                                        <td>@(item.Criteria.Separater ?? "-")</td>
                                         <td>
-                                            <a class="me-3" href="/Strategies/Edit/@item.Criteria.Id">
+                                            <span class="badges bg-lightgreen">@(item.Criteria.IsGeneral == true ? "عام " : "خاص")</span>
+                                        </td>
+
+                                        <td>
+                                            <a class="me-3" asp-action="Edit" asp-controller="Criteria" asp-route-id="@item.Criteria.Id">
                                                 <i class="fas fa-edit icon-size icon-edit"></i>
                                             </a>
-                                            <a class="me-3 confirm-text" href="javascript:void(0);" onclick="confirmDelete(@item.Criteria.Id, this)">
+                                            <a onclick="confirmDelete('@item.Criteria.Id', this)">
                                                 <i class="fas fa-trash-alt icon-size icon-delete"></i>
                                             </a>
-
+                                        </td>
+                                        <td>@item.CompaniesCount</td>
+                                        <td>
                                             <form asp-controller="Recommendations" asp-action="Result" method="post">
                                                 <input type="hidden" value="@item.Criteria.Id" name="id" />
                                                 <input type="hidden" value="1" name="viewIndex" />
@@ -77,15 +90,13 @@
                                                     @foreach (var item in item.CompaniesSticer)
                                                     {
                                                         <input type="hidden" value="@item" name="CompaniesSticer" />
-                                                      
+
                                                     }
                                                 }
-                                                <button type="submit"  class="btn btn-primary btn-sm">عرض</button>
+                                                <button type="submit" class="btn btn-primary btn-sm">عرض</button>
                                             </form>
-
                                         </td>
-                                        <td>@item.CompaniesCount</td>
-                                       
+
                                     </tr>
                                 }
                             }
@@ -131,24 +142,108 @@
 @section Scripts {
     <script>
         function confirmDelete(id, element) {
-            if (confirm('هل أنت متأكد من حذف هذه الإستراتيجية؟')) {
-                $.ajax({
-                    url: '/FormulasSetting/Delete',
-                    method: 'POST',
-                    data: { id: id },
-                    success: function (response) {
-                        if (response.success) {
-                            $(element).closest('tr').remove();
-                            alert('تم الحذف بنجاح');
-                        } else {
-                            alert('فشل الحذف: ' + response.message);
-                        }
-                    },
-                    error: function () {
-                        alert('حدث خطأ أثناء الحذف');
-                    }
+            // Debug: Log the id to ensure it's valid
+            console.log('Deleting criteria with id:', id);
+
+            if (!id) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'معرف الاستراتيجية غير صحيح.',
+                    icon: 'error',
+                    confirmButtonText: 'موافق',
+                    confirmButtonColor: '#3085d6'
                 });
+                return;
             }
+
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف الاستراتيجية مع جميع المعادلات التابعة لها!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'نعم، احذفها!',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    if (!token) {
+                        Swal.fire({
+                            title: 'خطأ',
+                            text: 'فشل في العثور على رمز التحقق.',
+                            icon: 'error',
+                            confirmButtonText: 'موافق',
+                            confirmButtonColor: '#3085d6'
+                        });
+                        return;
+                    }
+
+                    fetch('/FormulasSetting/DeleteCriteria', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ id: String(id) }) // Ensure id is a string
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'تم الحذف!',
+                                text: 'تم حذف الاستراتيجية بنجاح.',
+                                icon: 'success',
+                                confirmButtonText: 'موافق',
+                                confirmButtonColor: '#3085d6'
+                            }).then(() => {
+                                // Find the closest <tr>
+                                const row = element.closest('tr');
+                                if (row) {
+                                    // Add fade-out animation
+                                    row.style.transition = 'opacity 0.5s';
+                                    row.style.opacity = '0';
+                                    setTimeout(() => {
+                                        row.remove();
+                                        // Check if table is empty
+                                        const tableBody = document.querySelector('tbody');
+                                        if (tableBody && tableBody.children.length === 0) {
+                                            tableBody.innerHTML = '<tr><td colspan="2" class="text-center">لا توجد استراتيجيات.</td></tr>';
+                                        }
+                                    }, 500);
+                                } else {
+                                    console.warn('Could not find parent <tr> to remove.');
+                                    location.reload(); // Fallback to reload
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'خطأ',
+                                text: data.message || 'حدث خطأ أثناء الحذف.',
+                                icon: 'error',
+                                confirmButtonText: 'موافق',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error during deletion:', error);
+                        Swal.fire({
+                            title: 'خطأ',
+                            text: 'فشل في الاتصال بالخادم.',
+                            icon: 'error',
+                            confirmButtonText: 'موافق',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    });
+                }
+            });
         }
     </script>
+
 }

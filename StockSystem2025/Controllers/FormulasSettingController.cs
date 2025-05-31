@@ -316,7 +316,7 @@ namespace StockSystem2025.Controllers
                         })
                         .ToListAsync();
 
-                    await Parallel.ForEachAsync(criteria, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (criteriaItem, ct) =>
+                    await Parallel.ForEachAsync(criteria, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (criteriaItem, ct) =>
                     {
                         using (var scope = _serviceProvider.CreateScope())
                         {
@@ -1018,25 +1018,51 @@ namespace StockSystem2025.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCriteria([FromBody] DeleteCriteriaRequest request)
         {
+            if (string.IsNullOrEmpty(request?.Id))
+            {
+                return Json(new { success = false, message = "معرف الاستراتيجية غير صحيح." });
+            }
+
+            var criteria = await _context.Criterias
+                .Include(c => c.Formulas)
+                .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id);
+
+            if (criteria == null)
+            {
+                return Json(new { success = false, message = "الاستراتيجية غير موجودة." });
+            }
+
             try
             {
-                var criteria = await _context.Criterias.FindAsync(id);
-                if (criteria == null)
-                {
-                    return Json(new { success = false, message = "الإستراتيجية غير موجودة" });
-                }
+                // Delete associated formulas
+                _context.Formulas.RemoveRange(criteria.Formulas);
 
+                // Delete the criteria
                 _context.Criterias.Remove(criteria);
+
                 await _context.SaveChangesAsync();
+
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting criteria");
-                return Json(new { success = false, message = "حدث خطأ أثناء الحذف" });
+                // Log the exception (use your logging framework)
+                Console.WriteLine($"Error deleting criteria: {ex.Message}");
+                return Json(new { success = false, message = "حدث خطأ أثناء الحذف." });
             }
         }
+
+        // DTO to bind the JSON payload
+        public class DeleteCriteriaRequest
+        {
+            public string Id { get; set; }
+        }
+
+
+
+
     }
 }
