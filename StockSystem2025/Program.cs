@@ -35,7 +35,7 @@ builder.Services.AddSession(options =>
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConn")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConn"), options => options.CommandTimeout(120)));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -58,7 +58,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 // Configure database
 var connectionString = builder.Configuration.GetConnectionString("SQLConn");
 builder.Services.AddDbContext<StockdbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, options => options.CommandTimeout(120)));
 
 // Configure file upload limits
 builder.Services.Configure<IISServerOptions>(options =>

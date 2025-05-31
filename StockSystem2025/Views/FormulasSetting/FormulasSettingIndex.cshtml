@@ -11,23 +11,7 @@
 <div class="page-wrapper">
     <div class="content">
         <div class="wordset">
-            <ul>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf">
-                        <img src="~/assets/img/icons/pdf.svg" alt="img">
-                    </a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel">
-                        <img src="~/assets/img/icons/excel.svg" alt="img">
-                    </a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="print">
-                        <img src="~/assets/img/icons/printer.svg" alt="img">
-                    </a>
-                </li>
-            </ul>
+            <p>مدة التنفيذ: @Model.Time.ToString(@"hh\:mm\:ss\.fff")</p>
         </div>
 
         <div class="card">
@@ -36,8 +20,9 @@
                     <table class="table table-bordered table-hover text-center align-middle w-100">
                         <thead>
                             <tr>
-                                <th>م</th>
+                                <th>تسلسل</th>
                                 <th>اسم الإستراتيجية</th>
+                                <th>الترتيب</th>
                                 <th>الفئة</th>
                                 <th>ملاحظات</th>
                                 <th>الشكل</th>
@@ -49,7 +34,10 @@
                         </thead>
                         <tbody>
                             @{
-                                var orderedData = Model.Criteria.OrderBy(c => c.Criteria.OrderNo).ThenBy(c => c.Criteria.Id).ToList();
+                                var orderedData = Model.Criteria
+                                .OrderBy(c => c.Criteria.OrderNo == null ? int.MaxValue : c.Criteria.OrderNo)
+                                .ThenBy(c => c.Criteria.Id == null ? int.MaxValue : c.Criteria.Id)
+                                .ToList();
                             }
                             @if (Model.Criteria.Any())
                             {
@@ -59,6 +47,7 @@
                                     <tr>
                                         <td>@((page - 1) * pageSize + i + 1)</td>
                                         <td>@(item.Criteria.Name ?? "-")</td>
+                                        <td>@(item.Criteria.OrderNo != null ? @item.Criteria.OrderNo:"بدون ترتيب")</td>
                                         <td>@(item.Criteria.Type ?? "-")</td>
                                         <td>@(item.Criteria.Note ?? "-")</td>
                                         <td>

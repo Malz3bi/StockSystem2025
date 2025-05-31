@@ -81,6 +81,7 @@ namespace StockSystem2025.Controllers
             if (User.IsInRole("admin"))
             {
                 criteria.IsGeneral = model.IsGeneral;
+                criteria.OrderNo = model.OrderNo;
             }
 
             await _criteriaService.SaveCriteriaAsync(criteria);

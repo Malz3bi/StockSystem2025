@@ -104,6 +104,7 @@ namespace StockSystem2025.Controllers
                             FormulaValues = f.FormulaValues
                         }).ToList()
                     })
+                    .OrderBy(x => x.OrderNo).ThenBy(i=> i.Id)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
@@ -316,7 +317,7 @@ namespace StockSystem2025.Controllers
                         })
                         .ToListAsync();
 
-                    await Parallel.ForEachAsync(criteria, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (criteriaItem, ct) =>
+                    await Parallel.ForEachAsync(criteria, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (criteriaItem, ct) =>
                     {
                         using (var scope = _serviceProvider.CreateScope())
                         {
@@ -357,7 +358,7 @@ namespace StockSystem2025.Controllers
                             {
                                 int formulaDayNo = startDayNo + groupItem.First().Day - 1;
 
-                              
+
                                 var stockStickers = new HashSet<string>(stockResult.Select(y => y.Sticker));
                                 var res = stockPrevDayViews
                                     .Where(x => x.Key.DayNo == formulaDayNo && stockStickers.Contains(x.Key.Sticker))
@@ -707,12 +708,12 @@ namespace StockSystem2025.Controllers
                                             {
                                                 var midScloseDict = await dbContext.StockPrevDayViews
                                                     .AsNoTracking()
-                                                    .Where(x => x.DayNo >= formulaDayNo)
+                                                    .Where(x => x.DayNo >= formula13.Days)
                                                     .GroupBy(x => x.Sticker)
                                                     .Select(g => new
                                                     {
                                                         Sticker = g.Key,
-                                                        SumSclose = g.OrderBy(x => x.DayNo).Take(formula13.Days.Value).Average(x => x.PrevSclose)
+                                                        SumSclose = g.Average(x => x.PrevSclose)
                                                     })
                                                     .ToDictionaryAsync(x => x.Sticker, x => x.SumSclose);
 
@@ -1001,11 +1002,12 @@ namespace StockSystem2025.Controllers
                         }
                     });
                 }
-
-                model.Criteria = criteriaList.ToList();
-
                 stopwatch.Stop();
                 _logger.LogInformation($"LoadData took {stopwatch.ElapsedMilliseconds} ms");
+                model.Criteria = criteriaList.ToList();
+                model.Time = stopwatch.Elapsed;
+
+              
 
                 return model;
             }
@@ -1037,32 +1039,22 @@ namespace StockSystem2025.Controllers
 
             try
             {
-                // Delete associated formulas
                 _context.Formulas.RemoveRange(criteria.Formulas);
-
-                // Delete the criteria
                 _context.Criterias.Remove(criteria);
-
                 await _context.SaveChangesAsync();
-
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                // Log the exception (use your logging framework)
                 Console.WriteLine($"Error deleting criteria: {ex.Message}");
                 return Json(new { success = false, message = "حدث خطأ أثناء الحذف." });
             }
         }
 
-        // DTO to bind the JSON payload
+
         public class DeleteCriteriaRequest
         {
             public string Id { get; set; }
         }
-
-
-
-
     }
 }

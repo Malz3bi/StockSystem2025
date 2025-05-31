@@ -31,7 +31,7 @@ namespace StockSystem2025.Controllers
             return View();
         }
 
-        [Authorize(Roles = "مسؤول النظام")]
+      //  [Authorize(Roles = "مسؤول النظام")]
         public async Task<IActionResult> index()
 
         {
@@ -163,7 +163,7 @@ namespace StockSystem2025.Controllers
         }
 
 
-        [Authorize(Roles = "مسؤول النظام")]
+      //  [Authorize(Roles = "مسؤول النظام")]
         public async Task<IActionResult> Edet(string? Id)
         {
             ViewBag.roles = _roleManager.Roles.ToList();
@@ -189,7 +189,7 @@ namespace StockSystem2025.Controllers
             return View(UserEdit);
         }
 
-        [Authorize(Roles = "مسؤول النظام")]
+      //  [Authorize(Roles = "مسؤول النظام")]
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Edet(RegisterEditViewModel model)
@@ -230,7 +230,7 @@ namespace StockSystem2025.Controllers
 
 
 
-        [Authorize(Roles = "مسؤول النظام")]
+      //  [Authorize(Roles = "مسؤول النظام")]
         public async Task<IActionResult> Delete(string? Id)
         {
             var user = await _userManager.FindByIdAsync(Id);
@@ -247,7 +247,7 @@ namespace StockSystem2025.Controllers
             return View(UserDelete);
         }
 
-        [Authorize(Roles = "مسؤول النظام")]
+      //  [Authorize(Roles = "مسؤول النظام")]
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Delete(RegisterDeleteViewModel model)
@@ -295,7 +295,7 @@ namespace StockSystem2025.Controllers
             };
             return View(UserEdit);
         }
-        [Authorize(Roles = "مسؤول النظام")]
+      //  [Authorize(Roles = "مسؤول النظام")]
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel ChangePasswordViewModel)
         {
